@@ -1,7 +1,7 @@
 import argparse
 import torch
 from tqdm import tqdm
-import trainer.dataloader as module_data
+import all.data as module_data
 import model.model as module_arch
 from configs.parse_config import ConfigParser
 

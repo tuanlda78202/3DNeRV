@@ -9,14 +9,14 @@ logger.setLevel(logging.WARNING)
 import numpy as np
 import torch
 from torchvision.utils import make_grid
-from trainer.base import BaseTrainer
-from trainer.metrics.metric import mae, sm
+from all.base import BaseTrainer
+from all.metric.metric import mae, sm
 from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
 
 
-class DISTrainer(BaseTrainer):
+class U2NetTrainer(BaseTrainer):
     """
     Trainer class
     """
