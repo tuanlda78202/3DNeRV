@@ -24,6 +24,7 @@ class VideoDataSet(Dataset):
     def __init__(self, args):
         if os.path.isfile(args.data_path):
             self.video = decord.VideoReader(args.data_path)
+
         else:
             self.video = [
                 os.path.join(args.data_path, x)
@@ -32,8 +33,10 @@ class VideoDataSet(Dataset):
 
         # Resize the input video and center crop
         self.crop_list, self.resize_list = args.crop_list, args.resize_list
+
         # import pdb; pdb.set_trace; from IPython import embed; embed()
         first_frame = self.img_transform(self.img_load(0))
+
         self.final_size = first_frame.size(-2) * first_frame.size(-1)
 
     def img_load(self, idx):
@@ -48,6 +51,7 @@ class VideoDataSet(Dataset):
             crop_h, crop_w = [int(x) for x in self.crop_list.split("_")[:2]]
             if "last" not in self.crop_list:
                 img = center_crop(img, (crop_h, crop_w))
+
         if self.resize_list != "-1":
             if "_" in self.resize_list:
                 resize_h, resize_w = [int(x) for x in self.resize_list.split("_")]
@@ -55,8 +59,10 @@ class VideoDataSet(Dataset):
             else:
                 resize_hw = int(self.resize_list)
                 img = resize(img, resize_hw, "bicubic")
+
         if "last" in self.crop_list:
             img = center_crop(img, (crop_h, crop_w))
+
         return img
 
     def __len__(self):

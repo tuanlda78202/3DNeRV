@@ -23,13 +23,13 @@ def main():
     parser.add_argument(
         "--decoder",
         type=str,
-        default="/Users/charles/hnerv-data/tiny-ckpt/img_decoder.pth",
+        default="../hnerv-data/tiny-ckpt/img_decoder.pth",
         help="path for video decoder",
     )
     parser.add_argument(
         "--ckt",
         type=str,
-        default="/Users/charles/hnerv-data/tiny-ckpt/quant_vid.pth",
+        default="../hnerv-data/tiny-ckpt/quant_vid.pth",
         help="path for video checkpoint",
     )  #
     parser.add_argument(
@@ -50,7 +50,7 @@ def main():
     if not os.path.exists(args.dump_dir):
         os.makedirs(args.dump_dir)
 
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Load video checkpoints and dequant them
     quant_ckt = torch.load(args.ckt, map_location="cpu")
@@ -77,6 +77,7 @@ def main():
     )
 
     for idx in range(args.frames):
+        print(idx)
         out_img = os.path.join(args.dump_dir, f"frame{idx}_out.png")
         save_image(img_out[idx], out_img)
 
