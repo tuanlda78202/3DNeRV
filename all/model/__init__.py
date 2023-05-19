@@ -1,2 +1,2 @@
-from .isnet import *
 from .videomae import *
+from .hnerv import *

@@ -216,17 +216,20 @@ class PatchEmbed(nn.Module):
         )
 
     def forward(self, x, **kwargs):
+        # torch.Size([8, 3, 16, 224, 224])
         B, C, T, H, W = x.shape
+
         # FIXME look at relaxing size constraints
         assert (
             H == self.img_size[0] and W == self.img_size[1]
         ), f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
+
+        # torch.Size([8, 768, 8, 14, 14]) ->  torch.Size([8, 768, 1568]) -> # torch.Size([8, 1568, 768])
         x = self.proj(x).flatten(2).transpose(1, 2)
+
         return x
 
 
-# sin-cos position encoding
-# https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/transformer/Models.py#L31
 def get_sinusoid_encoding_table(n_position, d_hid):
     """Sinusoid position encoding table"""
 
@@ -366,6 +369,7 @@ class VisionTransformer(nn.Module):
 
     def forward_features(self, x):
         x = self.patch_embed(x)
+
         B, _, _ = x.size()
 
         if self.pos_embed is not None:
@@ -385,8 +389,8 @@ class VisionTransformer(nn.Module):
         else:
             for blk in self.blocks:
                 x = blk(x)
-
         x = self.norm(x)
+
         if self.fc_norm is not None:
             return self.fc_norm(x.mean(1))
         else:
@@ -511,3 +515,7 @@ def vit_huge_patch16_224(pretrained=False, **kwargs):
     )
     model.default_cfg = _cfg()
     return model
+
+
+x = vit_base_patch16_224()
+y = x(torch.rand(1, 3, 16, 224, 224))

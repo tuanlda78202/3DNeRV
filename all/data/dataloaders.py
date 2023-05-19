@@ -1,37 +1,50 @@
-from torchvision import transforms
-from all.base.base_dataloader import BaseDataLoader
-from all.data.datasets import *
-from all.data.datasets import ImageProcess
 import sys
 import os
+from torch.utils.data import Subset
+from all.data.datasets import VideoDataSet
+from all.base.base_dataloader import BaseDataLoader
 
 sys.path.append(os.getcwd())
 
 
-class KNCDataLoader(BaseDataLoader):
-    """Korean Name Card Data Loader (data ~ 82k, data-demo ~ 1.6k)"""
+class VideoDataLoader(BaseDataLoader):
+    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers=1):
+        super().__init__(dataset, batch_size, shuffle, validation_split, num_workers)
 
-    def __init__(
-        self, output_size, crop_size, batch_size, shuffle, validation_split, num_workers
-    ):
-        self.output_size = output_size
-        self.crop_size = crop_size
+        self.dataset = VideoDataSet()
 
-        image_process = ImageProcess(dir="data_demo")
-        self.img_list, self.mask_list = image_process.mask_image_list()
+        # setup dataloader
+        full_dataset = VideoDataSet(args)
+        full_dataloader = torch.utils.data.DataLoader(
+            full_dataset,
+            batch_size=args.batchSize,
+            shuffle=True,
+            num_workers=args.workers,
+            pin_memory=True,
+            sampler=None,
+            drop_last=False,
+            worker_init_fn=worker_init_fn,
+        )
+        args.final_size = full_dataset.final_size
+        args.full_data_length = len(full_dataset)
+        split_num_list = [int(x) for x in args.data_split.split("_")]
 
-        self.dataset = KNCDataset(
-            self.img_list,
-            self.mask_list,
-            transform=transforms.Compose(
-                [
-                    Rescale(self.output_size),
-                    RandomCrop(self.crop_size),
-                    Normalize,
-                ]
-            ),
+        train_ind_list, args.val_ind_list = data_split(
+            list(range(args.full_data_length)), split_num_list, args.shuffle_data, 0
         )
 
-        super().__init__(
-            self.dataset, batch_size, shuffle, validation_split, num_workers
+        args.dump_vis = args.dump_images or args.dump_videos
+
+        #  Make sure the testing dataset is fixed for every run
+        train_dataset = Subset(full_dataset, train_ind_list)
+        train_sampler = None
+        train_dataloader = torch.utils.data.DataLoader(
+            train_dataset,
+            batch_size=args.batchSize,
+            shuffle=(train_sampler is None),
+            num_workers=args.workers,
+            pin_memory=True,
+            sampler=train_sampler,
+            drop_last=True,
+            worker_init_fn=worker_init_fn,
         )
