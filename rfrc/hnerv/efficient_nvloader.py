@@ -12,7 +12,9 @@ def dequant_tensor(quant_t):
         quant_t["min"].to(torch.float32),
         quant_t["scale"].to(torch.float32),
     )
+
     new_t = tmin.expand_as(quant_t) + scale.expand_as(quant_t) * quant_t
+
     return new_t
 
 
@@ -21,13 +23,13 @@ def main():
     parser.add_argument(
         "--decoder",
         type=str,
-        default="checkpoints/img_decoder.pth",
+        default="/Users/charles/hnerv-data/tiny-ckpt/img_decoder.pth",
         help="path for video decoder",
     )
     parser.add_argument(
         "--ckt",
         type=str,
-        default="checkpoints/quant_vid.pth",
+        default="/Users/charles/hnerv-data/tiny-ckpt/quant_vid.pth",
         help="path for video checkpoint",
     )  #
     parser.add_argument(
@@ -49,6 +51,7 @@ def main():
         os.makedirs(args.dump_dir)
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
     # Load video checkpoints and dequant them
     quant_ckt = torch.load(args.ckt, map_location="cpu")
     vid_embed = dequant_tensor(quant_ckt["embed"]).to(device)
@@ -65,15 +68,18 @@ def main():
 
     # Dump video and frames
     out_vid = os.path.join(args.dump_dir, "nvloader_out.mp4")
+
     write_video(
         out_vid,
         img_out.permute(0, 2, 3, 1) * 255.0,
         fps=args.frames / 4,
         options={"crf": "10"},
     )
+
     for idx in range(args.frames):
         out_img = os.path.join(args.dump_dir, f"frame{idx}_out.png")
         save_image(img_out[idx], out_img)
+
     print(f"dumped video to {out_vid}")
 
 
