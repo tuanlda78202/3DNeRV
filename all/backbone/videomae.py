@@ -11,8 +11,7 @@ import torch.utils.checkpoint as checkpoint
 def _cfg(url="", **kwargs):
     return {
         "url": url,
-        "num_classes": 400,
-        "input_size": (3, 224, 224),
+        "input_size": (3, 960, 1920),
         "pool_size": None,
         "crop_pct": 0.9,
         "interpolation": "bicubic",
@@ -189,16 +188,16 @@ class PatchEmbed(nn.Module):
 
     def __init__(
         self,
-        img_size=224,
-        patch_size=16,
+        img_size=(960, 960),
+        patch_size=32,
         in_chans=3,
         embed_dim=768,
         num_frames=16,
-        tubelet_size=2,
+        tubelet_size=4,
     ):
         super().__init__()
-        img_size = to_2tuple(img_size)
-        patch_size = to_2tuple(patch_size)
+        img_size = (960, 960)
+        patch_size = (32, 32)
         self.tubelet_size = int(tubelet_size)
         num_patches = (
             (img_size[1] // patch_size[1])
@@ -225,8 +224,7 @@ class PatchEmbed(nn.Module):
         ), f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
 
         # torch.Size([8, 768, 8, 14, 14]) ->  torch.Size([8, 768, 1568]) -> # torch.Size([8, 1568, 768])
-        x = self.proj(x).flatten(2).transpose(1, 2)
-
+        x = self.proj(x)
         return x
 
 
@@ -256,10 +254,9 @@ class VisionTransformer(nn.Module):
 
     def __init__(
         self,
-        img_size=224,
-        patch_size=16,
+        img_size=(960, 960),
+        patch_size=32,
         in_chans=3,
-        num_classes=1000,
         embed_dim=768,
         depth=12,
         num_heads=12,
@@ -274,16 +271,16 @@ class VisionTransformer(nn.Module):
         init_values=0.0,
         use_learnable_pos_emb=False,
         init_scale=0.0,
-        all_frames=16,
-        tubelet_size=2,
+        all_frames=8,
+        tubelet_size=4,
         use_checkpoint=False,
         use_mean_pooling=True,
     ):
         super().__init__()
-        self.num_classes = num_classes
         self.num_features = (
             self.embed_dim
         ) = embed_dim  # num_features for consistency with other models
+
         self.tubelet_size = tubelet_size
         self.patch_embed = PatchEmbed(
             img_size=img_size,
@@ -299,7 +296,6 @@ class VisionTransformer(nn.Module):
         if use_learnable_pos_emb:
             self.pos_embed = nn.Parameter(torch.zeros(1, num_patches, embed_dim))
         else:
-            # sine-cosine positional embeddings is on the way
             self.pos_embed = get_sinusoid_encoding_table(num_patches, embed_dim)
 
         self.pos_drop = nn.Dropout(p=drop_rate)
@@ -325,22 +321,11 @@ class VisionTransformer(nn.Module):
             ]
         )
         self.norm = nn.Identity() if use_mean_pooling else norm_layer(embed_dim)
-        self.fc_norm = norm_layer(embed_dim) if use_mean_pooling else None
-        self.fc_dropout = (
-            nn.Dropout(p=fc_drop_rate) if fc_drop_rate > 0 else nn.Identity()
-        )
-        self.head = (
-            nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
-        )
 
         if use_learnable_pos_emb:
             trunc_normal_(self.pos_embed, std=0.02)
 
-        trunc_normal_(self.head.weight, std=0.02)
         self.apply(self._init_weights)
-
-        self.head.weight.data.mul_(init_scale)
-        self.head.bias.data.mul_(init_scale)
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
@@ -358,20 +343,11 @@ class VisionTransformer(nn.Module):
     def no_weight_decay(self):
         return {"pos_embed", "cls_token"}
 
-    def get_classifier(self):
-        return self.head
-
-    def reset_classifier(self, num_classes, global_pool=""):
-        self.num_classes = num_classes
-        self.head = (
-            nn.Linear(self.embed_dim, num_classes) if num_classes > 0 else nn.Identity()
-        )
-
-    def forward_features(self, x):
+    def forward(self, x):
         x = self.patch_embed(x)
 
-        B, _, _ = x.size()
-
+        B, width, t, h, w = x.size()
+        x = x.flatten(2).transpose(1, 2)
         if self.pos_embed is not None:
             x = (
                 x
@@ -389,16 +365,11 @@ class VisionTransformer(nn.Module):
         else:
             for blk in self.blocks:
                 x = blk(x)
-        x = self.norm(x)
 
-        if self.fc_norm is not None:
-            return self.fc_norm(x.mean(1))
-        else:
-            return x[:, 0]
-
-    def forward(self, x):
-        x = self.forward_features(x)
-        x = self.head(self.fc_dropout(x))
+        x = self.norm(x)  # [b thw=8x14x14 c=768]
+        x = x.reshape(B, t, h, w, -1).permute(0, 4, 1, 2, 3)  # [b c t h w]
+        print(x.shape)
+        x = x.mean(dim=2, keepdim=False)  # [b c h w]
         return x
 
 
@@ -442,72 +413,6 @@ def vit_base_patch16_384(pretrained=False, **kwargs):
         embed_dim=768,
         depth=12,
         num_heads=12,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs,
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_large_patch16_224(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        patch_size=16,
-        embed_dim=1024,
-        depth=24,
-        num_heads=16,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs,
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_large_patch16_384(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        img_size=384,
-        patch_size=16,
-        embed_dim=1024,
-        depth=24,
-        num_heads=16,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs,
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_large_patch16_512(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        img_size=512,
-        patch_size=16,
-        embed_dim=1024,
-        depth=24,
-        num_heads=16,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs,
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_huge_patch16_224(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        patch_size=16,
-        embed_dim=1280,
-        depth=32,
-        num_heads=16,
         mlp_ratio=4,
         qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6),

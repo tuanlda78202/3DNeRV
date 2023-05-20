@@ -45,12 +45,12 @@ class VideoDataSet(Dataset):
         return img / 255.0
 
     def img_transform(self, img):
-        if self.crop_list != "-1":
+        if self.crop_list != -1:
             crop_h, crop_w = [int(x) for x in self.crop_list.split("_")[:2]]
             if "last" not in self.crop_list:
                 img = center_crop(img, (crop_h, crop_w))
 
-        if self.resize_list != "-1":
+        if self.resize_list != -1:
             if "_" in self.resize_list:
                 resize_h, resize_w = [int(x) for x in self.resize_list.split("_")]
                 img = interpolate(img, (resize_h, resize_w), "bicubic")

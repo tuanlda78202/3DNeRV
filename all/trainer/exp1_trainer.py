@@ -10,8 +10,8 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from all.base import BaseTrainer
-from all.evaluation.metric import mae, sm
-from utils import inf_loop, MetricTracker
+
+# from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
 
