@@ -58,6 +58,7 @@ def main():
     dequant_ckt = {
         k: dequant_tensor(v).to(device) for k, v in quant_ckt["model"].items()
     }
+
     img_decoder = torch.jit.load(args.decoder, map_location="cpu").to(device)
     img_decoder.load_state_dict(dequant_ckt)
 

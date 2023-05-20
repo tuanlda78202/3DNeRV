@@ -1,7 +1,7 @@
 import torch
 from abc import abstractmethod
 from numpy import inf
-from utils.logger import WandB
+from utils.log import WandB
 
 """
 - Training process logging

@@ -644,3 +644,8 @@ class LayerNorm(nn.Module):
             x = (x - u) / torch.sqrt(s + self.eps)
             x = self.weight[:, None, None] * x + self.bias[:, None, None]
             return x
+
+
+from torchsummary import summary
+
+summary(ConvNeXt(), input_size=(3, 2160, 3840), device="cpu")

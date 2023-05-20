@@ -515,7 +515,3 @@ def vit_huge_patch16_224(pretrained=False, **kwargs):
     )
     model.default_cfg = _cfg()
     return model
-
-
-x = vit_base_patch16_224()
-y = x(torch.rand(1, 3, 16, 224, 224))
