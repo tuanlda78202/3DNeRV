@@ -1,3 +1,6 @@
+import torch.nn as nn
+
+
 class Block(nn.Module):
     r"""ConvNeXt Block. There are two equivalent implementations:
     (1) DwConv -> LayerNorm (channels_first) -> 1x1 Conv -> GELU -> 1x1 Conv; all in (N, C, H, W)

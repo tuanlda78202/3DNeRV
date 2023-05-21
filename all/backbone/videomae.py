@@ -189,15 +189,15 @@ class PatchEmbed(nn.Module):
 
     def __init__(
         self,
-        img_size=224,
-        patch_size=16,
+        img_size=(1080, 1920),
+        patch_size=20,
         in_chans=3,
         embed_dim=768,
         num_frames=16,
         tubelet_size=2,
     ):
         super().__init__()
-        img_size = to_2tuple(img_size)
+        # img_size = to_2tuple(img_size)
         patch_size = to_2tuple(patch_size)
         self.tubelet_size = int(tubelet_size)
         num_patches = (
@@ -221,7 +221,7 @@ class PatchEmbed(nn.Module):
         assert (
             H == self.img_size[0] and W == self.img_size[1]
         ), f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
-        x = self.proj(x)
+        x = self.proj(x).flatten(2).transpose(1, 2)
         return x
 
 
@@ -252,8 +252,8 @@ class VisionTransformer(nn.Module):
 
     def __init__(
         self,
-        img_size=224,
-        patch_size=16,
+        img_size=(1080, 1920),
+        patch_size=20,
         in_chans=3,
         num_classes=1000,
         embed_dim=768,
@@ -270,7 +270,7 @@ class VisionTransformer(nn.Module):
         init_values=0.0,
         use_learnable_pos_emb=False,
         init_scale=0.0,
-        all_frames=8,
+        all_frames=16,
         tubelet_size=2,
         use_checkpoint=False,
         use_mean_pooling=True,
@@ -365,8 +365,7 @@ class VisionTransformer(nn.Module):
 
     def forward_features(self, x):
         x = self.patch_embed(x)
-        B, width, t, h, w = x.size()
-        x = x.flatten(2).transpose(1, 2)
+        B, _, _ = x.size()
 
         if self.pos_embed is not None:
             x = (
@@ -386,20 +385,22 @@ class VisionTransformer(nn.Module):
             for blk in self.blocks:
                 x = blk(x)
 
-        x = self.norm(x)  # [b thw=8x14x14 c=768]
-        x = x.reshape(B, t, h, w, -1).permute(0, 4, 1, 2, 3)  # [b c t h w]\
-        return x
+        x = self.norm(x)
+        if self.fc_norm is not None:
+            return self.fc_norm(x.mean(1))
+        else:
+            return x[:, 0]
 
     def forward(self, x):
         x = self.forward_features(x)
+        # x = self.head(self.fc_dropout(x))
         return x
 
 
 @register_model
 def vit_small_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
-        img_size=960,
-        patch_size=32,
+        patch_size=16,
         embed_dim=384,
         depth=12,
         num_heads=6,
@@ -415,7 +416,8 @@ def vit_small_patch16_224(pretrained=False, **kwargs):
 @register_model
 def vit_base_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
-        patch_size=16,
+        img_size=(1080, 1920),
+        patch_size=20,
         embed_dim=768,
         depth=12,
         num_heads=12,
@@ -431,7 +433,6 @@ def vit_base_patch16_224(pretrained=False, **kwargs):
 @register_model
 def vit_base_patch16_384(pretrained=False, **kwargs):
     model = VisionTransformer(
-        img_size=384,
         patch_size=16,
         embed_dim=768,
         depth=12,

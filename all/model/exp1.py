@@ -4,6 +4,8 @@ sys.path.append(os.getcwd())
 import torch
 from all.backbone.videomae import vit_small_patch16_224
 from collections import OrderedDict
+from utils.util import load_yaml
+from all.data.datasets import VideoDataSet
 
 
 def load_state_dict(
@@ -113,6 +115,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model.to(device)
 
-x = torch.rand(1, 3, 8, 960, 960).to(device)
-y = model(x)
+config = load_yaml("/home/tuanlda78202/aaai24/configs/exp1/train_hnerv.yaml")
+x = VideoDataSet(config)
+buffer = x.get_batch(clip_len=64, frame_sample_rate=4)
+buffer = buffer.reshape(1, 3, 64, 1080, 1920)
+print(buffer.shape)
+
+y = model(buffer)
 print(y.shape)
