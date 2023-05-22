@@ -2,10 +2,10 @@ import os, sys
 
 sys.path.append(os.getcwd())
 import torch
-from all.backbone.videomae import vit_small_patch16_224
+from src.backbone.videomae import vit_small_patch16_224
 from collections import OrderedDict
 from utils.util import load_yaml
-from all.data.datasets import VideoDataSet
+from src.data.datasets import VideoDataSet
 
 
 def load_state_dict(

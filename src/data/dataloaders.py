@@ -1,8 +1,8 @@
 import sys
 import os
 from torch.utils.data import Subset, DataLoader
-from all.data.datasets import VideoDataSet
-from all.base.base_dataloader import BaseDataLoader
+from src.data.datasets import VideoDataSet
+from src.base.base_dataloader import BaseDataLoader
 
 sys.path.append(os.getcwd())
 

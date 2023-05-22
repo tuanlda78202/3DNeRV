@@ -9,10 +9,10 @@ import argparse
 import collections
 import torch
 import numpy as np
-from all.data import VNPDataLoader
+from src.data import VNPDataLoader
 import model as module_arch
 from configs.parse_config import ConfigParser
-from all import GPT2Trainer
+from src import GPT2Trainer
 from transformers import AutoTokenizer
 
 SEED = 42

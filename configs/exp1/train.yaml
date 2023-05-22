@@ -109,7 +109,7 @@ trainer:
   visual_tool: wandb
   project: aaai24
 
-  api_key_file: ./configs/api-key/tuanlda78202
+  api_key_file: ./configs/api/tuanlda78202
   entity: tuanlda78202
 
 
