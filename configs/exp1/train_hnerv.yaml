@@ -11,7 +11,7 @@ dataloader:
     drop_last: False
     device: 'cuda'
 
-  data_path: "beauty30.mp4"
+  data_path: "all/data/beauty30.mp4"
   vid: k400_train0       # video id
   data_split: 1_1_1      # Valid_train/total_train/all data split, e.g., 18_19_20 means for every 20 samples, the first 19 samples is full train set, and the first 18 samples is chose currently
   crop_list: "960_1920"    # video crop size

@@ -1,14 +1,10 @@
 import os
-import sys
-
-sys.path.append(os.getcwd())
 import numpy as np
 from torch.nn.functional import interpolate
 from torchvision.transforms.functional import center_crop, resize
 from torchvision.io import read_image
 from torch.utils.data import Dataset
 from decord import VideoReader, bridge, cpu
-from utils.util import load_yaml
 
 bridge.set_bridge("torch")
 
