@@ -3,7 +3,7 @@ import torch
 from tqdm import tqdm
 import src.data as module_data
 import model.model as module_arch
-from configs.parse_config import ConfigParser
+from config.parse_config import ConfigParser
 
 
 def main(config):

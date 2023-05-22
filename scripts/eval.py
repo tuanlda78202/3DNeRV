@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 import model as module_arch
-from configs.parse_config import ConfigParser
+from config.parse_config import ConfigParser
 
 import os
 
