@@ -16,20 +16,6 @@ from timm.models.layers import drop_path, to_2tuple, trunc_normal_
 from timm.models.registry import register_model
 
 
-def _cfg(url="", **kwargs):
-    return {
-        "url": url,
-        "num_classes": 400,
-        "input_size": (3, 224, 224),
-        "pool_size": None,
-        "crop_pct": 0.9,
-        "interpolation": "bicubic",
-        "mean": (0.5, 0.5, 0.5),
-        "std": (0.5, 0.5, 0.5),
-        **kwargs,
-    }
-
-
 class DropPath(nn.Module):
     """Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks)."""
 
@@ -418,6 +404,7 @@ class VisionTransformer(nn.Module):
         )
         self.norm = nn.Identity() if use_mean_pooling else norm_layer(embed_dim)
         self.fc_norm = norm_layer(embed_dim) if use_mean_pooling else None
+
         self.head_dropout = nn.Dropout(head_drop_rate)
         self.head = (
             nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
@@ -488,6 +475,20 @@ class VisionTransformer(nn.Module):
         x = self.head_dropout(x)
         x = self.head(x)
         return x
+
+
+def _cfg(url="", **kwargs):
+    return {
+        "url": url,
+        "num_classes": 400,
+        "input_size": (3, 224, 224),
+        "pool_size": None,
+        "crop_pct": 0.9,
+        "interpolation": "bicubic",
+        "mean": (0.5, 0.5, 0.5),
+        "std": (0.5, 0.5, 0.5),
+        **kwargs,
+    }
 
 
 @register_model
