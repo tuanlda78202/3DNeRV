@@ -1,13 +1,12 @@
 """
 Extract features for temporal action detection datasets
-```bash
+
 python extract_tad_feature.py \
     --data_set THUMOS14 \
     --data_path YOUR_PATH/thumos14_videos \
     --save_path YOUR_PATH/th14_vit_g_16_4 \
     --model vit_giant_patch14_224 \
     --ckpt_path YOUR_PATH/vit_g_hyrbid_pt_1200e_k710_ft.pth
-```
 """
 
 import argparse
@@ -32,12 +31,12 @@ def to_normalized_float_tensor(vid):
 # as non-minibatch so that they are applied as if they were 4d (thus image).
 # this way, we only apply the transformation in the spatial domain
 def resize(vid, size, interpolation="bilinear"):
-    # NOTE: using bilinear interpolation because we don't work on minibatches
-    # at this level
+    # NOTE: using bilinear interpolation because we don't work on minibatches at this level
     scale = None
     if isinstance(size, int):
         scale = float(size) / min(vid.shape[-2:])
         size = None
+
     return torch.nn.functional.interpolate(
         vid, size=size, scale_factor=scale, mode=interpolation, align_corners=False
     )
@@ -63,32 +62,34 @@ def get_args():
 
     parser.add_argument(
         "--data_set",
-        default="THUMOS14",
-        choices=["THUMOS14", "FINEACTION"],
+        default="UVG",
+        choices=["THUMOS14", "FINEACTION", "UVG"],
         type=str,
         help="dataset",
-    )
+    )  # UVG
 
     parser.add_argument(
-        "--data_path", default="YOUR_PATH/thumos14_video", type=str, help="dataset path"
-    )
+        "--data_path", default="uvg", type=str, help="dataset path"
+    )  # beauty30.mp4
+
     parser.add_argument(
         "--save_path",
-        default="YOUR_PATH/thumos14_video/th14_vit_g_16_4",
+        default="uvg/vit_small_patch16_224",
         type=str,
         help="path for saving features",
     )
 
     parser.add_argument(
         "--model",
-        default="vit_giant_patch14_224",
+        default="vit_small_patch16_224",
         type=str,
         metavar="MODEL",
         help="Name of model",
     )
+
     parser.add_argument(
         "--ckpt_path",
-        default="YOUR_PATH/vit_g_hyrbid_pt_1200e_k710_ft.pth",
+        default="../vit_s_k710_dl_from_giant.pth",
         help="load from checkpoint",
     )
 
@@ -102,10 +103,18 @@ def get_start_idx_range(data_set):
     def fineaction_range(num_frames):
         return range(0, num_frames - 15, 16)
 
-    if data_set == "THUMOS14":
+    def uvg_range(num_frames):
+        return range(0, num_frames - 8, 16)
+
+    if data_set == "UVG":
+        return uvg_range
+
+    elif data_set == "THUMOS14":
         return thumos14_range
+
     elif data_set == "FINEACTION":
         return fineaction_range
+
     else:
         raise NotImplementedError()
 
@@ -114,6 +123,7 @@ def extract_feature(args):
     # preparation
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
+
     video_loader = get_video_loader()
     start_idx_range = get_start_idx_range(args.data_set)
     transform = transforms.Compose([ToFloatTensorInZeroOne(), Resize((224, 224))])
@@ -133,19 +143,24 @@ def extract_feature(args):
         drop_path_rate=0.3,
         use_mean_pooling=True,
     )
+
     ckpt = torch.load(args.ckpt_path, map_location="cpu")
+
     for model_key in ["model", "module"]:
         if model_key in ckpt:
             ckpt = ckpt[model_key]
             break
+
     model.load_state_dict(ckpt)
     model.eval()
     model.cuda()
 
-    # extract feature
+    # Extract feature
     num_videos = len(vid_list)
+
     for idx, vid_name in enumerate(vid_list):
         url = os.path.join(args.save_path, vid_name.split(".")[0] + ".npy")
+
         if os.path.exists(url):
             continue
 
@@ -153,6 +168,7 @@ def extract_feature(args):
         vr = video_loader(video_path)
 
         feature_list = []
+
         for start_idx in start_idx_range(len(vr)):
             data = vr.get_batch(np.arange(start_idx, start_idx + 16)).asnumpy()
             frame = torch.from_numpy(data)  # torch.Size([16, 566, 320, 3])
