@@ -117,9 +117,3 @@ model.to(device)
 
 config = load_yaml("/home/tuanlda78202/aaai24/configs/exp1/train_hnerv.yaml")
 x = VideoDataSet(config)
-buffer = x.get_batch(clip_len=64, frame_sample_rate=4)
-buffer = buffer.reshape(1, 3, 64, 1080, 1920)
-print(buffer.shape)
-
-y = model(buffer)
-print(y.shape)
