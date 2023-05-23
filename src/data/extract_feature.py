@@ -66,15 +66,13 @@ def get_args():
         choices=["THUMOS14", "FINEACTION", "UVG"],
         type=str,
         help="dataset",
-    )  # UVG
+    )
 
-    parser.add_argument(
-        "--data_path", default="uvg", type=str, help="dataset path"
-    )  # beauty30.mp4
+    parser.add_argument("--data_path", default="uvg", type=str, help="dataset path")
 
     parser.add_argument(
         "--save_path",
-        default="uvg/vit_small_patch16_224",
+        default="vit_small_patch16_224",
         type=str,
         help="path for saving features",
     )

@@ -1,119 +1,316 @@
-import os, sys
-
-sys.path.append(os.getcwd())
+import time
+import numpy as np
 import torch
-from src.backbone.videomae import vit_small_patch16_224
-from collections import OrderedDict
-from utils.util import load_yaml
-from src.data.datasets import VideoDataSet
+import torch.nn as nn
+from math import ceil, sqrt
 
 
-def load_state_dict(
-    model, state_dict, prefix="", ignore_missing="relative_position_index"
-):
-    missing_keys = []
-    unexpected_keys = []
-    error_msgs = []
-    metadata = getattr(state_dict, "_metadata", None)
-    state_dict = state_dict.copy()
-    if metadata is not None:
-        state_dict._metadata = metadata
+class PositionEncoding(nn.Module):
+    def __init__(self, pe_embed):
+        super(PositionEncoding, self).__init__()
+        self.pe_embed = pe_embed
+        if "pe" in pe_embed:
+            lbase, levels = [float(x) for x in pe_embed.split("_")[-2:]]
+            self.pe_bases = lbase ** torch.arange(int(levels)) * pi
 
-    def load(module, prefix=""):
-        local_metadata = {} if metadata is None else metadata.get(prefix[:-1], {})
-        module._load_from_state_dict(
-            state_dict,
-            prefix,
-            local_metadata,
-            True,
-            missing_keys,
-            unexpected_keys,
-            error_msgs,
-        )
-        for name, child in module._modules.items():
-            if child is not None:
-                load(child, prefix + name + ".")
-
-    load(model, prefix=prefix)
-
-    warn_missing_keys = []
-    ignore_missing_keys = []
-    for key in missing_keys:
-        keep_flag = True
-        for ignore_key in ignore_missing.split("|"):
-            if ignore_key in key:
-                keep_flag = False
-                break
-        if keep_flag:
-            warn_missing_keys.append(key)
+    def forward(self, pos):
+        if "pe" in self.pe_embed:
+            value_list = pos * self.pe_bases.to(pos.device)
+            pe_embed = torch.cat([torch.sin(value_list), torch.cos(value_list)], dim=-1)
+            return pe_embed.view(pos.size(0), -1, 1, 1)
         else:
-            ignore_missing_keys.append(key)
+            return pos
 
-    missing_keys = warn_missing_keys
 
-    if len(missing_keys) > 0:
-        print(
-            "Weights of {} not initialized from pretrained model: {}".format(
-                model.__class__.__name__, missing_keys
-            )
+class DownConv(nn.Module):
+    def __init__(self, **kargs):
+        super(DownConv, self).__init__()
+        ks, ngf, new_ngf, strd = (
+            kargs["ks"],
+            kargs["ngf"],
+            kargs["new_ngf"],
+            kargs["strd"],
         )
-    if len(unexpected_keys) > 0:
-        print(
-            "Weights from pretrained model not used in {}: {}".format(
-                model.__class__.__name__, unexpected_keys
+        if kargs["conv_type"] == "pshuffel":
+            self.downconv = nn.Sequential(
+                nn.PixelUnshuffle(strd) if strd != 1 else nn.Identity(),
+                nn.Conv2d(
+                    ngf * strd**2,
+                    new_ngf,
+                    ks,
+                    1,
+                    ceil((ks - 1) // 2),
+                    bias=kargs["bias"],
+                ),
             )
-        )
-    if len(ignore_missing_keys) > 0:
-        print(
-            "Ignored weights of {} not initialized from pretrained model: {}".format(
-                model.__class__.__name__, ignore_missing_keys
+        elif kargs["conv_type"] == "conv":
+            self.downconv = nn.Conv2d(
+                ngf, new_ngf, ks + strd, strd, ceil(ks / 2), bias=kargs["bias"]
             )
+        elif kargs["conv_type"] == "interpolate":
+            self.downconv = nn.Sequential(
+                nn.Upsample(
+                    scale_factor=1.0 / strd,
+                    mode="bilinear",
+                ),
+                nn.Conv2d(
+                    ngf,
+                    new_ngf,
+                    ks + strd,
+                    1,
+                    ceil((ks + strd - 1) / 2),
+                    bias=kargs["bias"],
+                ),
+            )
+
+    def forward(self, x):
+        return self.downconv(x)
+
+
+class UpConv(nn.Module):
+    def __init__(self, **kargs):
+        super(UpConv, self).__init__()
+        ks, ngf, new_ngf, strd = (
+            kargs["ks"],
+            kargs["ngf"],
+            kargs["new_ngf"],
+            kargs["strd"],
         )
-    if len(error_msgs) > 0:
-        print("\n".join(error_msgs))
+
+        if kargs["conv_type"] == "pshuffel":
+            self.upconv = nn.Sequential(
+                nn.Conv2d(
+                    ngf,
+                    new_ngf * strd * strd,
+                    ks,
+                    1,
+                    ceil((ks - 1) // 2),
+                    bias=kargs["bias"],
+                ),
+                nn.PixelShuffle(strd) if strd != 1 else nn.Identity(),
+            )
+
+        elif kargs["conv_type"] == "conv":
+            self.upconv = nn.ConvTranspose2d(
+                ngf, new_ngf, ks + strd, strd, ceil(ks / 2)
+            )
+
+        elif kargs["conv_type"] == "interpolate":
+            self.upconv = nn.Sequential(
+                nn.Upsample(
+                    scale_factor=strd,
+                    mode="bilinear",
+                ),
+                nn.Conv2d(
+                    ngf,
+                    new_ngf,
+                    strd + ks,
+                    1,
+                    ceil((ks + strd - 1) / 2),
+                    bias=kargs["bias"],
+                ),
+            )
+
+    def forward(self, x):
+        return self.upconv(x)
 
 
-# args
-file_path = "../checkpoint.pth"
-model_key = "model|module"
-
-# model
-model = vit_small_patch16_224()
-
-# Load checkpoint
-checkpoint = torch.load(file_path, map_location="cpu")
-print("Load ckpt from %s" % file_path)
-
-for model_key in model_key.split("|"):
-    if model_key in checkpoint:
-        checkpoint_model = checkpoint[model_key]
-        print("Load state_dict by model_key = %s" % model_key)
-        break
-if checkpoint_model is None:
-    checkpoint_model = checkpoint
-state_dict = model.state_dict()
-
-for k in ["head.weight", "head.bias"]:
-    if k in checkpoint_model and checkpoint_model[k].shape != state_dict[k].shape:
-        print(f"Removing key {k} from pretrained checkpoint")
-        del checkpoint_model[k]
-
-all_keys = list(checkpoint_model.keys())
-new_dict = OrderedDict()
-for key in all_keys:
-    if key.startswith("backbone."):
-        new_dict[key[9:]] = checkpoint_model[key]
-    elif key.startswith("encoder."):
-        new_dict[key[8:]] = checkpoint_model[key]
+def NormLayer(norm_type, ch_width):
+    if norm_type == "none":
+        norm_layer = nn.Identity()
+    elif norm_type == "bn":
+        norm_layer = nn.BatchNorm2d(num_features=ch_width)
+    elif norm_type == "in":
+        norm_layer = nn.InstanceNorm2d(num_features=ch_width)
     else:
-        new_dict[key] = checkpoint_model[key]
-checkpoint_model = new_dict
+        raise NotImplementedError
 
-load_state_dict(model, checkpoint_model)
+    return norm_layer
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model.to(device)
+def ActivationLayer(act_type):
+    if act_type == "relu":
+        act_layer = nn.ReLU(True)
+    elif act_type == "leaky":
+        act_layer = nn.LeakyReLU(inplace=True)
+    elif act_type == "leaky01":
+        act_layer = nn.LeakyReLU(negative_slope=0.1, inplace=True)
+    elif act_type == "relu6":
+        act_layer = nn.ReLU6(inplace=True)
+    elif act_type == "gelu":
+        act_layer = nn.GELU()
+    elif act_type == "sin":
+        act_layer = Sin
+    elif act_type == "swish":
+        act_layer = nn.SiLU(inplace=True)
+    elif act_type == "softplus":
+        act_layer = nn.Softplus()
+    elif act_type == "hardswish":
+        act_layer = nn.Hardswish(inplace=True)
+    else:
+        raise KeyError(f"Unknown activation function {act_type}.")
 
-config = load_yaml("/home/tuanlda78202/aaai24/configs/exp1/train_hnerv.yaml")
-x = VideoDataSet(config)
+    return act_layer
+
+
+def OutImg(x, out_bias="tanh"):
+    if out_bias == "sigmoid":
+        return torch.sigmoid(x)
+    elif out_bias == "tanh":
+        return (torch.tanh(x) * 0.5) + 0.5
+    else:
+        return x + float(out_bias)
+
+
+######################################################
+
+
+class NeRVBlock(nn.Module):
+    def __init__(self, **kargs):
+        super().__init__()
+        conv = UpConv if kargs["dec_block"] else DownConv
+
+        self.conv = conv(
+            ngf=kargs["ngf"],
+            new_ngf=kargs["new_ngf"],
+            strd=kargs["strd"],
+            ks=kargs["ks"],
+            conv_type=kargs["conv_type"],
+            bias=kargs["bias"],
+        )
+        self.norm = NormLayer(kargs["norm"], kargs["new_ngf"])
+        self.act = ActivationLayer(kargs["act"])
+
+    def forward(self, x):
+        return self.act(self.norm(self.conv(x)))
+
+
+class HNeRV(nn.Module):
+    def __init__(self, args):
+        super().__init__()
+        ks_dec1, ks_dec2 = [1, 5]
+
+        # BUILD Decoder LAYERS
+        decoder_layers = []
+        ngf = args.fc_dim
+
+        self.dec_strds = []
+
+        for i, strd in enumerate(args.dec_strds):  # 5 4 4 2 2
+            reduction = 2
+            new_ngf = int(round(ngf / reduction))
+
+            cur_blk = NeRVBlock(
+                dec_block=True,  # upconv
+                conv_type=args.conv_type[1],  # convnext pshuffel
+                ngf=ngf,
+                new_ngf=new_ngf,
+                ks=min(ks_dec1 + 2 * i, ks_dec2),
+                strd=1 if j else strd,
+                bias=True,
+                norm=args.norm,
+                act=args.act,
+            )
+            decoder_layers.append(cur_blk)
+            ngf = new_ngf
+
+        self.decoder = nn.ModuleList(decoder_layers)
+        self.head_layer = nn.Conv2d(ngf, 3, 3, 1, 1)
+        self.out_bias = args.out_bias
+
+    def forward(self, input, input_embed=None, encode_only=False):
+        if input_embed != None:
+            img_embed = input_embed
+        else:
+            if "pe" in self.embed:
+                input = self.pe_embed(input[:, None]).float()
+            img_embed = self.encoder(input)
+
+        embed_list = [img_embed]
+
+        # Decoder
+        dec_start = time.time()
+
+        output = self.decoder[0](img_embed)
+        n, c, h, w = output.shape
+        output = (
+            output.view(n, -1, self.fc_h, self.fc_w, h, w)
+            .permute(0, 1, 4, 2, 5, 3)
+            .reshape(n, -1, self.fc_h * h, self.fc_w * w)
+        )
+        embed_list.append(output)
+
+        for layer in self.decoder[1:]:
+            output = layer(output)
+            embed_list.append(output)
+
+        img_out = OutImg(self.head_layer(output), self.out_bias)
+
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+
+        dec_time = time.time() - dec_start
+
+        return img_out, embed_list, dec_time
+
+
+class HNeRVMAE(nn.Module):
+    def __init__(self, embedding=None):
+        self.embedding = embedding
+
+        self.dec1 = nn.Sequential(
+            nn.Conv2d(
+                192,
+                96 * 4**2,
+                kernel_size=3,
+                stride=(1, 1),
+                padding=ceil((3 - 1) // 2),
+            ),
+            nn.PixelShuffle(4),
+        )
+
+        self.dec2 = nn.Sequential(
+            nn.Conv2d(
+                96,
+                48 * 2**2,
+                kernel_size=3,
+                stride=(1, 1),
+                padding=ceil((3 - 1) // 2),
+            ),
+            nn.PixelShuffle(4),
+        )
+
+        self.dec3 = nn.Sequential(
+            nn.Conv2d(
+                48,
+                24 * 2**2,
+                kernel_size=3,
+                stride=(1, 1),
+                padding=ceil((3 - 1) // 2),
+            ),
+            nn.PixelShuffle(4),
+        )
+
+        self.dec4 = nn.Sequential(
+            nn.Conv2d(24, 3, kernel_size=3, stride=(1, 1), padding=ceil((3 - 1) // 2)),
+            nn.PixelShuffle(4),
+        )
+
+        self.act = ReLU()
+
+    def forward(self, x):
+        x = self.act(self.dec1(x))
+        x = self.act(self.dec2(x))
+        x = self.act(self.dec3(x))
+        x = self.act(self.dec4(x))
+
+        return x
+
+
+x = HNeRVMAE()
+
+input = torch.rand(1, 1568, 384)
+intermediate = input.reshape(16, 192, 14, 14)
+
+y = x(intermediate)
+print(x.shape)
