@@ -2,24 +2,7 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
-from math import ceil, sqrt
-
-
-class PositionEncoding(nn.Module):
-    def __init__(self, pe_embed):
-        super(PositionEncoding, self).__init__()
-        self.pe_embed = pe_embed
-        if "pe" in pe_embed:
-            lbase, levels = [float(x) for x in pe_embed.split("_")[-2:]]
-            self.pe_bases = lbase ** torch.arange(int(levels)) * pi
-
-    def forward(self, pos):
-        if "pe" in self.pe_embed:
-            value_list = pos * self.pe_bases.to(pos.device)
-            pe_embed = torch.cat([torch.sin(value_list), torch.cos(value_list)], dim=-1)
-            return pe_embed.view(pos.size(0), -1, 1, 1)
-        else:
-            return pos
+from math import ceil
 
 
 class DownConv(nn.Module):
@@ -192,13 +175,12 @@ class HNeRV(nn.Module):
 
         # BUILD Decoder LAYERS
         decoder_layers = []
-        ngf = args.fc_dim
+        ngf = args.fc_dim  # 192
 
-        self.dec_strds = []
+        self.dec_strds = [4, 2, 2]
 
-        for i, strd in enumerate(args.dec_strds):  # 5 4 4 2 2
-            reduction = 2
-            new_ngf = int(round(ngf / reduction))
+        for i, strd in enumerate(self.dec_strds):
+            new_ngf = int(round(ngf / 2))
 
             cur_blk = NeRVBlock(
                 dec_block=True,  # upconv
@@ -206,11 +188,12 @@ class HNeRV(nn.Module):
                 ngf=ngf,
                 new_ngf=new_ngf,
                 ks=min(ks_dec1 + 2 * i, ks_dec2),
-                strd=1 if j else strd,
+                strd=1,
                 bias=True,
                 norm=args.norm,
                 act=args.act,
             )
+
             decoder_layers.append(cur_blk)
             ngf = new_ngf
 
@@ -256,61 +239,68 @@ class HNeRV(nn.Module):
 
 class HNeRVMAE(nn.Module):
     def __init__(self, embedding=None):
+        super().__init__()
         self.embedding = embedding
 
-        self.dec1 = nn.Sequential(
-            nn.Conv2d(
-                192,
-                96 * 4**2,
-                kernel_size=3,
-                stride=(1, 1),
-                padding=ceil((3 - 1) // 2),
-            ),
-            nn.PixelShuffle(4),
+        self.conv1 = nn.Conv2d(
+            192,
+            96 * 4**2,
+            kernel_size=3,
+            stride=(1, 1),
+            padding=ceil((3 - 1) // 2),
         )
 
-        self.dec2 = nn.Sequential(
-            nn.Conv2d(
-                96,
-                48 * 2**2,
-                kernel_size=3,
-                stride=(1, 1),
-                padding=ceil((3 - 1) // 2),
-            ),
-            nn.PixelShuffle(4),
+        self.px1 = nn.PixelShuffle(4)
+
+        self.conv2 = nn.Conv2d(
+            96,
+            48 * 2**2,
+            kernel_size=3,
+            stride=(1, 1),
+            padding=ceil((3 - 1) // 2),
         )
 
-        self.dec3 = nn.Sequential(
-            nn.Conv2d(
-                48,
-                24 * 2**2,
-                kernel_size=3,
-                stride=(1, 1),
-                padding=ceil((3 - 1) // 2),
-            ),
-            nn.PixelShuffle(4),
+        self.px2 = nn.PixelShuffle(2)
+
+        self.conv3 = nn.Conv2d(
+            48,
+            24 * 2**2,
+            kernel_size=3,
+            stride=(1, 1),
+            padding=ceil((3 - 1) // 2),
         )
 
-        self.dec4 = nn.Sequential(
-            nn.Conv2d(24, 3, kernel_size=3, stride=(1, 1), padding=ceil((3 - 1) // 2)),
-            nn.PixelShuffle(4),
+        self.px3 = nn.PixelShuffle(2)
+
+        self.conv4 = nn.Conv2d(
+            24, 3, kernel_size=3, stride=(1, 1), padding=ceil((3 - 1) // 2)
         )
 
-        self.act = ReLU()
+        self.act = nn.ReLU()
 
     def forward(self, x):
-        x = self.act(self.dec1(x))
-        x = self.act(self.dec2(x))
-        x = self.act(self.dec3(x))
-        x = self.act(self.dec4(x))
+        x = self.act(self.px1(self.conv1(x)))
+        x = self.act(self.px2(self.conv2(x)))
+        x = self.act(self.px3(self.conv3(x)))
+        x = self.act(self.conv4(x))
 
+        x = x.permute(0, 2, 3, 1) * 255
         return x
 
 
-x = HNeRVMAE()
+import numpy as np
+from torchvision.io import write_video
 
-input = torch.rand(1, 1568, 384)
-intermediate = input.reshape(16, 192, 14, 14)
+arrays = np.load("/home/tuanlda78202/3ai24/vit_small_patch16_224/beauty.npy")
+frame = torch.from_numpy(arrays)[0]
+input = frame.reshape(16, 192, 14, 14)
 
-y = x(intermediate)
-print(x.shape)
+model = HNeRVMAE()
+output = model(input)
+
+write_video(
+    "check.mp4",
+    output,
+    fps=16,
+    options={"crf": "10"},
+)
