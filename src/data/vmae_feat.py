@@ -1,14 +1,3 @@
-"""
-Extract features for temporal action detection datasets
-
-python extract_tad_feature.py \
-    --data_set THUMOS14 \
-    --data_path YOUR_PATH/thumos14_videos \
-    --save_path YOUR_PATH/th14_vit_g_16_4 \
-    --model vit_giant_patch14_224 \
-    --ckpt_path YOUR_PATH/vit_g_hyrbid_pt_1200e_k710_ft.pth
-"""
-
 import argparse
 import os
 import random
