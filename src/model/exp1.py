@@ -5,7 +5,7 @@ import torch.nn as nn
 from math import ceil
 import torch
 from src.backbone.videomaev2 import vit_small_patch16_224
-from src.data.vmae_feat import *
+from src.model.vmae_feat import *
 
 # NOTE: Do not comment `import models`, it is used to register models
 import models  # noqa: F401
