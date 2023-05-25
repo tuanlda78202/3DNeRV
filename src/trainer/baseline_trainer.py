@@ -1,3 +1,4 @@
+import os
 import logging
 
 # os.environ["WANDB_SILENT"] = "True"
@@ -5,13 +6,10 @@ import logging
 logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)
-
 import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base_trainer import BaseTrainer
-
-# from utils import inf_loop, MetricTracker
 from tqdm import tqdm
 import wandb
 

@@ -57,7 +57,9 @@ def get_args():
         help="dataset",
     )
 
-    parser.add_argument("--data_path", default="uvg", type=str, help="dataset path")
+    parser.add_argument(
+        "--data_path", default="data/uvg", type=str, help="dataset path"
+    )
 
     parser.add_argument(
         "--save_path",
@@ -167,8 +169,8 @@ def extract_feature(args):
                 feature_list.append(feature.cpu().numpy())
 
         # [N, C]
-        np.save(url, np.vstack(feature_list))
-        print(f"[{idx} / {num_videos}]: save feature on {url}")
+        # np.save(url, np.vstack(feature_list))
+        # print(f"[{idx} / {num_videos}]: save feature on {url}")
 
 
 if __name__ == "__main__":

@@ -1,2 +1,2 @@
 from .convnext import *
-from .videomae import *
+from .videomaev2 import *

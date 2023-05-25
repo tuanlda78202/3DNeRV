@@ -1,4 +1,3 @@
-# pylint: disable=line-too-long,too-many-lines,missing-docstring
 import os
 import warnings
 
@@ -28,7 +27,7 @@ class VideoDataset(Dataset):
         new_height=256,
         new_width=340,
         keep_aspect_ratio=True,
-        num_segment=50,
+        num_segment=50,  # 12 * 50 = 600
         num_crop=1,
         test_num_segment=10,
         test_num_crop=3,
@@ -104,8 +103,8 @@ class VideoDataset(Dataset):
             self.test_seg = []
             self.test_dataset = []
 
-            for ck in range(self.test_num_segment):  # 10
-                for cp in range(self.test_num_crop):  # 3
+            for ck in range(self.test_num_segment):
+                for cp in range(self.test_num_crop):
                     for idx in range(len(cleaned)):
                         self.test_dataset.append(self.dataset_samples[idx])
                         self.test_seg.append((ck, cp))
@@ -122,8 +121,8 @@ class VideoDataset(Dataset):
             scale_t = 1
 
             sample = self.dataset_samples[index]
-            # T H W C
-            buffer = self.load_video(sample, sample_rate_scale=scale_t)
+
+            buffer = self.load_video(sample, sample_rate_scale=scale_t)  # T H W C
 
             if len(buffer) == 0:
                 while len(buffer) == 0:
@@ -152,7 +151,7 @@ class VideoDataset(Dataset):
 
         elif self.mode == "validation":
             sample = self.dataset_samples[index]
-            buffer = self.load_video(sample)
+            buffer = self.load_video(sample)  # 3 x 600 x 224 x 224
 
             if len(buffer) == 0:
                 while len(buffer) == 0:
@@ -165,7 +164,9 @@ class VideoDataset(Dataset):
 
             buffer = self.data_transform(buffer)
 
-            return buffer, sample.split("/")[-1].split(".")[0]
+            # return buffer, sample.split("/")[-1].split(".")[0]
+            # permute for loader
+            return buffer.permute(1, 2, 3, 0)  # CTHW to THWC
 
         elif self.mode == "test":
             sample = self.test_dataset[index]
@@ -245,8 +246,9 @@ class VideoDataset(Dataset):
                 chunk_nb,
                 split_nb,
             )
+
         else:
-            raise NameError("mode {} unkown".format(self.mode))
+            raise NameError("mode {} unknown".format(self.mode))
 
     def _aug_frame(self, buffer, args):
         aug_transform = video_transforms.create_random_augment(

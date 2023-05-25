@@ -336,7 +336,7 @@ class VisionTransformer(nn.Module):
         img_size=224,
         patch_size=16,
         in_chans=3,
-        num_classes=1000,
+        num_classes=710,  # 1000
         embed_dim=768,
         depth=12,
         num_heads=12,
@@ -351,7 +351,7 @@ class VisionTransformer(nn.Module):
         init_values=0.0,
         use_learnable_pos_emb=False,
         init_scale=0.0,
-        all_frames=16,
+        all_frames=12,  # 16
         tubelet_size=2,
         use_mean_pooling=True,
         with_cp=False,
