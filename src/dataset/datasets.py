@@ -21,14 +21,14 @@ class VideoDataset(Dataset):
         anno_path,
         data_root="",
         mode="train",
-        clip_len=8,
-        frame_sample_rate=2,
+        clip_len=12,
+        frame_sample_rate=1,
         crop_size=224,
         short_side_size=256,
         new_height=256,
         new_width=340,
         keep_aspect_ratio=True,
-        num_segment=1,
+        num_segment=50,
         num_crop=1,
         test_num_segment=10,
         test_num_crop=3,
@@ -82,6 +82,7 @@ class VideoDataset(Dataset):
                     ),
                 ]
             )
+
         elif mode == "test":
             self.data_resize = video_transforms.Compose(
                 [
@@ -152,6 +153,7 @@ class VideoDataset(Dataset):
         elif self.mode == "validation":
             sample = self.dataset_samples[index]
             buffer = self.load_video(sample)
+
             if len(buffer) == 0:
                 while len(buffer) == 0:
                     warnings.warn(
@@ -160,8 +162,10 @@ class VideoDataset(Dataset):
                     index = np.random.randint(self.__len__())
                     sample = self.dataset_samples[index]
                     buffer = self.load_video(sample)
+
             buffer = self.data_transform(buffer)
-            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0]
+
+            return buffer, sample.split("/")[-1].split(".")[0]
 
         elif self.mode == "test":
             sample = self.test_dataset[index]
@@ -331,14 +335,18 @@ class VideoDataset(Dataset):
 
             return buffer
 
-        # handle temporal segments
-        converted_len = int(self.clip_len * self.frame_sample_rate)
-        seg_len = length // self.num_segment
+        # Temporal segments
+        converted_len = int(self.clip_len * self.frame_sample_rate)  # 12 * 1 = 12
+        seg_len = length // self.num_segment  # 600 // 50 = 12
 
         all_index = []
-        for i in range(self.num_segment):
+
+        for i in range(self.num_segment):  # 50
             if seg_len <= converted_len:
-                index = np.linspace(0, seg_len, num=seg_len // self.frame_sample_rate)
+                index = np.linspace(
+                    0, seg_len, num=seg_len // self.frame_sample_rate
+                )  # 0,12,12
+
                 index = np.concatenate(
                     (
                         index,
@@ -346,15 +354,19 @@ class VideoDataset(Dataset):
                         * seg_len,
                     )
                 )
+
                 index = np.clip(index, 0, seg_len - 1).astype(np.int64)
+
             else:
                 if self.mode == "validation":
                     end_idx = (converted_len + seg_len) // 2
                 else:
                     end_idx = np.random.randint(converted_len, seg_len)
+
                 str_idx = end_idx - converted_len
                 index = np.linspace(str_idx, end_idx, num=self.clip_len)
                 index = np.clip(index, str_idx, end_idx - 1).astype(np.int64)
+
             index = index + i * seg_len
             all_index.extend(list(index))
 
