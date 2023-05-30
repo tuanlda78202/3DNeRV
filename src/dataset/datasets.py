@@ -17,8 +17,9 @@ class VideoDataset(Dataset):
 
     def __init__(
         self,
-        anno_path,
-        data_root="",
+        data_path="data/uvghd30/uvghd30.mp4",
+        anno_path=None,
+        data_root=None,
         mode="train",
         clip_len=12,
         frame_sample_rate=1,
@@ -27,7 +28,7 @@ class VideoDataset(Dataset):
         new_height=256,
         new_width=340,
         keep_aspect_ratio=True,
-        num_segment=50,  # 12 * 50 = 600
+        num_segment=325,  # 12 * 325 = 3900
         num_crop=1,
         test_num_segment=10,
         test_num_crop=3,
@@ -35,6 +36,7 @@ class VideoDataset(Dataset):
         args=None,
     ):
         self.anno_path = anno_path
+        self.data_path = data_path
         self.data_root = data_root
         self.mode = mode
         self.clip_len = clip_len
@@ -59,6 +61,7 @@ class VideoDataset(Dataset):
                 self.rand_erase = True
 
         self.video_loader = get_video_loader()
+        self.buffer = self.load_video(data_path=self.data_path).permute(1, 2, 3, 0)
 
         cleaned = pd.read_csv(self.anno_path, header=None, delimiter=" ")
         self.dataset_samples = list(
@@ -111,7 +114,7 @@ class VideoDataset(Dataset):
 
     def __len__(self):
         if self.mode != "test":
-            return len(self.dataset_samples)
+            return len(self.buffer)
         else:
             return len(self.test_dataset)
 
@@ -150,8 +153,7 @@ class VideoDataset(Dataset):
             return buffer, self.label_array[index], index, {}
 
         elif self.mode == "validation":
-            sample = self.dataset_samples[index]
-            buffer = self.load_video(sample)  # 3 x 600 x 224 x 224
+            buffer = self.load_video(data_path=self.data_path)  # 3 x 3900 x 224 x 224
 
             if len(buffer) == 0:
                 while len(buffer) == 0:
@@ -303,13 +305,13 @@ class VideoDataset(Dataset):
 
         return buffer
 
-    def load_video(self, sample, sample_rate_scale=1):
-        fname = sample
+    def load_video(self, data_path, sample=None, sample_rate_scale=1):
+        # fname = sample
 
         try:
-            vr = self.video_loader(fname)
+            vr = self.video_loader(data_path)
         except Exception as e:
-            print(f"Failed to load video from {fname} with error {e}!")
+            print(f"Failed to load video from {data_path} with error {e}!")
             return []
 
         length = len(vr)

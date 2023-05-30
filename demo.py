@@ -8,18 +8,15 @@ from math import ceil
 import torch.nn.functional as F
 from torch.optim import Adam
 
-# DataLoader
+# DataLoader (just for one dataset)
 dataset = VideoDataset(
-    anno_path="data/uvg_hd_30fps.csv", data_root="data", mode="validation"
+    anno_path="data/uvghd_30fps.csv", data_root="data", mode="validation"
 )
-
 beauty_data = dataset[0]
-dataloader = DataLoader(beauty_data, batch_size=12)
-
+beauty_dataloader = DataLoader(beauty_data, batch_size=12)
 
 # Extract feature
-
-pretrained_model = vit_small_patch16_224()
+cp_model = vit_small_patch16_224()
 cp = torch.load("../vit_s_k710_dl_from_giant.pth", map_location="cpu")
 
 for model_key in ["model", "module"]:
@@ -27,18 +24,12 @@ for model_key in ["model", "module"]:
         cp = cp[model_key]
         break
 
-pretrained_model.load_state_dict(cp)
-pretrained_model.eval()
-pretrained_model.cuda()
-
-tqdm_batch = tqdm(
-    iterable=dataloader,
-    desc="Epoch {}".format(0),
-    total=len(dataloader),
-    unit="it",
-)
+cp_model.load_state_dict(cp)
+cp_model.eval()
+cp_model.cuda()
 
 
+# Model
 class HNeRVMAE(nn.Module):
     def __init__(self, embedding=None):
         super().__init__()
@@ -94,15 +85,25 @@ model = HNeRVMAE()
 
 optimizer = Adam(model.parameters(), lr=0.001, betas=(0.9, 0.99))
 
+# Training
+
+tqdm_batch = tqdm(
+    iterable=beauty_dataloader,
+    desc="Epoch {}".format(0),
+    total=len(beauty_dataloader),
+    unit="it",
+)
+
 for e in range(10):
     for batch_idx, data in enumerate(tqdm_batch):
         data = data.permute(3, 0, 1, 2).unsqueeze(0).cuda()
 
         # Forward feature ckpt
-        feature = pretrained_model.forward_features(data)
+        feature = cp_model.forward_features(data)
         input = feature.reshape(12, 192, 14, 14)
 
         optimizer.zero_grad()
+
         # HNeRV MAE
         model = HNeRVMAE().cuda()
 

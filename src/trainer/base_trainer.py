@@ -61,8 +61,6 @@ class BaseTrainer:
         self.iters = 0
         self.checkpoint_dir = config.save_dir
 
-        # Setup visualization writer instance
-
         if cfg_trainer["visual_tool"] == "wandb":
             visual_config = {
                 "Architecture": config["arch"]["type"],

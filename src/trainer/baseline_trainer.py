@@ -14,7 +14,7 @@ from tqdm import tqdm
 import wandb
 
 
-class U2NetTrainer(BaseTrainer):
+class BaselineTrainer(BaseTrainer):
     """
     Trainer class
     """
