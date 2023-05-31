@@ -49,6 +49,7 @@ class VideoDataset(Dataset):
         self.vr.seek(current_idx)
         list_idx = list(range(current_idx, current_idx + self.frame_interval))
         buffer = self.vr.get_batch(list_idx).asnumpy()
+        self.vr.seek(0)
 
         if len(buffer) == 0:
             while len(buffer) == 0:
