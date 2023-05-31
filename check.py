@@ -1,18 +1,14 @@
-from src.dataset.datasets import VideoDataset
-from src.backbone.videomaev2 import vit_small_patch16_224
-from torch.utils.data import DataLoader
-import torch
+from src.dataset.build import build_dataloader
 from tqdm import tqdm
-import torch.nn as nn
-from math import ceil
-import torch.nn.functional as F
-from torch.optim import Adam
-import numpy as np
 
-from src.dataset.loader import get_video_loader
+dataloader = build_dataloader(name="uvghd30", batch_size=5)
 
-video_loader = get_video_loader()
-
-vr = video_loader("data/uvghd30/uvghd30.mp4")
-
-print(len(vr[0]))
+for ep in range(10):
+    tqdm_batch = tqdm(
+        iterable=dataloader,
+        desc="Epoch {}".format(ep),
+        total=len(dataloader),
+        unit="it",
+    )
+    for batch_idx, data in enumerate(tqdm_batch):
+        print(data.shape)

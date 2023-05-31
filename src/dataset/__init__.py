@@ -1,5 +1,5 @@
 from .build import build_dataset
-from .datasets import VideoDataset, RawFrameDataset
+from .datasets import VideoDataset
 
 __all__ = ["build_dataset"]
 
