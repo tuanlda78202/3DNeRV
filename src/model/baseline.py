@@ -6,7 +6,9 @@ import torch.nn.functional as F
 
 
 class NeRVBlock(nn.Module):
-    def __init__(self, in_ch, out_ch, scale, ks=3, stride=1, padding=1) -> None:
+    def __init__(
+        self, in_ch, out_ch, scale, ks=3, stride=1, padding=ceil((3 - 1) // 2)
+    ):
         super().__init__()
 
         self.conv = nn.Conv2d(
@@ -18,7 +20,7 @@ class NeRVBlock(nn.Module):
         )
         self.ps = nn.PixelShuffle(scale)
         self.norm = nn.Identity()
-        self.act = nn.ReLU()
+        self.act = nn.GELU()
 
     def forward(self, x):
         return self.act(self.norm(self.ps(self.conv(x))))
@@ -47,10 +49,9 @@ class HNeRVMae(nn.Module):
         x = self.blk1(x)
         x = self.blk2(x)
         x = self.blk3(x)
-        x = F.relu(self.final(x))
+        x = F.gelu(self.final(x))
 
-        x = x.permute(0, 2, 3, 1)
-        return x
+        return x.permute(0, 2, 3, 1)
 
     def vmae_pretrained(
         self,

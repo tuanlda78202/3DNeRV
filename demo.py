@@ -5,6 +5,7 @@ from torch.optim import Adam
 from src.model.baseline import HNeRVMae
 import torch
 import numpy as np
+from src.evaluation.metric import *
 
 SEED = 42
 torch.manual_seed(SEED)
@@ -46,9 +47,11 @@ for ep in range(10):
         output = model(data)
 
         # Loss
-        pred = output.reshape(BATCH_SIZE, 3, FRAME_INTERVAL, CROP_SIZE, CROP_SIZE)
-        target = data
-        loss = F.mse_loss(pred, target)
+        pred = output
+        gt = data.reshape(FRAME_INTERVAL, CROP_SIZE, CROP_SIZE, 3)
+
+        loss = F.mse_loss(pred, gt, reduction="none")
+        psnr = psnr_fn_batch(pred, gt)
 
         optimizer.zero_grad()
 
