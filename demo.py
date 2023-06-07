@@ -27,8 +27,7 @@ dataloader = build_dataloader(
 
 # Model
 model = HNeRVMae().cuda()
-
-optimizer = Adam(model.parameters(), lr=0.001, betas=(0.9, 0.99))
+optimizer = Adam(model.parameters(), lr=0.01, betas=(0.9, 0.99))
 
 # Training
 for ep in range(10):
@@ -49,9 +48,8 @@ for ep in range(10):
         # Loss
         pred = output
         gt = data.reshape(FRAME_INTERVAL, CROP_SIZE, CROP_SIZE, 3)
-
-        loss = F.mse_loss(pred, gt, reduction="none")
-        psnr = psnr_fn_batch(pred, gt)
+        loss = F.mse_loss(pred, gt)
+        # psnr = psnr_fn_batch(pred, gt)
 
         optimizer.zero_grad()
 

@@ -40,6 +40,9 @@ class HNeRVMae(nn.Module):
             24, 3, kernel_size=3, stride=(1, 1), padding=ceil((3 - 1) // 2)
         )
 
+        self.norm = nn.Identity()
+        self.act = nn.GELU()
+
     def forward(self, x):
         # Encoder
         x = self.encoder.forward_features(x)
@@ -49,7 +52,7 @@ class HNeRVMae(nn.Module):
         x = self.blk1(x)
         x = self.blk2(x)
         x = self.blk3(x)
-        x = F.gelu(self.final(x))
+        x = self.act(self.norm(self.final(x)))
 
         return x.permute(0, 2, 3, 1)
 
