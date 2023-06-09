@@ -749,10 +749,12 @@ def evaluate(
     img_embed_list = []
     model_list, quant_ckt = quant_model(model, args)
     metric_list = [[] for _ in range(len(args.metric_names))]
+
     for model_ind, cur_model in enumerate(model_list):
         time_list = []
         cur_model.eval()
         device = next(cur_model.parameters()).device
+
         if dump_vis:
             visual_dir = f"{args.outf}/visualize_model" + (
                 "_quant" if model_ind else "_orig"
@@ -917,9 +919,12 @@ def evaluate(
 
 
 def quant_model(model, args):
+    
     model_list = [deepcopy(model)]
+    
     if args.quant_model_bit == -1:
         return model_list, None
+    
     else:
         cur_model = deepcopy(model)
         quant_ckt, cur_ckt = [cur_model.state_dict() for _ in range(2)]
