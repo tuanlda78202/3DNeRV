@@ -11,16 +11,20 @@ from pytorch_msssim import ms_ssim, ssim
 
 ################## split one video into seen/unseen frames ##################
 def data_split(img_list, split_num_list, shuffle_data, rand_num=0):
-    valid_train_length, total_train_length, total_data_length = split_num_list
+    valid_train_length, total_train_length, total_data_length = split_num_list # 1 1 1 
+    
     # assert total_train_length < total_data_length
     temp_train_list, temp_val_list = [], []
+    
     if shuffle_data:
         random.Random(rand_num).shuffle(img_list)
+        
     for cur_i, frame_id in enumerate(img_list):
         if (cur_i % total_data_length) < valid_train_length:
             temp_train_list.append(frame_id)
         elif (cur_i % total_data_length) >= total_train_length:
             temp_val_list.append(frame_id)
+            
     return temp_train_list, temp_val_list
 
 

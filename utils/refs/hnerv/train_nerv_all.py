@@ -47,7 +47,9 @@ def main():
         "--data_split",
         type=str,
         default="1_1_1",
-        help="Valid_train/total_train/all data split, e.g., 18_19_20 means for every 20 samples, the first 19 samples is full train set, and the first 18 samples is chose currently",
+        help="Valid_train/total_train/all data split, \
+            e.g., 18_19_20 means for every 20 samples, the first 19 samples is full train set, \
+            and the first 18 samples is chose currently",
     )
     parser.add_argument(
         "--crop_list",
@@ -377,6 +379,7 @@ def train(local_rank, args):
     )
     args.final_size = full_dataset.final_size
     args.full_data_length = len(full_dataset)
+
     split_num_list = [int(x) for x in args.data_split.split("_")]
     train_ind_list, args.val_ind_list = data_split(
         list(range(args.full_data_length)), split_num_list, args.shuffle_data, 0
@@ -919,12 +922,11 @@ def evaluate(
 
 
 def quant_model(model, args):
-    
     model_list = [deepcopy(model)]
-    
+
     if args.quant_model_bit == -1:
         return model_list, None
-    
+
     else:
         cur_model = deepcopy(model)
         quant_ckt, cur_ckt = [cur_model.state_dict() for _ in range(2)]

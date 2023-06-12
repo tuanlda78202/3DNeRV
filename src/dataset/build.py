@@ -20,9 +20,9 @@ def build_dataset(name, data_path, frame_interval, crop_size):
 
 def build_dataloader(
     name,
+    frame_interval,
     data_path="data/uvghd30/uvghd30.mp4",
     batch_size=5,
-    frame_interval=12,
     crop_size=224,
 ):
     if name == "uvghd30":

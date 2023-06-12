@@ -16,13 +16,13 @@ class VideoDataset(Dataset):
     def __init__(
         self,
         data_path,
+        frame_interval,
         mode="train",
-        frame_interval=12,
         crop_size=224,
         short_side_size=256,
     ):
         self.data_path = data_path
-        self.model = mode
+        self.mode = mode
         self.frame_interval = frame_interval
         self.crop_size = crop_size
         self.short_side_size = short_side_size

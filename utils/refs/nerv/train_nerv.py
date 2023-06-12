@@ -477,7 +477,7 @@ def train(local_rank, args):
     val_data_dir = f"./data/{args.dataset.lower()}"
 
     train_dataset = DataSet(
-        train_data_dir,
+        train_data_dir,p
         img_transforms,
         vid_list=args.vid,
         frame_gap=args.frame_gap,

@@ -27,9 +27,10 @@ class NeRVBlock(nn.Module):
 
 
 class HNeRVMae(nn.Module):
-    def __init__(self):
+    def __init__(self, bs):
         super().__init__()
 
+        self.bs = bs
         self.encoder = self.vmae_pretrained()
 
         self.blk1 = NeRVBlock(in_ch=192, out_ch=96, scale=4)
@@ -44,9 +45,8 @@ class HNeRVMae(nn.Module):
         self.act = nn.GELU()
 
     def forward(self, x):
-        # Encoder
         x = self.encoder.forward_features(x)
-        x = x.reshape(12, 192, 14, 14)
+        x = x.reshape(self.bs, 192, 14, 14)
 
         # Decoder
         x = self.blk1(x)
@@ -58,10 +58,9 @@ class HNeRVMae(nn.Module):
 
     def vmae_pretrained(
         self,
-        vmae_model=vit_small_patch16_224(),
         vmae_cp="../vit_s_k710_dl_from_giant.pth",
     ):
-        pretrained_mae = vmae_model
+        pretrained_mae = vit_small_patch16_224(all_frames=self.bs)
         checkpoint = torch.load(vmae_cp, map_location="cpu")
 
         for model_key in ["model", "module"]:
@@ -72,5 +71,8 @@ class HNeRVMae(nn.Module):
         pretrained_mae.load_state_dict(checkpoint)
         pretrained_mae.eval()
         pretrained_mae.cuda()
+
+        for param in pretrained_mae.parameters():
+            param.requires_grad = False
 
         return pretrained_mae

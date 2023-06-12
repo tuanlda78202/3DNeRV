@@ -10,6 +10,27 @@ from copy import deepcopy
 from dahuffman import HuffmanCodec
 from torchvision.utils import save_image
 
+@torch.no_grad()
+def evaluate(model, dataloader, args, dump_vis=False, huffman_coding=False):
+    # List
+    img_embed_list = []
+    time_list = []
+    metric_list = [[] for _ in range(len(args.metric_names))]
+    
+    # Model 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model, quant_ckt = quant_model(model, args)
+    model.eval()
+    
+    for i, sample in enumerate(dataloader):
+        data = sample.to(device)
+        
+        
+
+
+        
+    
+
 
 # Evaluation training
 @torch.no_grad()
