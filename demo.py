@@ -9,6 +9,7 @@ from src.evaluation.metric import *
 import wandb
 from torchsummary import summary
 import os
+from pytorch_msssim import ms_ssim, ssim
 
 os.environ["WANDB_SILENT"] = "true"
 
@@ -75,7 +76,8 @@ for ep in range(300):
         pred = output.reshape(FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
         gt = data.reshape(FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
 
-        loss = F.mse_loss(pred, gt)
+        # loss = F.mse_loss(pred, gt)
+        loss = 1 - ssim(pred, gt, data_range=1, size_average=False)
         psnr_db = psnr_batch(pred, gt, bs=FRAME_INTERVAL)
 
         optimizer.zero_grad()
