@@ -21,7 +21,7 @@ np.random.seed(SEED)
 
 # DataLoader
 BATCH_SIZE = 1
-FRAME_INTERVAL = 100
+FRAME_INTERVAL = 60
 CROP_SIZE = 224
 dataloader = build_dataloader(
     name="uvghd30",
@@ -53,10 +53,10 @@ def psnr_batch(batch_pred, batch_gt, bs):
     return sum(psnr_list) / len(psnr_list)
 
 
-wandb.init(project="baseline-hnerv-mae")
+wandb.init(project="baseline-300e-60f")
 
 # Training
-for ep in range(200):
+for ep in range(300):
     tqdm_batch = tqdm(
         iterable=dataloader,
         desc="Epoch {}".format(ep),
@@ -89,7 +89,7 @@ for ep in range(200):
 
         wandb.log({"loss": loss.item(), "psnr": psnr_db})
 
-    if ep % 5 == 0:
+    if ep != 0 and ep % 50 == 0:
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
         output = model(data)
 
@@ -104,8 +104,8 @@ for ep in range(200):
 
         wandb.log(
             {
-                "pred": wandb.Video(pred, fps=24, format="mp4"),
-                "gt": wandb.Video(gt, fps=24, format="mp4"),
+                "pred": wandb.Video(pred, fps=30, format="mp4"),
+                "gt": wandb.Video(gt, fps=30, format="mp4"),
             },
         )
 
