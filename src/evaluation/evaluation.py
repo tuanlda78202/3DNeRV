@@ -11,6 +11,56 @@ from dahuffman import HuffmanCodec
 from torchvision.utils import save_image
 
 
+def save_checkpoint(epoch, model, optimizer, loss):
+    checkpoint_dir = "ckpt"
+
+    arch = type(model).__name__
+
+    state = {
+        "arch": arch,
+        "epoch": epoch,
+        "state_dict": model.state_dict(),
+        "optimizer": optimizer.state_dict(),
+        "loss": loss,
+    }
+
+    filename = str(checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))
+
+    torch.save(state, filename)
+
+    print("Saving checkpoint: {} ...".format(filename))
+
+
+def resume_checkpoint(model, optimizer, resume_path):
+    resume_path = str(resume_path)
+
+    print("Loading checkpoint: {} ...".format(resume_path))
+
+    checkpoint = torch.load(resume_path)
+    start_epoch = checkpoint["epoch"] + 1
+
+    # load architecture params from checkpoint.
+    if checkpoint["arch"] != model:
+        print(
+            "Warning: Architecture configuration given in config file is different from that of "
+            "checkpoint. This may yield an exception while state_dict is being loaded."
+        )
+    else:
+        model.load_state_dict(checkpoint["state_dict"])
+
+    # load optimizer state from checkpoint only when optimizer type is not changed.
+    if checkpoint["optimizer"] != optimizer:
+        print(
+            "Warning: Optimizer type given in config file is different from that of checkpoint. "
+            "Optimizer parameters not being resumed."
+        )
+    else:
+        optimizer.load_state_dict(checkpoint["optimizer"])
+
+    print("Checkpoint loaded. Resume training from epoch {}".format(start_epoch))
+
+
+"""
 # Evaluation training
 @torch.no_grad()
 def evaluated(
@@ -249,3 +299,4 @@ def dequant_tensor(quant_t):
     quant_t, tmin, scale = quant_t["quant"], quant_t["min"], quant_t["scale"]
     new_t = tmin.expand_as(quant_t) + scale.expand_as(quant_t) * quant_t
     return new_t
+"""

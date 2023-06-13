@@ -9,7 +9,11 @@ from src.evaluation.metric import *
 import wandb
 from torchsummary import summary
 import os
+<<<<<<< HEAD
 from pytorch_msssim import ms_ssim, ssim
+=======
+from src.evaluation.evaluation import save_checkpoint, resume_checkpoint
+>>>>>>> 113e172a1f562148c14154dce2e3e360e4fd2602
 
 os.environ["WANDB_SILENT"] = "true"
 
@@ -65,6 +69,8 @@ for ep in range(300):
         unit="it",
     )
 
+    model.train()
+
     for batch_idx, data in enumerate(tqdm_batch):
         # BTHWC to BCTHW
         data = data.permute(0, 4, 1, 2, 3).cuda()
@@ -92,6 +98,8 @@ for ep in range(300):
         wandb.log({"loss": loss.item(), "psnr": psnr_db})
 
     if ep != 0 and ep % 50 == 0:
+        model.eval()
+
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
         output = model(data)
 
@@ -113,6 +121,9 @@ for ep in range(300):
 
         wandb.log({"loss": loss.item(), "psnr": psnr_db})
         del pred, gt, output, data
+
+        # save_checkpoint(ep, model, optimizer, loss)
+        # resume_checkpoint(model, optimizer, resume_path)
 
 
 wandb.finish()
