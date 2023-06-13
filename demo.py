@@ -9,11 +9,8 @@ from src.evaluation.metric import *
 import wandb
 from torchsummary import summary
 import os
-<<<<<<< HEAD
 from pytorch_msssim import ms_ssim, ssim
-=======
 from src.evaluation.evaluation import save_checkpoint, resume_checkpoint
->>>>>>> 113e172a1f562148c14154dce2e3e360e4fd2602
 
 os.environ["WANDB_SILENT"] = "true"
 
@@ -25,9 +22,10 @@ torch.backends.cudnn.deterministic = False
 np.random.seed(SEED)
 
 # DataLoader
-BATCH_SIZE = 1
-FRAME_INTERVAL = 60
+BATCH_SIZE = 6
+FRAME_INTERVAL = 10
 CROP_SIZE = 224
+
 dataloader = build_dataloader(
     name="uvghd30",
     batch_size=BATCH_SIZE,
@@ -36,8 +34,8 @@ dataloader = build_dataloader(
 )
 
 # Model
-model = HNeRVMae(bs=FRAME_INTERVAL).cuda()
-# print(summary(model, (3, 12, 224, 224), batch_size=1))
+model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
+# print(summary(model, (3, FRAME_INTERVAL, 224, 224), batch_size=1))
 
 optimizer = Adam(model.parameters(), lr=0.001, betas=(0.9, 0.99))
 
@@ -49,16 +47,19 @@ def psnr(pred, gt):
     return round(db.item(), 2)
 
 
-def psnr_batch(batch_pred, batch_gt, bs):
+def psnr_batch(batch_pred, batch_gt, bs, fi):
     psnr_list = []
 
-    for idx in range(bs):
-        psnr_list.append(psnr(batch_pred[idx], batch_gt[idx]))
+    for batch_idx in range(bs):
+        for fi_idx in range(fi):
+            psnr_list.append(
+                psnr(batch_pred[batch_idx][fi_idx], batch_gt[batch_idx][fi_idx])
+            )
 
     return sum(psnr_list) / len(psnr_list)
 
 
-wandb.init(project="baseline-300e-60f")
+# wandb.init(project="baseline-300e-60f")
 
 # Training
 for ep in range(300):
@@ -79,12 +80,12 @@ for ep in range(300):
         output = model(data)
 
         # Loss
-        pred = output.reshape(FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
-        gt = data.reshape(FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
+        pred = output
+        gt = data.permute(0, 2, 1, 3, 4)
 
-        # loss = F.mse_loss(pred, gt)
-        loss = 1 - ssim(pred, gt, data_range=1, size_average=False)
-        psnr_db = psnr_batch(pred, gt, bs=FRAME_INTERVAL)
+        print(pred.shape, gt.shape)
+        loss = F.mse_loss(pred, gt)
+        psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
 
         optimizer.zero_grad()
 
@@ -95,7 +96,7 @@ for ep in range(300):
 
         tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db)
 
-        wandb.log({"loss": loss.item(), "psnr": psnr_db})
+        # wandb.log({"loss": loss.item(), "psnr": psnr_db})
 
     if ep != 0 and ep % 50 == 0:
         model.eval()
