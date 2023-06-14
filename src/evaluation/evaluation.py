@@ -12,7 +12,7 @@ from torchvision.utils import save_image
 
 
 def save_checkpoint(epoch, model, optimizer, loss):
-    checkpoint_dir = "ckpt"
+    checkpoint_dir = "/home/tuanlda78202/3ai24/ckpt/"
 
     arch = type(model).__name__
 
@@ -24,7 +24,7 @@ def save_checkpoint(epoch, model, optimizer, loss):
         "loss": loss,
     }
 
-    filename = str(checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))
+    filename = str(checkpoint_dir + "checkpoint-epoch{}.pth".format(epoch))
 
     torch.save(state, filename)
 

@@ -11,6 +11,7 @@ from torchsummary import summary
 import os
 from pytorch_msssim import ms_ssim, ssim
 from src.evaluation.evaluation import save_checkpoint, resume_checkpoint
+import random
 
 os.environ["WANDB_SILENT"] = "true"
 
@@ -22,11 +23,11 @@ torch.backends.cudnn.deterministic = False
 np.random.seed(SEED)
 
 # DataLoader
-BATCH_SIZE = 6
-FRAME_INTERVAL = 10
+BATCH_SIZE = 10
+FRAME_INTERVAL = 6
 CROP_SIZE = 224
 
-dataloader = build_dataloader(
+dataset, dataloader = build_dataloader(
     name="uvghd30",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
@@ -59,10 +60,10 @@ def psnr_batch(batch_pred, batch_gt, bs, fi):
     return sum(psnr_list) / len(psnr_list)
 
 
-# wandb.init(project="baseline-300e-60f")
+wandb.init(project="vmae-nerv3d-500e")
 
 # Training
-for ep in range(300):
+for ep in range(1000 + 1):
     tqdm_batch = tqdm(
         iterable=dataloader,
         desc="Epoch {}".format(ep),
@@ -83,7 +84,6 @@ for ep in range(300):
         pred = output
         gt = data.permute(0, 2, 1, 3, 4)
 
-        print(pred.shape, gt.shape)
         loss = F.mse_loss(pred, gt)
         psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
 
@@ -96,9 +96,9 @@ for ep in range(300):
 
         tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db)
 
-        # wandb.log({"loss": loss.item(), "psnr": psnr_db})
+        wandb.log({"loss": loss.item(), "psnr": psnr_db})
 
-    if ep != 0 and ep % 50 == 0:
+    if ep != 0 and (ep + 1) % 100 == 0:
         model.eval()
 
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
@@ -107,24 +107,22 @@ for ep in range(300):
         data = torch.mul(data, 255)
         output = torch.mul(output, 255)
 
-        pred = output.reshape(FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
-        gt = data.reshape(FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
+        pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
+        gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
 
         pred = pred.cpu().detach().numpy()
         gt = gt.cpu().detach().numpy()
 
         wandb.log(
             {
-                "pred": wandb.Video(pred, fps=30, format="mp4"),
-                "gt": wandb.Video(gt, fps=30, format="mp4"),
+                "pred": wandb.Video(pred, fps=6, format="mp4"),
+                "gt": wandb.Video(gt, fps=6, format="mp4"),
             },
         )
 
-        wandb.log({"loss": loss.item(), "psnr": psnr_db})
         del pred, gt, output, data
 
-        # save_checkpoint(ep, model, optimizer, loss)
+        save_checkpoint(ep, model, optimizer, loss)
         # resume_checkpoint(model, optimizer, resume_path)
-
 
 wandb.finish()

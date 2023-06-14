@@ -38,4 +38,4 @@ def build_dataloader(
     else:
         raise NotImplementedError("Unsupported Dataloader")
 
-    return dataloader
+    return dataset, dataloader
