@@ -40,24 +40,30 @@ def resume_checkpoint(model, optimizer, resume_path):
     start_epoch = checkpoint["epoch"] + 1
 
     # load architecture params from checkpoint.
+    """
     if checkpoint["arch"] != model:
         print(
             "Warning: Architecture configuration given in config file is different from that of "
             "checkpoint. This may yield an exception while state_dict is being loaded."
         )
     else:
-        model.load_state_dict(checkpoint["state_dict"])
+    """
+    model.load_state_dict(checkpoint["state_dict"])
 
     # load optimizer state from checkpoint only when optimizer type is not changed.
+    """
     if checkpoint["optimizer"] != optimizer:
         print(
             "Warning: Optimizer type given in config file is different from that of checkpoint. "
             "Optimizer parameters not being resumed."
         )
     else:
-        optimizer.load_state_dict(checkpoint["optimizer"])
+    """
+    optimizer.load_state_dict(checkpoint["optimizer"])
 
     print("Checkpoint loaded. Resume training from epoch {}".format(start_epoch))
+
+    return start_epoch, model, optimizer
 
 
 """

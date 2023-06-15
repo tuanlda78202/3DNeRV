@@ -32,11 +32,11 @@ class VideoDataset(Dataset):
 
         self.data_transform = video_transforms.Compose(
             [
-                video_transforms.Resize(self.short_side_size, interpolation="bilinear"),
                 video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
                 volume_transforms.ClipToTensor(),
             ]
         )
+        # video_transforms.Resize(self.short_side_size, interpolation="bilinear")
         # video_transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
     def __len__(self):

@@ -24,21 +24,21 @@ np.random.seed(SEED)
 
 # DataLoader
 BATCH_SIZE = 10
-FRAME_INTERVAL = 6
+FRAME_INTERVAL = 3
 CROP_SIZE = 224
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
-    crop_size=CROP_SIZE,
+    crop_size=960,
 )
 
 # Model
 model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
 # print(summary(model, (3, FRAME_INTERVAL, 224, 224), batch_size=1))
 
-optimizer = Adam(model.parameters(), lr=0.001, betas=(0.9, 0.99))
+optimizer = Adam(model.parameters(), lr=3e-4, betas=(0.9, 0.99))
 
 
 def psnr(pred, gt):
@@ -60,10 +60,17 @@ def psnr_batch(batch_pred, batch_gt, bs, fi):
     return sum(psnr_list) / len(psnr_list)
 
 
-wandb.init(project="vmae-nerv3d-500e")
+"""
+start_epoch, model, optimizer = resume_checkpoint(
+    model, optimizer, "/home/tuanlda78202/3ai24/ckpt/checkpoint-epoch299.pth"
+)
+"""
+
+start_epoch = 0
+wandb.init(project="vmae-nerv3d-1ke")
 
 # Training
-for ep in range(1000 + 1):
+for ep in range(start_epoch, 1000 + 1):
     tqdm_batch = tqdm(
         iterable=dataloader,
         desc="Epoch {}".format(ep),
@@ -98,7 +105,7 @@ for ep in range(1000 + 1):
 
         wandb.log({"loss": loss.item(), "psnr": psnr_db})
 
-    if ep != 0 and (ep + 1) % 100 == 0:
+    if ep != 0 and (ep + 1) % 10 == 0:
         model.eval()
 
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
@@ -122,6 +129,7 @@ for ep in range(1000 + 1):
 
         del pred, gt, output, data
 
+    if ep != 0 and (ep + 1) % 100 == 0:
         save_checkpoint(ep, model, optimizer, loss)
         # resume_checkpoint(model, optimizer, resume_path)
 
