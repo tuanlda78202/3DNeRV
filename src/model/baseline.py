@@ -69,9 +69,9 @@ class HNeRVMae(nn.Module):
             12, 3, kernel_size=3, stride=(1, 1), padding=ceil((3 - 1) // 2)
         )
         # 3D
-        self.blk3d_1 = NeRVBlock3D(in_ch=192, out_ch=48, scale=4)
-        self.blk3d_2 = NeRVBlock3D(in_ch=48, out_ch=24, scale=2)
-        self.blk3d_3 = NeRVBlock3D(in_ch=24, out_ch=6, scale=2)
+        self.blk3d_1 = NeRVBlock3D(in_ch=675, out_ch=30, scale=5)
+        self.blk3d_2 = NeRVBlock3D(in_ch=30, out_ch=12, scale=3)
+        self.blk3d_3 = NeRVBlock3D(in_ch=12, out_ch=6, scale=2)
 
         self.final3d = nn.Conv3d(6, 3, kernel_size=3, stride=1, padding=1)
 
@@ -80,7 +80,8 @@ class HNeRVMae(nn.Module):
 
     def forward(self, x):
         x = self.encoder.forward_features(x)
-        x = x.reshape(self.bs, 192, self.fi, 14, 14)
+
+        x = x.reshape(self.bs, 675, self.fi, 32, 32)
 
         if self.c3d == True:
             x = self.blk3d_1(x)
@@ -103,7 +104,9 @@ class HNeRVMae(nn.Module):
         self,
         vmae_cp="../vit_s_k710_dl_from_giant.pth",
     ):
-        pretrained_mae = vit_small_patch16_224(all_frames=self.fi)
+        pretrained_mae = vit_small_patch16_224(
+            all_frames=self.fi,
+        )
         checkpoint = torch.load(vmae_cp, map_location="cpu")
 
         for model_key in ["model", "module"]:

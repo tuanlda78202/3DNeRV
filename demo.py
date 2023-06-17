@@ -23,20 +23,20 @@ torch.backends.cudnn.deterministic = False
 np.random.seed(SEED)
 
 # DataLoader
-BATCH_SIZE = 10
-FRAME_INTERVAL = 3
-CROP_SIZE = 224
+BATCH_SIZE = 2
+FRAME_INTERVAL = 6
+CROP_SIZE = 960
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
-    crop_size=960,
+    crop_size=CROP_SIZE,
 )
 
 # Model
-model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
-# print(summary(model, (3, FRAME_INTERVAL, 224, 224), batch_size=1))
+model = HNeRVMae(bs=1, fi=FRAME_INTERVAL, c3d=True).cuda()
+# print(summary(model, (3, FRAME_INTERVAL, 960, 960), batch_size=1))
 
 optimizer = Adam(model.parameters(), lr=3e-4, betas=(0.9, 0.99))
 

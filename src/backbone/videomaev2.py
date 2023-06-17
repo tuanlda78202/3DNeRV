@@ -336,8 +336,8 @@ class VisionTransformer(nn.Module):
 
     def __init__(
         self,
-        img_size=224,
-        patch_size=16,
+        img_size=960,
+        patch_size=32,
         in_chans=3,
         num_classes=710,  # 1000
         embed_dim=768,
@@ -374,6 +374,7 @@ class VisionTransformer(nn.Module):
             tubelet_size=tubelet_size,
         )
         num_patches = self.patch_embed.num_patches
+
         self.with_cp = with_cp
 
         if use_learnable_pos_emb:
