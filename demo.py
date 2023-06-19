@@ -39,7 +39,7 @@ dataset, dataloader = build_dataloader(
 model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
 # print(summary(model, (3, FRAME_INTERVAL, 960, 960), batch_size=1))
 
-optimizer = Adam(model.parameters(), lr=3e-4, betas=(0.9, 0.99))
+optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
 
 
 def psnr(pred, gt):

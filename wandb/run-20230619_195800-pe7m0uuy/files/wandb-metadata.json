@@ -1,0 +1,105 @@
+{
+    "os": "Linux-5.19.0-45-generic-x86_64-with-glibc2.35",
+    "python": "3.10.11",
+    "heartbeatAt": "2023-06-19T12:58:01.279230",
+    "startedAt": "2023-06-19T12:58:00.477252",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/tuanlda78202/3ai24/demo.py",
+    "codePath": "demo.py",
+    "git": {
+        "remote": "https://github.com/tuanlda78202/3ai24.git",
+        "commit": "f5c5e4f80bb6465e10172495b34c0667583b452f"
+    },
+    "email": "tuanleducanh78202@gmail.com",
+    "root": "/home/tuanlda78202/3ai24",
+    "host": "tuanlda78202",
+    "username": "tuanlda78202",
+    "executable": "/home/tuanlda78202/miniconda3/envs/torch3060/bin/python",
+    "cpu_count": 6,
+    "cpu_count_logical": 12,
+    "cpu_freq": {
+        "current": 3624.0604999999996,
+        "min": 800.0,
+        "max": 4300.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3770.355,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3960.225,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3740.383,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3794.071,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3990.436,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3350.765,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3934.066,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 2816.036,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 2727.013,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3847.88,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3809.206,
+            "min": 800.0,
+            "max": 4300.0
+        },
+        {
+            "current": 3748.29,
+            "min": 800.0,
+            "max": 4300.0
+        }
+    ],
+    "disk": {
+        "total": 937.3305015563965,
+        "used": 55.643306732177734
+    },
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3060",
+            "memory_total": 12884901888
+        }
+    ],
+    "memory": {
+        "total": 15.484981536865234
+    }
+}
