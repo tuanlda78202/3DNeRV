@@ -69,25 +69,29 @@ class HNeRVMae(nn.Module):
             12, 3, kernel_size=3, stride=(1, 1), padding=ceil((3 - 1) // 2)
         )
         # 3D
-        self.blk3d_1 = NeRVBlock3D(in_ch=675, out_ch=30, scale=5)
-        self.blk3d_2 = NeRVBlock3D(in_ch=30, out_ch=12, scale=3)
-        self.blk3d_3 = NeRVBlock3D(in_ch=12, out_ch=6, scale=2)
+
+        self.blk3d_1 = NeRVBlock3D(in_ch=192, out_ch=360, scale=2)
+        self.blk3d_2 = NeRVBlock3D(in_ch=360, out_ch=80, scale=2)
+        self.blk3d_3 = NeRVBlock3D(in_ch=80, out_ch=18, scale=2)
+        self.blk3d_4 = NeRVBlock3D(in_ch=18, out_ch=3, scale=2)
 
         self.final3d = nn.Conv3d(6, 3, kernel_size=3, stride=1, padding=1)
-
         self.norm = nn.Identity()
         self.act = nn.GELU()
 
     def forward(self, x):
         x = self.encoder.forward_features(x)
 
-        x = x.reshape(self.bs, 675, self.fi, 32, 32)
+        B, N, D = x.shape
+        dim_encoder = int(N * D / 40**2 / self.fi)  # 192
+        x = x.reshape(self.bs, dim_encoder, self.fi, 40, 40)
 
         if self.c3d == True:
             x = self.blk3d_1(x)
             x = self.blk3d_2(x)
             x = self.blk3d_3(x)
-            x = self.act(self.norm(self.final3d(x)))
+            x = self.blk3d_4(x)
+            # x = self.act(self.norm(self.final3d(x)))
 
             return x.permute(0, 2, 1, 3, 4)
 

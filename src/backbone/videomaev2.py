@@ -269,7 +269,7 @@ class PatchEmbed(nn.Module):
 
     def __init__(
         self,
-        img_size=224,
+        img_size=640,
         patch_size=16,
         in_chans=3,
         embed_dim=768,
@@ -279,6 +279,7 @@ class PatchEmbed(nn.Module):
         super().__init__()
         img_size = to_2tuple(img_size)
         patch_size = to_2tuple(patch_size)
+
         num_spatial_patches = (img_size[0] // patch_size[0]) * (
             img_size[1] // patch_size[1]
         )
@@ -336,7 +337,7 @@ class VisionTransformer(nn.Module):
 
     def __init__(
         self,
-        img_size=960,
+        img_size=640,
         patch_size=32,
         in_chans=3,
         num_classes=710,  # 1000
