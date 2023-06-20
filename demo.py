@@ -68,7 +68,7 @@ start_epoch, model, optimizer = resume_checkpoint(
 """
 
 start_epoch = 0
-wandb.init(project="vmae-nerv3d-1ke")
+wandb.init(project="vmae-nerv3d-1ke", name="bee640")
 
 # Training
 for ep in range(start_epoch, 400 + 1):
