@@ -29,7 +29,7 @@ CROP_SIZE = 640
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="/home/tuanlda78202/3ai24/data/beauty.mp4",
+    data_path="/home/tuanlda78202/3ai24/data/bee.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -71,7 +71,7 @@ start_epoch = 0
 wandb.init(project="vmae-nerv3d-1ke")
 
 # Training
-for ep in range(start_epoch, 1000 + 1):
+for ep in range(start_epoch, 400 + 1):
     tqdm_batch = tqdm(
         iterable=dataloader,
         desc="Epoch {}".format(ep),

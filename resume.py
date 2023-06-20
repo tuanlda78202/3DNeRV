@@ -29,7 +29,7 @@ CROP_SIZE = 640
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="/home/tuanlda78202/3ai24/data/beauty.mp4",
+    data_path="/home/tuanlda78202/3ai24/data/ready.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -62,7 +62,7 @@ def psnr_batch(batch_pred, batch_gt, bs, fi):
 
 
 start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "/home/tuanlda78202/3ai24/ckpt/checkpoint-epoch399.pth"
+    model, optimizer, "/home/tuanlda78202/ckpt/ready-epoch399.pth"
 )
 
 
