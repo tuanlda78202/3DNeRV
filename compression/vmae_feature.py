@@ -50,6 +50,7 @@ tqdm_batch = tqdm(
     total=len(dataloader),
     unit="it",
 )
+
 model.eval()
 
 for batch_idx, data in enumerate(tqdm_batch):
@@ -58,12 +59,12 @@ for batch_idx, data in enumerate(tqdm_batch):
     feature = model_feature.forward_features(data)
 
     memory_feature = feature.element_size() * feature.nelement()
-    memory_data = data.element_size() * data.nelement()
+    memory_data = data.element_size() * data.nelement()  # 5 * 4800 * 384
 
     tqdm_batch.set_postfix(
-        memory_feat=memory_feature,
-        memory_data=memory_data,
-        feature_shape=feature.shape,
+        memory_feat=memory_feature,  # 35M
+        memory_data=memory_data,  # 140M
+        feature_shape=feature.shape,  # [5,4800,384]
     )
     feature_list.append(feature.cpu().numpy())
 

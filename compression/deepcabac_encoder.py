@@ -228,6 +228,7 @@ stepsize = 2 ** (-0.5 * 15)
 stepsize_other = 2 ** (-0.5 * 19)
 _lambda = 0.0
 
+# Just for model decoder (not included embedding mae)
 t0 = time.time()
 for name, param in tqdm(model_dict.items()):
     param = param.cpu().numpy()
