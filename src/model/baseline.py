@@ -27,7 +27,7 @@ class NeRVBlock2D(nn.Module):
 
 
 class NeRVBlock3D(nn.Module):
-    def __init__(self, in_ch, out_ch, scale, ks=3, stride=1, padding=1):
+    def __init__(self, in_ch, out_ch, scale, ks=3, stride=1, padding=1, bias=True):
         super().__init__()
 
         self.conv = nn.Conv3d(
@@ -36,6 +36,7 @@ class NeRVBlock3D(nn.Module):
             kernel_size=ks,
             stride=stride,
             padding=padding,
+            bias=bias,
         )
         self.ps = nn.PixelShuffle(scale)
         self.norm = nn.Identity()
@@ -126,3 +127,27 @@ class HNeRVMae(nn.Module):
             param.requires_grad = False
 
         return pretrained_mae
+
+
+class HNeRVMaeDecoder(nn.Module):
+    def __init__(self, fi=None, bias=True):
+        super().__init__()
+
+        self.fi = fi
+        self.bias = bias
+
+        self.blk3d_1 = NeRVBlock3D(in_ch=192, out_ch=360, scale=2, bias=self.bias)
+        self.blk3d_2 = NeRVBlock3D(in_ch=360, out_ch=80, scale=2, bias=self.bias)
+        self.blk3d_3 = NeRVBlock3D(in_ch=80, out_ch=18, scale=2, bias=self.bias)
+        self.blk3d_4 = NeRVBlock3D(in_ch=18, out_ch=3, scale=2, bias=self.bias)
+
+    def forward(self, x):
+        B, N, D = x.shape
+        dim_encoder = int(N * D / 40**2 / self.fi)
+        x = x.reshape(B, dim_encoder, self.fi, 40, 40)
+
+        x = self.blk3d_1(x)
+        x = self.blk3d_2(x)
+        x = self.blk3d_3(x)
+        x = self.blk3d_4(x)
+        return x.permute(0, 2, 1, 3, 4)
