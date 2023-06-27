@@ -32,7 +32,7 @@ CROP_SIZE = 640
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="/home/tuanlda78202/3ai24/data/bee.mp4",
+    data_path="/home/tuanlda78202/3ai24/data/bosphorus.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -46,11 +46,11 @@ optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
 
 
 start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "/home/tuanlda78202/ckpt/bee-epoch399.pth"
+    model, optimizer, "/home/tuanlda78202/3ai24/ckpt/checkpoint-epoch399.pth"
 )
 
 
-wandb.init(project="vmae-nerv3d-1ke", name="infer-bee640")
+wandb.init(project="vmae-nerv3d-1ke", name="infer-bosphorus640")
 
 model.eval()
 

@@ -29,7 +29,7 @@ CROP_SIZE = 640
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="/home/tuanlda78202/3ai24/data/bee.mp4",
+    data_path="data/shake.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -39,7 +39,8 @@ dataset, dataloader = build_dataloader(
 model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
 # print(summary(model, (3, FRAME_INTERVAL, 960, 960), batch_size=1))
 
-optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
+learning_rate = 3e-4
+optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
 
 
 def psnr(pred, gt):
@@ -61,17 +62,21 @@ def psnr_batch(batch_pred, batch_gt, bs, fi):
     return sum(psnr_list) / len(psnr_list)
 
 
+start_epoch = 0
+num_epoch = 400
+
 """
-start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "/home/tuanlda78202/3ai24/ckpt/checkpoint-epoch299.pth"
+wandb.init(
+    project="vmae-nerv3d-1ke",
+    name="shake640-400e",
+    config={
+        "learning_rate": learning_rate,
+        "epochs": num_epoch,
+    },
 )
 """
-
-start_epoch = 0
-wandb.init(project="vmae-nerv3d-1ke", name="bee640")
-
 # Training
-for ep in range(start_epoch, 400 + 1):
+for ep in range(start_epoch, num_epoch + 1):
     tqdm_batch = tqdm(
         iterable=dataloader,
         desc="Epoch {}".format(ep),
@@ -104,7 +109,7 @@ for ep in range(start_epoch, 400 + 1):
 
         tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db)
 
-        wandb.log({"loss": loss.item(), "psnr": psnr_db})
+        # wandb.log({"loss": loss.item(), "psnr": psnr_db})
 
     if ep != 0 and (ep + 1) % 10 == 0:
         model.eval()
@@ -133,5 +138,4 @@ for ep in range(start_epoch, 400 + 1):
     if ep != 0 and (ep + 1) % 100 == 0:
         save_checkpoint(ep, model, optimizer, loss)
         # resume_checkpoint(model, optimizer, resume_path)
-
-wandb.finish()
+# wandb.finish()

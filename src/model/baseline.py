@@ -111,7 +111,8 @@ class HNeRVMae(nn.Module):
     ):
         pretrained_mae = vit_small_patch16_224(
             all_frames=self.fi,
-        )
+        )  # patch_size=32, embed_dim=192
+
         checkpoint = torch.load(vmae_cp, map_location="cpu")
 
         for model_key in ["model", "module"]:
