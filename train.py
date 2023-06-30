@@ -1,7 +1,7 @@
 from src.dataset.build import build_dataloader
 from tqdm import tqdm
 import torch.nn.functional as F
-from torch.optim import Adam
+from torch.optim import Adam, lr_scheduler
 from src.model.baseline import HNeRVMae
 import torch
 import numpy as np
@@ -9,9 +9,8 @@ from src.evaluation.metric import *
 import wandb
 from torchsummary import summary
 import os
-from pytorch_msssim import ms_ssim, ssim
-from src.evaluation.evaluation import save_checkpoint, resume_checkpoint
-import random
+from src.evaluation.evaluation import save_checkpoint
+from src.evaluation.metric import *
 
 os.environ["WANDB_SILENT"] = "true"
 
@@ -39,42 +38,25 @@ dataset, dataloader = build_dataloader(
 model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
 # print(summary(model, (3, FRAME_INTERVAL, 960, 960), batch_size=1))
 
-learning_rate = 3e-4
-optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
-
-
-def psnr(pred, gt):
-    mse = torch.mean((pred - gt) ** 2)
-    # db = 20 * torch.log10(255.0 / torch.sqrt(mse))
-    db = -10 * torch.log10(mse)  # bcs normalized
-    return round(db.item(), 2)
-
-
-def psnr_batch(batch_pred, batch_gt, bs, fi):
-    psnr_list = []
-
-    for batch_idx in range(bs):
-        for fi_idx in range(fi):
-            psnr_list.append(
-                psnr(batch_pred[batch_idx][fi_idx], batch_gt[batch_idx][fi_idx])
-            )
-
-    return sum(psnr_list) / len(psnr_list)
-
-
 start_epoch = 0
 num_epoch = 400
+learning_rate = 1e-3
 
-"""
+optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
+scheduler = lr_scheduler.CosineAnnealingLR(
+    optimizer, T_max=num_epoch * len(dataset) / BATCH_SIZE, eta_min=1e-6
+)
+
+
 wandb.init(
     project="vmae-nerv3d-1ke",
-    name="shake640-400e",
+    name="refine-shake640-400e",
     config={
         "learning_rate": learning_rate,
         "epochs": num_epoch,
     },
 )
-"""
+
 # Training
 for ep in range(start_epoch, num_epoch + 1):
     tqdm_batch = tqdm(
@@ -107,9 +89,12 @@ for ep in range(start_epoch, num_epoch + 1):
 
         optimizer.step()
 
-        tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db)
+        lrt = scheduler.get_last_lr()[0]
+        tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db, lr_scheduler=lrt)
 
-        # wandb.log({"loss": loss.item(), "psnr": psnr_db})
+        wandb.log({"loss": loss.item(), "psnr": psnr_db, "lr_scheduler": lrt})
+
+        scheduler.step()
 
     if ep != 0 and (ep + 1) % 10 == 0:
         model.eval()
@@ -138,4 +123,5 @@ for ep in range(start_epoch, num_epoch + 1):
     if ep != 0 and (ep + 1) % 100 == 0:
         save_checkpoint(ep, model, optimizer, loss)
         # resume_checkpoint(model, optimizer, resume_path)
-# wandb.finish()
+
+wandb.finish()
