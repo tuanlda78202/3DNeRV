@@ -32,7 +32,7 @@ CROP_SIZE = 640
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="/home/tuanlda78202/3ai24/data/shake.mp4",
+    data_path="data/yach.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -46,11 +46,11 @@ optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
 
 
 start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "/home/tuanlda78202/ckpt/lr-cosine/shake-400e.pth"
+    model, optimizer, "../ckpt/lr-constant/yach-epoch399.pth"
 )
 
 
-wandb.init(project="vmae-nerv3d-1ke", name="lr-cosine-infer-shake640-400e")
+wandb.init(project="vmae-nerv3d-1ke", name="lr-constant-infer-yach640-400e")
 
 model.eval()
 
