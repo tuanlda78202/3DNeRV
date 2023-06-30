@@ -107,7 +107,7 @@ class HNeRVMae(nn.Module):
 
     def vmae_pretrained(
         self,
-        vmae_cp="../vit_s_k710_dl_from_giant.pth",
+        vmae_cp="/home/tuanlda78202/ckpt/vit_s_k710_dl_from_giant.pth",
     ):
         pretrained_mae = vit_small_patch16_224(
             all_frames=self.fi,
