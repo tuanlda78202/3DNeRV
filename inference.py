@@ -46,11 +46,11 @@ optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
 
 
 start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "../ckpt/lr-constant/yach-epoch399.pth"
+    model, optimizer, "../ckpt/lr-cosine/yach-400e.pth"
 )
 
 
-wandb.init(project="vmae-nerv3d-1ke", name="lr-constant-infer-yach640-400e")
+wandb.init(project="vmae-nerv3d-1ke", name="lr-cosine-infer-yach640-400e")
 
 model.eval()
 

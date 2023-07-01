@@ -28,7 +28,7 @@ CROP_SIZE = 640
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="data/bee.mp4",
+    data_path="data/yach.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -50,7 +50,7 @@ scheduler = lr_scheduler.CosineAnnealingLR(
 
 wandb.init(
     project="vmae-nerv3d-1ke",
-    name="lr-cosine-bee640-400e",
+    name="lr-cosine-yach640-400e",
     config={
         "learning_rate": learning_rate,
         "epochs": num_epoch,
