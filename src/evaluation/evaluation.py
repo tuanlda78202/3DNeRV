@@ -12,7 +12,7 @@ from torchvision.utils import save_image
 
 
 def save_checkpoint(epoch, model, optimizer, loss):
-    checkpoint_dir = "/home/tuanlda78202/3ai24/ckpt/"
+    checkpoint_dir = "/home/tuanlda78202/nerv3d/ckpt/"
 
     arch = type(model).__name__
 
