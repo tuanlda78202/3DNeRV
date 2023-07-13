@@ -37,7 +37,6 @@ dataset, dataloader = build_dataloader(
 # Model
 model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
 # print(summary(model, (3, FRAME_INTERVAL, 720, 1080), batch_size=1))
-print(model)
 
 start_epoch = 0
 num_epoch = 300
@@ -47,7 +46,6 @@ optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
 scheduler = lr_scheduler.CosineAnnealingLR(
     optimizer, T_max=num_epoch * len(dataset) / BATCH_SIZE, eta_min=1e-6
 )
-
 
 wandb.init(
     project="vmae-nerv3d-1ke",
