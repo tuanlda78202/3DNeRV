@@ -12,7 +12,7 @@ import os
 from src.evaluation.evaluation import save_checkpoint
 from src.evaluation.metric import *
 
-os.environ["WANDB_SILENT"] = "true"
+# os.environ["WANDB_SILENT"] = "true"
 
 SEED = 42
 torch.manual_seed(SEED)
@@ -23,12 +23,12 @@ np.random.seed(SEED)
 
 # DataLoader
 BATCH_SIZE = 5
-FRAME_INTERVAL = 6
-CROP_SIZE = 640
+FRAME_INTERVAL = 4
+CROP_SIZE = 960
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="data/uvghd30/uvghd30.mp4",
+    data_path="data/beauty.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
     crop_size=CROP_SIZE,
@@ -36,10 +36,11 @@ dataset, dataloader = build_dataloader(
 
 # Model
 model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
-# print(summary(model, (3, FRAME_INTERVAL, CROP_SIZE, CROP_SIZE), batch_size=1))
+# print(summary(model, (3, FRAME_INTERVAL, 720, 1080), batch_size=1))
+print(model)
 
 start_epoch = 0
-num_epoch = 400
+num_epoch = 300
 learning_rate = 1e-3
 
 optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
@@ -50,7 +51,7 @@ scheduler = lr_scheduler.CosineAnnealingLR(
 
 wandb.init(
     project="vmae-nerv3d-1ke",
-    name="lr-cosine-uvghd30640-400e",
+    name="beauty720p-300e",
     config={
         "learning_rate": learning_rate,
         "epochs": num_epoch,
@@ -105,8 +106,8 @@ for ep in range(start_epoch, num_epoch + 1):
         data = torch.mul(data, 255)
         output = torch.mul(output, 255)
 
-        pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
-        gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
+        pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1080)
+        gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1080)
 
         pred = pred.cpu().detach().numpy()
         gt = gt.cpu().detach().numpy()

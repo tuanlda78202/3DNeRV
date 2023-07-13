@@ -180,7 +180,6 @@ class Attention(nn.Module):
             qkv[1],
             qkv[2],
         )  # make torchscript happy (cannot use tensor as tuple)
-
         q = q * self.scale
         attn = q @ k.transpose(-2, -1)
 
@@ -269,7 +268,7 @@ class PatchEmbed(nn.Module):
 
     def __init__(
         self,
-        img_size=640,
+        img_size=(720, 1080),
         patch_size=16,
         in_chans=3,
         embed_dim=768,
@@ -277,7 +276,7 @@ class PatchEmbed(nn.Module):
         tubelet_size=2,
     ):
         super().__init__()
-        img_size = to_2tuple(img_size)
+        img_size = img_size
         patch_size = to_2tuple(patch_size)
 
         num_spatial_patches = (img_size[0] // patch_size[0]) * (
@@ -338,7 +337,7 @@ class VisionTransformer(nn.Module):
     def __init__(
         self,
         img_size=640,
-        patch_size=32,
+        patch_size=16,
         in_chans=3,
         num_classes=710,  # 1000
         embed_dim=768,
@@ -503,7 +502,7 @@ def vit_small_patch16_224(pretrained=False, **kwargs):
         patch_size=16,
         embed_dim=384,
         depth=12,
-        num_heads=6,
+        num_heads=3,
         mlp_ratio=4,
         qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6),

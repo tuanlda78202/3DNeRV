@@ -32,7 +32,7 @@ class VideoDataset(Dataset):
 
         self.data_transform = video_transforms.Compose(
             [
-                video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
+                video_transforms.CenterCrop(size=(720, 1080)),
                 volume_transforms.ClipToTensor(),
             ]
         )
