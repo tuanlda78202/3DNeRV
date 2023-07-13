@@ -8,7 +8,7 @@ from typing import Tuple, Union
 
 
 class BaseYUV:
-    def __init__(self, src_path, width, height):
+    def __init__(self, src_path, height, width):
         self.src_path = src_path
         self.width = width
         self.height = height
@@ -42,8 +42,8 @@ class BaseYUV:
 
 
 class YUVReader(BaseYUV):
-    def __init__(self, src_path, width, height, src_format="420", skip_frame=0):
-        super().__init__(src_path, width, height)
+    def __init__(self, src_path, height, width, src_format="420", skip_frame=0):
+        super().__init__(src_path, height, width)
         if not src_path.endswith(".yuv"):
             src_path = src_path + ".yuv"
             self.src_path = src_path
