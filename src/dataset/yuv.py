@@ -7,6 +7,106 @@ import torch.nn.functional as F
 
 from torch import Tensor
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+import os
+import io
+import numpy as np
+from PIL import Image
+from .functional import rgb_to_ycbcr420, ycbcr420_to_rgb
+
+
+class BaseYUV:
+    def __init__(self, src_path, width, height):
+        self.src_path = src_path
+        self.width = width
+        self.height = height
+        self.eof = False
+
+    def read_one_frame(self, dst_format="rgb"):
+        """
+        y is 1xhxw Y float numpy array, in the range of [0, 1]
+        uv is 2x(h/2)x(w/2) UV float numpy array, in the range of [0, 1]
+        rgb is 3xhxw float numpy array, in the range of [0, 1]
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def _none_exist_frame(dst_format):
+        if dst_format == "420":
+            return None, None
+        assert dst_format == "rgb"
+        return None
+
+    @staticmethod
+    def _get_dst_format(rgb=None, y=None, uv=None, src_format="rgb", dst_format="rgb"):
+        if dst_format == "rgb":
+            if rgb is None:
+                rgb = ycbcr420_to_rgb(y, uv, order=1)
+            return rgb
+        assert dst_format == "420"
+        if y is None:
+            y, uv = rgb_to_ycbcr420(rgb)
+        return y, uv
+
+
+class YUVReader(BaseYUV):
+    def __init__(self, src_path, width, height, src_format="420", skip_frame=0):
+        super().__init__(src_path, width, height)
+        if not src_path.endswith(".yuv"):
+            src_path = src_path + ".yuv"
+            self.src_path = src_path
+
+        self.src_format = src_format
+        self.y_size = width * height
+
+        if src_format == "420":
+            self.uv_size = width * height // 2
+        else:
+            assert False
+        # pylint: disable=R1732
+        self.file = open(src_path, "rb")
+
+    def read_one_frame(self, frame_index, dst_format="420"):
+        assert frame_index > 0
+
+        if self.eof:
+            return self._none_exist_frame(dst_format)
+
+        # Seek frame (width * height * 3/2) * frame_index
+        frame_offset = self.y_size * 1.5 * (frame_index - 1)
+        self.file.seek(int(frame_offset))
+
+        # Read Y and UV component
+        y = self.file.read(self.y_size)
+        uv = self.file.read(self.uv_size)
+
+        if not y or not uv:
+            self.eof = True
+            return self._none_exist_frame(dst_format)
+
+        y = np.frombuffer(y, dtype=np.uint8).copy().reshape(1, self.height, self.width)
+        uv = (
+            np.frombuffer(uv, dtype=np.uint8)
+            .copy()
+            .reshape(2, self.height // 2, self.width // 2)
+        )
+
+        # Normalize
+        y = y.astype(np.float32) / 255
+        uv = uv.astype(np.float32) / 255
+
+        return self._get_dst_format(y=y, uv=uv, src_format="420", dst_format=dst_format)
+
+    def __len__(self):
+        one_frame = float(self.y_size * 3 / 2)
+        return int(os.path.getsize(self.src_path) / one_frame)
+
+    def close(self):
+        self.file.close()
+
+
 YCBCR_WEIGHTS = {
     # Spec: (K_r, K_g, K_b) with K_g = 1 - K_r - K_b
     "ITU-R_BT.709": (0.2126, 0.7152, 0.0722)
