@@ -39,7 +39,7 @@ model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
 # print(summary(model, (3, FRAME_INTERVAL, 720, 1080), batch_size=1))
 
 start_epoch = 0
-num_epoch = 300
+num_epoch = 400
 learning_rate = 1e-3
 
 optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
@@ -49,7 +49,7 @@ scheduler = lr_scheduler.CosineAnnealingLR(
 
 wandb.init(
     project="vmae-nerv3d-1ke",
-    name="beauty720p-300e",
+    name="beauty720p-400e",
     config={
         "learning_rate": learning_rate,
         "epochs": num_epoch,
