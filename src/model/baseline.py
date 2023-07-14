@@ -85,6 +85,7 @@ class HNeRVMae(nn.Module):
 
     def forward(self, x):
         x = self.encoder.forward_features(x)
+        # x = nn.AdaptiveAvgPool2d((24, 36))(x)
 
         B, N, D = x.shape
         dim_encoder = int(N * D / 24 / 36 / self.fi)  # 670

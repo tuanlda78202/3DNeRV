@@ -12,7 +12,8 @@ import os
 from src.evaluation.evaluation import save_checkpoint
 from src.evaluation.metric import *
 
-# os.environ["WANDB_SILENT"] = "true"
+os.environ["WANDB_MODE"] = "offline"
+os.environ["WANDB_SILENT"] = "true"
 
 SEED = 42
 torch.manual_seed(SEED)
@@ -46,6 +47,7 @@ optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
 scheduler = lr_scheduler.CosineAnnealingLR(
     optimizer, T_max=num_epoch * len(dataset) / BATCH_SIZE, eta_min=1e-6
 )
+
 
 wandb.init(
     project="vmae-nerv3d-1ke",
