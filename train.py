@@ -24,14 +24,14 @@ np.random.seed(SEED)
 # DataLoader
 BATCH_SIZE = 5
 FRAME_INTERVAL = 4
-CROP_SIZE = 960
+# CROP_SIZE = 960
 
 dataset, dataloader = build_dataloader(
-    name="uvghd30",
-    data_path="data/beauty.mp4",
+    name="uvg-raw",
+    data_path="../uvg-raw/beauty.yuv",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
-    crop_size=CROP_SIZE,
+    crop_size=(720, 1080),
 )
 
 # Model
@@ -49,7 +49,7 @@ scheduler = lr_scheduler.CosineAnnealingLR(
 
 wandb.init(
     project="vmae-nerv3d-1ke",
-    name="beauty720p-400e",
+    name="beauty-raw720p-400e",
     config={
         "learning_rate": learning_rate,
         "epochs": num_epoch,

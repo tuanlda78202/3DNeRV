@@ -1,7 +1,6 @@
 from src.dataset.yuv import YUVReader
-import numpy as np
 from torch.utils.data import Dataset
-
+import numpy as np
 
 src_reader = YUVReader("../uvg-raw/beauty.yuv", 1080, 1920)
 frame = src_reader.read_one_frame(frame_index=100, dst_format="rgb")
@@ -11,7 +10,7 @@ class YUVDataset(Dataset):
     def __init__(
         self,
         data_path,
-        frame_interval,
+        frame_interval=4,
         crop_size=(1080, 1920),
         mode="train",
     ):
@@ -27,17 +26,11 @@ class YUVDataset(Dataset):
         return len(self.vr) // self.frame_interval
 
     def __getitem__(self, index):
-        current_idx = index * self.frame_interval
-        self.vr.seek(current_idx)
-        list_idx = list(range(current_idx, current_idx + self.frame_interval))
-        # buffer = self.vr.get_batch(list_idx).asnumpy()
-        self.vr.seek(0)
+        buffer = []
+        for idx in range(self.frame_interval):
+            frame = self.vr.read_one_frame(
+                frame_index=index * self.frame_interval + idx, dst_format="rgb"
+            )
+            buffer.append(frame)
 
-        buffer = self.data_transform(buffer)
-
-        return buffer.permute(1, 2, 3, 0)  # CTHW to THWC
-
-
-data = YUVDataset("../uvg-raw/beauty.yuv", frame_interval=4)
-
-print(len(data))
+        return np.array(buffer).permute(0, 2, 3, 1)  # TCHW to THWC

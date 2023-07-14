@@ -5,6 +5,10 @@ import torch
 from torch import Tensor
 import torch.nn.functional as F
 from typing import Tuple, Union
+from torch.utils.data import Dataset
+import numpy as np
+from torchvision import transforms
+from . import video_transforms, volume_transforms
 
 
 class BaseYUV:
@@ -34,6 +38,7 @@ class BaseYUV:
         if dst_format == "rgb":
             if rgb is None:
                 rgb = ycbcr420_to_rgb(y, uv, order=1)
+
             return rgb
         assert dst_format == "420"
         if y is None:
@@ -59,6 +64,7 @@ class YUVReader(BaseYUV):
         self.file = open(src_path, "rb")
 
     def read_one_frame(self, frame_index, dst_format="420"):
+        frame_index += 1
         assert frame_index > 0
 
         if self.eof:
@@ -95,6 +101,46 @@ class YUVReader(BaseYUV):
 
     def close(self):
         self.file.close()
+
+
+class YUVDataset(Dataset):
+    def __init__(
+        self,
+        data_path,
+        frame_interval=4,
+        crop_size=(720, 1080),
+        mode="train",
+    ):
+        self.data_path = data_path
+        self.mode = mode
+        self.frame_interval = frame_interval
+        self.crop_size = crop_size
+
+        self.vr = YUVReader(self.data_path, 1080, 1920)
+        self.file = self.vr.file
+
+        self.data_transform = video_transforms.Compose(
+            [
+                video_transforms.CenterCrop(size=self.crop_size),
+                volume_transforms.ClipToTensor(),
+            ]
+        )
+
+    def __len__(self):
+        return len(self.vr) // self.frame_interval
+
+    def __getitem__(self, index):
+        buffer = []
+        for idx in range(self.frame_interval):
+            frame = self.vr.read_one_frame(
+                frame_index=index * self.frame_interval + idx, dst_format="rgb"
+            )
+            buffer.append(frame)  # CHW
+
+        buffer = np.array(buffer).reshape(self.frame_interval, 1080, 1920, 3)
+        buffer = self.data_transform(buffer)
+
+        return buffer.permute(1, 2, 3, 0)  # CTHW to THWC
 
 
 YCBCR_WEIGHTS = {
