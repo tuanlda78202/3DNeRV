@@ -47,7 +47,7 @@ class BaseYUV:
 
 
 class YUVReader(BaseYUV):
-    def __init__(self, src_path, height, width, src_format="420", skip_frame=0):
+    def __init__(self, src_path, height, width, src_format="420"):
         super().__init__(src_path, height, width)
         if not src_path.endswith(".yuv"):
             src_path = src_path + ".yuv"
@@ -63,7 +63,7 @@ class YUVReader(BaseYUV):
         # pylint: disable=R1732
         self.file = open(src_path, "rb")
 
-    def read_one_frame(self, frame_index, dst_format="420"):
+    def read_one_frame(self, frame_index, dst_format="rgb"):
         frame_index += 1
         assert frame_index > 0
 
@@ -93,7 +93,8 @@ class YUVReader(BaseYUV):
         y = y.astype(np.float32) / 255
         uv = uv.astype(np.float32) / 255
 
-        return self._get_dst_format(y=y, uv=uv, src_format="420", dst_format=dst_format)
+        rgb = self._get_dst_format(y=y, uv=uv, src_format="420", dst_format=dst_format)
+        return rgb
 
     def __len__(self):
         one_frame = float(self.y_size * 3 / 2)
@@ -122,7 +123,6 @@ class YUVDataset(Dataset):
         self.data_transform = video_transforms.Compose(
             [
                 video_transforms.CenterCrop(size=self.crop_size),
-                volume_transforms.ClipToTensor(),
             ]
         )
 
@@ -133,14 +133,14 @@ class YUVDataset(Dataset):
         buffer = []
         for idx in range(self.frame_interval):
             frame = self.vr.read_one_frame(
-                frame_index=index * self.frame_interval + idx, dst_format="rgb"
+                frame_index=index * self.frame_interval + idx
             )
             buffer.append(frame)  # CHW
 
-        buffer = np.array(buffer).reshape(self.frame_interval, 1080, 1920, 3)
-        buffer = self.data_transform(buffer)
+        buffer = np.array(buffer).transpose(0, 2, 3, 1)  # THWC
+        buffer = np.array(self.data_transform(buffer))
 
-        return buffer.permute(1, 2, 3, 0)  # CTHW to THWC
+        return torch.from_numpy(buffer)
 
 
 YCBCR_WEIGHTS = {
@@ -190,6 +190,7 @@ def ycbcr420_to_rgb(y, uv, order=1):
     b = y + (2 - 2 * Kb) * (cb - 0.5)
     g = (y - Kr * r - Kb * b) / Kg
     rgb = np.concatenate((r, g, b), axis=0)
+
     rgb = np.clip(rgb, 0.0, 1.0)
     return rgb
 

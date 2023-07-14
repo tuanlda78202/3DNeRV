@@ -12,7 +12,7 @@ import os
 from src.evaluation.evaluation import save_checkpoint
 from src.evaluation.metric import *
 
-os.environ["WANDB_MODE"] = "offline"
+# os.environ["WANDB_MODE"] = "offline"
 os.environ["WANDB_SILENT"] = "true"
 
 SEED = 42
@@ -97,14 +97,14 @@ for ep in range(start_epoch, num_epoch + 1):
 
         scheduler.step()
 
-    if ep != 0 and (ep + 1) % 10 == 0:
+    if ep != 0 and (ep + 1) % 5 == 0:
         model.eval()
 
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
         output = model(data)
 
-        data = torch.mul(data, 255)
-        output = torch.mul(output, 255)
+        data = torch.mul(data, 255).type(torch.uint8)
+        output = torch.mul(output, 255).type(torch.uint8)
 
         pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1080)
         gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1080)
@@ -114,8 +114,8 @@ for ep in range(start_epoch, num_epoch + 1):
 
         wandb.log(
             {
-                "pred": wandb.Video(pred, fps=6, format="mp4"),
-                "gt": wandb.Video(gt, fps=6, format="mp4"),
+                "pred": wandb.Video(pred, fps=4, format="mp4"),
+                "gt": wandb.Video(gt, fps=4, format="mp4"),
             },
         )
 
