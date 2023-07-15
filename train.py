@@ -11,6 +11,8 @@ from torchsummary import summary
 import os
 from src.evaluation.evaluation import save_checkpoint
 from src.evaluation.metric import *
+import time
+
 
 # os.environ["WANDB_MODE"] = "offline"
 os.environ["WANDB_SILENT"] = "true"
@@ -48,7 +50,7 @@ scheduler = lr_scheduler.CosineAnnealingLR(
     optimizer, T_max=num_epoch * len(dataset) / BATCH_SIZE, eta_min=1e-6
 )
 
-
+"""
 wandb.init(
     project="vmae-nerv3d-1ke",
     name="beauty-raw720p-400e",
@@ -57,7 +59,7 @@ wandb.init(
         "epochs": num_epoch,
     },
 )
-
+"""
 # Training
 for ep in range(start_epoch, num_epoch + 1):
     tqdm_batch = tqdm(
@@ -70,34 +72,44 @@ for ep in range(start_epoch, num_epoch + 1):
     model.train()
 
     for batch_idx, data in enumerate(tqdm_batch):
+        start_time = time.time()
         # BTHWC to BCTHW
         data = data.permute(0, 4, 1, 2, 3).cuda()
+        print("--- DataLoader: %s seconds ---" % (time.time() - start_time))
 
+        start_time = time.time()
         # HNeRV MAE
         output = model(data)
+        print("--- Model: %s seconds ---" % (time.time() - start_time))
 
+        start_time = time.time()
         # Loss
         pred = output
         gt = data.permute(0, 2, 1, 3, 4)
-
         loss = F.mse_loss(pred, gt)
-        psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
+        print("--- Loss: %s seconds ---" % (time.time() - start_time))
 
+        start_time = time.time()
+        psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
+        print("--- PSNR: %s seconds ---" % (time.time() - start_time))
+
+        start_time = time.time()
         optimizer.zero_grad()
 
         # Optimizer
         loss.backward()
 
         optimizer.step()
+        print("--- Optimizer: %s seconds ---" % (time.time() - start_time))
 
         lrt = scheduler.get_last_lr()[0]
         tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db, lr_scheduler=lrt)
 
-        wandb.log({"loss": loss.item(), "psnr": psnr_db, "lr_scheduler": lrt})
+        # wandb.log({"loss": loss.item(), "psnr": psnr_db, "lr_scheduler": lrt})
 
         scheduler.step()
 
-    if ep != 0 and (ep + 1) % 5 == 0:
+    if ep != 0 and (ep + 1) % 20 == 0:
         model.eval()
 
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
@@ -125,4 +137,4 @@ for ep in range(start_epoch, num_epoch + 1):
         save_checkpoint(ep, model, optimizer, loss)
         # resume_checkpoint(model, optimizer, resume_path)
 
-wandb.finish()
+# wandb.finish()
