@@ -49,7 +49,6 @@ scheduler = lr_scheduler.CosineAnnealingLR(
     optimizer, T_max=num_epoch * len(dataset) / BATCH_SIZE, eta_min=1e-6
 )
 
-"""
 wandb.init(
     project="vmae-nerv3d-1ke",
     name="beauty-raw720p-400e",
@@ -58,7 +57,7 @@ wandb.init(
         "epochs": num_epoch,
     },
 )
-"""
+
 # Training
 for ep in range(start_epoch, num_epoch + 1):
     tqdm_batch = tqdm(
@@ -94,11 +93,11 @@ for ep in range(start_epoch, num_epoch + 1):
         lrt = scheduler.get_last_lr()[0]
         tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db, lr_scheduler=lrt)
 
-        # wandb.log({"loss": loss.item(), "psnr": psnr_db, "lr_scheduler": lrt})
+        wandb.log({"loss": loss.item(), "psnr": psnr_db, "lr_scheduler": lrt})
 
         scheduler.step()
 
-    if ep != 0 and (ep + 1) % 20 == 0:
+    if ep != 0 and (ep + 1) % 10 == 0:
         model.eval()
 
         data = next(iter(dataloader)).permute(0, 4, 1, 2, 3).cuda()
