@@ -39,7 +39,9 @@ def build_dataloader(
             crop_size=crop_size,
         )
 
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+        dataloader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=False, num_workers=6
+        )
 
     elif name == "uvg-raw":
         dataset = build_dataset(
@@ -49,7 +51,9 @@ def build_dataloader(
             crop_size=crop_size,
         )
 
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+        dataloader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=False, num_workers=6
+        )
 
     else:
         raise NotImplementedError("Unsupported Dataloader")

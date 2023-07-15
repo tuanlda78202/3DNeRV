@@ -9,6 +9,7 @@ from torch.utils.data import Dataset
 import numpy as np
 from torchvision import transforms
 from . import video_transforms, volume_transforms
+import time
 
 
 class BaseYUV:
@@ -130,6 +131,8 @@ class YUVDataset(Dataset):
         return len(self.vr) // self.frame_interval
 
     def __getitem__(self, index):
+        # start_time = time.time()
+
         buffer = []
         for idx in range(self.frame_interval):
             frame = self.vr.read_one_frame(
@@ -139,6 +142,8 @@ class YUVDataset(Dataset):
 
         buffer = np.array(buffer).transpose(0, 2, 3, 1)  # THWC
         buffer = np.array(self.data_transform(buffer))
+
+        # print("--- Data get index: %s seconds ---" % (time.time() - start_time))
 
         return torch.from_numpy(buffer)
 

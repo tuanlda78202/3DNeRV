@@ -27,7 +27,6 @@ np.random.seed(SEED)
 # DataLoader
 BATCH_SIZE = 5
 FRAME_INTERVAL = 4
-# CROP_SIZE = 960
 
 dataset, dataloader = build_dataloader(
     name="uvg-raw",
@@ -72,35 +71,25 @@ for ep in range(start_epoch, num_epoch + 1):
     model.train()
 
     for batch_idx, data in enumerate(tqdm_batch):
-        start_time = time.time()
         # BTHWC to BCTHW
         data = data.permute(0, 4, 1, 2, 3).cuda()
-        print("--- DataLoader: %s seconds ---" % (time.time() - start_time))
 
-        start_time = time.time()
         # HNeRV MAE
         output = model(data)
-        print("--- Model: %s seconds ---" % (time.time() - start_time))
 
-        start_time = time.time()
         # Loss
         pred = output
-        gt = data.permute(0, 2, 1, 3, 4)
+        gt = data.permute(0, 2, 1, 3, 4)  # BCTHW to BTCHW
         loss = F.mse_loss(pred, gt)
-        print("--- Loss: %s seconds ---" % (time.time() - start_time))
 
-        start_time = time.time()
         psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
-        print("--- PSNR: %s seconds ---" % (time.time() - start_time))
 
-        start_time = time.time()
         optimizer.zero_grad()
 
         # Optimizer
         loss.backward()
 
         optimizer.step()
-        print("--- Optimizer: %s seconds ---" % (time.time() - start_time))
 
         lrt = scheduler.get_last_lr()[0]
         tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr_db, lr_scheduler=lrt)
@@ -137,4 +126,4 @@ for ep in range(start_epoch, num_epoch + 1):
         save_checkpoint(ep, model, optimizer, loss)
         # resume_checkpoint(model, optimizer, resume_path)
 
-# wandb.finish()
+wandb.finish()
