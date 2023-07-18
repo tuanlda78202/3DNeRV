@@ -2,7 +2,7 @@ from src.dataset.build import build_dataloader
 from tqdm import tqdm
 import torch.nn.functional as F
 from torch.optim import Adam, lr_scheduler
-from src.model.baseline import HNeRVMae
+from src.model.hnerv3d import HNeRVMae
 import torch
 import numpy as np
 from src.evaluation.metric import *
@@ -29,19 +29,27 @@ BATCH_SIZE = 5
 FRAME_INTERVAL = 4
 
 dataset, dataloader = build_dataloader(
-    name="uvg-raw",
-    data_path="../uvg-raw/beauty.yuv",
+    name="uvghd30",
+    data_path="data/beauty.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
-    crop_size=(720, 1080),
+    crop_size=(720, 1280),
 )
 
 # Model
-model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
-# print(summary(model, (3, FRAME_INTERVAL, 720, 1080), batch_size=1))
+model = HNeRVMae(
+    img_size=(720, 1280),
+    frame_interval=4,
+    embed_dim=8,
+    decode_dim=661,
+    embed_size=(9, 16),
+    scales=[5, 4, 2, 2],
+    lower_width=6,
+    reduce=3,
+).cuda()
 
 start_epoch = 0
-num_epoch = 400
+num_epoch = 300
 learning_rate = 1e-3
 
 optimizer = Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.99))
@@ -49,16 +57,8 @@ scheduler = lr_scheduler.CosineAnnealingLR(
     optimizer, T_max=num_epoch * len(dataset) / BATCH_SIZE, eta_min=1e-6
 )
 
-"""
-wandb.init(
-    project="vmae-nerv3d-1ke",
-    name="beauty-raw720p-400e",
-    config={
-        "learning_rate": learning_rate,
-        "epochs": num_epoch,
-    },
-)
-"""
+# wandb.init(project="vmae-nerv3d-1ke", name="beauty-raw720p-300e")
+
 # Training
 for ep in range(start_epoch, num_epoch + 1):
     tqdm_batch = tqdm(
