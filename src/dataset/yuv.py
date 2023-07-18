@@ -110,7 +110,7 @@ class YUVDataset(Dataset):
         self,
         data_path,
         frame_interval=4,
-        crop_size=(720, 1080),
+        crop_size=(720, 1280),
         mode="train",
     ):
         self.data_path = data_path

@@ -268,7 +268,7 @@ class PatchEmbed(nn.Module):
 
     def __init__(
         self,
-        img_size=(720, 1080),
+        img_size=(720, 1280),
         patch_size=16,
         in_chans=3,
         embed_dim=768,
