@@ -51,7 +51,7 @@ class NeRVBlock3D(nn.Module):
             padding=ceil((kernel_size-1) // 2),
             bias=bias
         )
-        self.ps = nn.PixelShuffle(scale)
+        self.ps = nn.PixelShuffle(scale) if scale != 1 else nn.Identity()
         self.norm = norm_fn()
         self.act = act_fn()
 
@@ -66,16 +66,19 @@ class NeRVBlock3D(nn.Module):
 class HNeRVMae(nn.Module):
     def __init__(
         self,
-        img_size: Tuple = (720, 1280), # shape-impact
-        frame_interval: int = 4, # shape-impact
+        img_size: Tuple = (720, 1280), #
+        frame_interval: int = 4, #
         
-        encode_length: int = 6300,
+        embed_dim: int = 8, # d
+        embed_size: Tuple = (9, 16), #
+        #encode_length: int = 6, #
+
+        decode_dim: int = 92, # c2
         lower_kernel: int = 1,
         upper_kernel: int = 5,
-        scales: List = [5, 2, 2], # shape-impact
+        scales: List = [5, 4, 2, 2],
         reduce: float = 3,
-        lower_width: int = 12,
-        embed_size: Tuple = (36, 64), # shape-impact
+        lower_width: int = 6,
         bias: bool = True,
         
         norm_fn=nn.Identity,
@@ -87,23 +90,41 @@ class HNeRVMae(nn.Module):
     ):
         super().__init__()
 
+        # build encoder
         self.encoder = vmae_pretrained(
             ckt_path, model_fn, all_frames=frame_interval, img_size=img_size)
-        hidden_dim = self.encoder.embed_dim
-        num_patches = self.encoder.patch_embed.num_patches
+        self.hidden_dim = self.encoder.embed_dim
+        patch_size = self.encoder.patch_embed.patch_size
+        tubelet_size = self.encoder.patch_embed.tubelet_size
 
-        assert encode_length <= num_patches
-        self.intermediate = nn.AdaptiveAvgPool1d(encode_length)
-        
-        self.embed_h, self.embed_w = embed_size
-        assert (hidden_dim * encode_length) % (self.embed_h * self.embed_w * frame_interval) == 0
-        assert self.embed_h * np.prod(scales) == img_size[0] and self.embed_w * np.prod(scales) == img_size[1]
-        self.embed_dim = (hidden_dim * encode_length) // (self.embed_h * self.embed_w * frame_interval)
-        
+        # reduce size of embeddings (hidden to embed)
+        self.embed_dim = embed_dim
         self.frame_interval = frame_interval
+        self.embed_h, self.embed_w = embed_size
 
+        self.hidden_t = frame_interval // tubelet_size
+        self.hidden_h, self.hidden_w = img_size[0] // patch_size[0], img_size[1] // patch_size[1]
+        self.proj = nn.ModuleList([
+            nn.Conv3d(
+                in_channels=self.hidden_dim,
+                out_channels=self.embed_dim,
+                kernel_size=1,
+                stride=1
+            ),
+            act_fn(),
+            nn.AdaptiveAvgPool3d((self.hidden_t, self.embed_h, self.embed_w))
+        ])
+        self.embed_dim //= tubelet_size
+
+        # build decoder
         self.decoder = []
-        ngf = self.embed_dim
+
+        self.decoder.append(NeRVBlock3D(
+            1, self.embed_dim, decode_dim, kernel_size=1, 
+            bias=bias, norm_fn=norm_fn, act_fn=act_fn
+        ))
+
+        ngf = decode_dim
         for i, scale in enumerate(scales):
             reduction = sqrt(scale) if reduce==-1 else reduce
             new_ngf = int(max(round(ngf / reduction), lower_width))
@@ -121,10 +142,11 @@ class HNeRVMae(nn.Module):
 
     def forward(self, x: torch.Tensor):
         x = self.encoder.forward_features(x)
-        x = self.intermediate(x.permute(0, 2, 1)).permute(0, 2, 1)
-
         B, _, _ = x.shape
-        x = x.reshape(B, self.embed_dim, self.frame_interval, self.embed_h, self.embed_w)
+        x = x.reshape(B, self.hidden_dim, self.hidden_t, self.hidden_h, self.hidden_w)
+
+        x = self.proj(x)
+        x = x.reshape(B, self.embed_dim, self.frame_interval, self.embed_h, self.embed_w) # embedding
         
         x = self.decoder(x)
         x = self.out(self.head_norm(self.head_proj(x)))
