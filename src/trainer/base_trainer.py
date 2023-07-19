@@ -43,8 +43,34 @@ class BaseTrainer:
         self.epochs = cfg_trainer["epochs"]
         self.save_period = cfg_trainer["save_period"]
         self.monitor = cfg_trainer.get("monitor", "off")
+        self.start_epoch = 0
+        self.iters = 0
+        self.checkpoint_dir = config.save_dir
 
-        # configuration to monitor model performance and save best
+        if cfg_trainer["resume"]:
+            self._resume_checkpoint(config.resume)
+
+        # Visualization tool
+        if cfg_trainer["visual_tool"] == "wandb":
+            visual_config = {
+                "Architecture": config["arch"]["type"],
+                "trainer": cfg_trainer["type"],
+            }
+            self.wandb = WandB(
+                config["name"],
+                cfg_trainer,
+                self.logger,
+                cfg_trainer["visual_tool"],
+                visualize_config=visual_config,
+            )
+
+        else:
+            raise ImportError(
+                "Visualization tool isn't exists, please refer to comment 1.* "
+                "to choose appropriate module"
+            )
+
+        # Monitor model performance and save best
         if self.monitor == "off":
             self.mnt_mode = "off"
             self.mnt_best = 0
@@ -56,35 +82,6 @@ class BaseTrainer:
             self.early_stop = cfg_trainer.get("early_stop", inf)
             if self.early_stop <= 0:
                 self.early_stop = inf
-
-        self.start_epoch = 0
-        self.iters = 0
-        self.checkpoint_dir = config.save_dir
-
-        if cfg_trainer["visual_tool"] == "wandb":
-            visual_config = {
-                "Architecture": config["arch"]["type"],
-                "trainer": cfg_trainer["type"],
-            }
-            self.track = WandB(
-                config["name"],
-                cfg_trainer,
-                self.logger,
-                cfg_trainer["visual_tool"],
-                visualize_config=visual_config,
-            )
-
-        elif cfg_trainer["visual_tool"] == "None":
-            self.track = None
-
-        else:
-            raise ImportError(
-                "Visualization tool isn't exists, please refer to comment 1.* "
-                "to choose appropriate module"
-            )
-
-        if config.resume is not None:
-            self._resume_checkpoint(config.resume)
 
     @abstractmethod
     def _train_epoch(self, epoch):
@@ -148,11 +145,11 @@ class BaseTrainer:
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
 
-        # self.track: WandB Class  -> self.track.write: WandB Library
+        # self.wandb: WandB Class  -> self.wandb.write: WandB Library
         # Launch multiple runs from one script?​
         # run.finish(): Use this at the end of your run to finish logging for that run
-        if self.track is not None and self.track.name == "wandb":
-            self.track.writer.finish()
+        if self.wandb is not None:
+            self.wandb.writer.finish()
 
     def _save_checkpoint(self, epoch, save_best=False):
         """
@@ -172,6 +169,7 @@ class BaseTrainer:
             "monitor_best": self.mnt_best,
             "config": self.config,
         }
+
         filename = str(self.checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))
         torch.save(state, filename)
         self.logger.info("Saving checkpoint: {} ...".format(filename))

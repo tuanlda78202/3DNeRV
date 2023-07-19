@@ -1,1 +1,1 @@
-from .baseline_trainer import *
+from .nerv3d_trainer import *

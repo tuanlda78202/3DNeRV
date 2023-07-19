@@ -15,11 +15,9 @@ class VideoDataset(Dataset):
         self,
         data_path,
         frame_interval,
-        mode="train",
-        crop_size=(720, 1280),
+        crop_size,
     ):
         self.data_path = data_path
-        self.mode = mode
         self.frame_interval = frame_interval
         self.crop_size = crop_size
 

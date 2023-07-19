@@ -7,7 +7,6 @@ def build_dataset(name, data_path, frame_interval, crop_size=None):
     if name == "uvghd30":
         dataset = VideoDataset(
             data_path=data_path,
-            mode="train",
             frame_interval=frame_interval,
             crop_size=crop_size,
         )

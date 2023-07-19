@@ -14,7 +14,7 @@ from tqdm import tqdm
 import wandb
 
 
-class BaselineTrainer(BaseTrainer):
+class NeRV3DTrainer(BaseTrainer):
     """
     Trainer class
     """
