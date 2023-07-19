@@ -119,7 +119,7 @@ class HNeRVMae(nn.Module):
         )
         self.embed_dim //= tubelet_size
 
-        # Build Decoder
+        # Decoder
         self.decoder = []
 
         self.decoder.append(
