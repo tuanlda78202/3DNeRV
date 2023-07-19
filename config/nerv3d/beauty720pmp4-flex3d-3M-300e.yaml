@@ -1,4 +1,4 @@
-name: 720pMP4-Flex3D-2.67M-300e
+name: Beauty-720pMP4-Flex3D-2.67M-300e
 
 dataloader:
   type: build_dataloader
@@ -6,10 +6,10 @@ dataloader:
   args:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       # EXPERIMENTS
-    frame_interval: 4                                 # MEMORY
+    frame_interval: 4                                  # MEMORY
     crop_size: [720, 1280]
 
-    batch_size: 2                                     # MEMORY
+    batch_size: 2                                      # MEMORY
     num_workers: 0      
 
 arch:
@@ -17,11 +17,11 @@ arch:
 
   args:
     img_size: [720, 1280]
-    frame_interval: 4       #dataset.args['frame_interval']
+    frame_interval: 4       
     
     embed_dim: 8 
     embed_size: [9, 16]
-    decode_dim: 92
+    decode_dim: 314
 
     lower_kernel: 1
     upper_kernel: 5
@@ -42,7 +42,7 @@ metrics:
   type: psnr_batch
 
   args:
-    batch_size: 3                                   # MEMORY  
+    batch_size: 2                                   # MEMORY  
     frame_interval: 4                               # MEMORY
 
 
@@ -64,7 +64,7 @@ trainer:
   resume: False 
   
   epochs: 300
-  valid_period: 2
+  valid_period: 10
 
   save_dir: saved/
   save_period: 100

@@ -105,7 +105,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         tqdm_batch.close()
 
-        if epoch != 0 and (epoch + 1) % self.valid_period == 0:
+        if (epoch + 1) % self.valid_period == 0:
             self._valid_epoch(self)
 
     @staticmethod
@@ -117,7 +117,6 @@ class NeRV3DTrainer(BaseTrainer):
         :return: WandB log video that contains information about validation
         """
         self.model.eval()
-        self.valid_metrics.reset()
 
         with torch.no_grad():
             random_num = random.randint(0, len(self.dataset))
@@ -136,7 +135,7 @@ class NeRV3DTrainer(BaseTrainer):
             )
             valid_pred = valid_pred.squeeze(0).cpu().detach().numpy()
 
-            self.wandb.log(
+            wandb.log(
                 {
                     "pred": wandb.Video(valid_pred, fps=4, format="mp4"),
                     "data": wandb.Video(valid_data, fps=4, format="mp4"),
@@ -146,5 +145,6 @@ class NeRV3DTrainer(BaseTrainer):
             del valid_data, valid_pred
 
             # Add histogram of model parameters to the WandB
-            for name, p in self.model.named_parameters():
-                self.wandb.add_histogram(name, p, bins="auto")
+            for name, para in self.model.named_parameters():
+                para_np = para.data.cpu().numpy()
+                wandb.log({name: wandb.Histogram(para_np)})

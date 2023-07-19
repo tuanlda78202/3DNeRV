@@ -10,7 +10,7 @@ class WandB:
     and collaborate with your team so you can focus on building the best models.
     """
 
-    def __init__(self, name, cfg_trainer, logger, visual_tool, visualize_config=None):
+    def __init__(self, name, cfg_trainer, logger, visual_tool, config):
         self.writer = None
         self.selected_module = ""
         self.name = "wandb"
@@ -45,7 +45,7 @@ class WandB:
             project=cfg_trainer["project"],
             entity=cfg_trainer["entity"],
             name=name,
-            config=visualize_config,
+            config=config,
         )
 
         self.step = 0

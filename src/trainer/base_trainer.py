@@ -43,7 +43,6 @@ class BaseTrainer:
         cfg_trainer = config["trainer"]
         self.epochs = cfg_trainer["epochs"]
         self.save_period = cfg_trainer["save_period"]
-        self.monitor = cfg_trainer.get("monitor", "off")
         self.start_epoch = 0
         self.iters = 0
         self.checkpoint_dir = config.save_dir
@@ -51,16 +50,13 @@ class BaseTrainer:
         if cfg_trainer["resume"]:
             self._resume_checkpoint(config.resume)
 
-        # Visualization tool
         if cfg_trainer["visual_tool"] == "wandb":
-            visual_config = {"Architecture": config["arch"]["type"]}
-
             self.wandb = WandB(
                 config["name"],
                 cfg_trainer,
                 self.logger,
                 cfg_trainer["visual_tool"],
-                visualize_config=visual_config,
+                config=self.config,
             )
 
         else:
@@ -68,19 +64,6 @@ class BaseTrainer:
                 "Visualization tool isn't exists, please refer to comment 1.* "
                 "to choose appropriate module"
             )
-
-        # Monitor model performance and save best
-        if self.monitor == "off":
-            self.mnt_mode = "off"
-            self.mnt_best = 0
-        else:
-            self.mnt_mode, self.mnt_metric = self.monitor.split()
-            assert self.mnt_mode in ["min", "max"]
-
-            self.mnt_best = inf if self.mnt_mode == "min" else -inf
-            self.early_stop = cfg_trainer.get("early_stop", inf)
-            if self.early_stop <= 0:
-                self.early_stop = inf
 
     @abstractmethod
     def _train_epoch(self, epoch):
@@ -98,11 +81,10 @@ class BaseTrainer:
         for epoch in range(self.start_epoch, self.epochs + 1):
             self._train_epoch(epoch)
 
-            if epoch % self.save_period == 0:
+            if epoch != 0 and (epoch + 1) % self.save_period == 0:
                 self._save_checkpoint(epoch)
 
-        if self.wandb is not None:
-            self.wandb.writer.finish()
+        self.wandb.finish()
 
     def _save_checkpoint(self, epoch):
         """
@@ -119,7 +101,6 @@ class BaseTrainer:
             "iter": self.iters,
             "state_dict": self.model.state_dict(),
             "optimizer": self.optimizer.state_dict(),
-            "monitor_best": self.mnt_best,
             "config": self.config,
         }
 

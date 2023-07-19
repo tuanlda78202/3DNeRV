@@ -7,12 +7,13 @@ import argparse
 import collections
 
 sys.path.append(os.getcwd())
-warnings.filterwarnings("ignore")
 np.random.seed(42)
 torch.manual_seed(42)
 torch.backends.cudnn.benchmark = True
 torch.backends.cuda.matmul.allow_tf32 = True
 
+from torchsummary import summary
+from ptflops import get_model_complexity_info
 from config.parse_config import ConfigParser
 import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
@@ -29,13 +30,13 @@ def main(config):
     dataset, dataloader = build_data()
 
     # Model
-    base_model = config.init_obj("arch", module_arch)
-    logger.info(base_model)
+    model = config.init_obj("arch", module_arch)
+    logger.info(model)
 
     # Global device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
-    model = torch.compile(base_model.to(device))
+    model = torch.compile(model.to(device))
 
     # Criterion & Metrics
     criterion = config.init_ftn("loss", module_loss)

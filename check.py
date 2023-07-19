@@ -1,22 +1,32 @@
+from src.model.hnerv3d import HNeRVMae
 import torch
+from ptflops import get_model_complexity_info
+from torchsummary import summary
 
-# Make sure we're using a NVIDIA GPU
-if torch.cuda.is_available():
-    # Get GPU capability score
-    GPU_SCORE = torch.cuda.get_device_capability()
-    print(f"GPU capability score: {GPU_SCORE}")
-    if GPU_SCORE >= (8, 0):
-        print(
-            f"GPU score higher than or equal to (8, 0), PyTorch 2.x speedup features available."
-        )
-    else:
-        print(
-            f"GPU score lower than (8, 0), PyTorch 2.x speedup features will be limited (PyTorch 2.x speedups happen most on newer GPUs)."
-        )
+with torch.cuda.device(0):
+    model = HNeRVMae(
+        img_size=(720, 1280),
+        frame_interval=4,
+        embed_dim=8,
+        decode_dim=314,
+        embed_size=(9, 16),
+        scales=[5, 4, 2, 2],
+        lower_width=6,
+        reduce=3,
+        ckpt_path="../ckpt/vit_s_k710_dl_from_giant.pth",
+    ).cuda()
 
-    # Print GPU info
+    model = torch.compile(model)
 
-else:
-    print(
-        "PyTorch couldn't find a GPU, to leverage the best of PyTorch 2.0, you should connect to a GPU."
+    macs, params = get_model_complexity_info(
+        model,
+        (3, 4, 720, 1280),
+        as_strings=True,
+        print_per_layer_stat=True,
+        verbose=True,
     )
+
+    print("{:<30}  {:<8}".format("Computational complexity: ", macs))
+    print("{:<30}  {:<8}".format("Number of parameters: ", params))
+
+    print(summary(model, (3, 4, 720, 1280), batch_size=1, device="cuda"))

@@ -69,11 +69,11 @@ class NeRVBlock3D(nn.Module):
 class HNeRVMae(nn.Module):
     def __init__(
         self,
-        img_size: Tuple = (720, 1280),  #
-        frame_interval: int = 4,  #
-        embed_dim: int = 8,  # d
-        embed_size: Tuple = (9, 16),  #
-        decode_dim: int = 92,  # c2
+        img_size: Tuple = (720, 1280),
+        frame_interval: int = 4,
+        embed_dim: int = 8,
+        embed_size: Tuple = (9, 16),
+        decode_dim: int = 314,
         lower_kernel: int = 1,
         upper_kernel: int = 5,
         scales: List = [5, 4, 2, 2],
