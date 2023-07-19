@@ -14,7 +14,7 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cuda.matmul.allow_tf32 = True
 
 from config.parse_config import ConfigParser
-import src.dataset as module_data
+import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
 import src.evaluation.loss as module_loss
 import src.evaluation.metric as module_metric
@@ -25,8 +25,7 @@ def main(config):
     logger = config.get_logger("train")
 
     # Dataset & DataLoader
-    dataset = config.init_obj("dataset", module_data)
-    dataloader = config.init_obj("dataloader", module_data)
+    dataset, dataloader = config.init_ftn("dataloader", module_data)
 
     # Model
     base_model = config.init_obj("arch", module_arch)

@@ -99,9 +99,6 @@ class ConfigParser:
 
         module_args.update(kwargs)
 
-        if module_name == "GPT2":
-            return getattr(module, module_name)(GPTConfig(**module_args))
-
         return getattr(module, module_name)(*args, **module_args)
 
     def init_ftn(self, name, module, *args, **kwargs):

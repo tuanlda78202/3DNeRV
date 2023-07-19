@@ -9,9 +9,14 @@ dataset:
     crop_size: (720, 1280)
 
 dataloader:
-  type: VideoDataLoader
+  type: build_dataloader
 
   args:
+    name: "uvghd30"
+    data_path: "data/ready.mp4"
+    frame_interval: 4 
+    crop_size: (720, 1280)
+
     batch_size: 3
     shuffle: False
     num_workers: 0
