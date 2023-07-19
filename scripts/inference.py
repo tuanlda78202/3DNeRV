@@ -1,97 +1,94 @@
-import argparse
-import torch
+from src.dataset.build import build_dataloader
 from tqdm import tqdm
-import src.dataset as module_data
-import model.model as module_arch
-from config.parse_config import ConfigParser
+import torch.nn.functional as F
+from torch.optim import Adam
+from src.model.hnerv3d import HNeRVMae
+import torch
+import numpy as np
+from src.evaluation.metric import *
+import wandb
+from torchsummary import summary
+import os
+from pytorch_msssim import ms_ssim, ssim
+from src.evaluation.evaluation import save_checkpoint, resume_checkpoint
+from src.evaluation.metric import *
+
+import random
 
 
-def main(config):
-    logger = config.get_logger("test")
+# os.environ["WANDB_SILENT"] = "true"
 
-    # setup data_loader instances
-    data_loader = getattr(module_data, config["data_loader"]["type"])(
-        config["data_loader"]["args"]["data_dir"],
-        batch_size=512,
-        shuffle=False,
-        validation_split=0.0,
-        training=False,
-        num_workers=2,
-    )
+SEED = 42
+torch.manual_seed(SEED)
+torch.backends.cuda.matmul.allow_tf32 = True
+torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.deterministic = False
+np.random.seed(SEED)
 
-    # build model architecture
-    model = config.init_obj("arch", module_arch)
-    logger.info(model)
+# DataLoader
+BATCH_SIZE = 3
+FRAME_INTERVAL = 4
 
-    # get function handles of loss and metrics
-    loss_fn = getattr(module_loss, config["loss"])
-    metric_fns = [getattr(module_metric, met) for met in config["metrics"]]
+dataset, dataloader = build_dataloader(
+    name="uvghd30",
+    data_path="data/beauty.mp4",
+    batch_size=BATCH_SIZE,
+    frame_interval=FRAME_INTERVAL,
+    crop_size=(720, 1280),
+)
 
-    logger.info("Loading checkpoint: {} ...".format(config.resume))
-    checkpoint = torch.load(config.resume)
-    state_dict = checkpoint["state_dict"]
-    if config["n_gpu"] > 1:
-        model = torch.nn.DataParallel(model)
-    model.load_state_dict(state_dict)
+# Model
+model = HNeRVMae(
+    img_size=(720, 1280),
+    frame_interval=4,
+    embed_dim=8,
+    decode_dim=314,
+    embed_size=(9, 16),
+    scales=[5, 4, 2, 2],
+    lower_width=6,
+    reduce=3,
+).cuda()
 
-    # prepare model for testing
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    model.eval()
+optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
 
-    total_loss = 0.0
-    total_metrics = torch.zeros(len(metric_fns))
+start_epoch, model, optimizer = resume_checkpoint(
+    model, optimizer, "ckpt/checkpoint-epoch199.pth"
+)
 
-    with torch.no_grad():
-        for i, (data, target) in enumerate(tqdm(data_loader)):
-            data, target = data.to(device), target.to(device)
-            output = model(data)
 
-            #
-            # save sample images, or do something with output here
-            #
+wandb.init(project="vmae-nerv3d-1ke", name="infer-flex3d-3M-beauty-hd-300e")
 
-            # computing loss, metrics on test set
-            loss = loss_fn(output, target)
-            batch_size = data.shape[0]
-            total_loss += loss.item() * batch_size
-            for i, metric in enumerate(metric_fns):
-                total_metrics[i] += metric(output, target) * batch_size
+model.eval()
 
-    n_samples = len(data_loader.sampler)
-    log = {"loss": total_loss / n_samples}
-    log.update(
+for batch_idx, data in enumerate(dataloader):
+    data = data.permute(0, 4, 1, 2, 3).cuda()
+    output = model(data)
+
+    # PSNR
+    pred = output
+    gt = data.permute(0, 2, 1, 3, 4)
+
+    loss = F.mse_loss(pred, gt)
+    psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
+
+    data = torch.mul(data, 255).type(torch.uint8)
+    output = torch.mul(output, 255).type(torch.uint8)
+
+    pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1280)
+    gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1280)
+
+    pred = pred.cpu().detach().numpy()
+    gt = gt.cpu().detach().numpy()
+
+    wandb.log(
         {
-            met.__name__: total_metrics[i].item() / n_samples
-            for i, met in enumerate(metric_fns)
-        }
-    )
-    logger.info(log)
-
-
-if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="PyTorch Template")
-    args.add_argument(
-        "-c",
-        "--config",
-        default=None,
-        type=str,
-        help="config file path (default: None)",
-    )
-    args.add_argument(
-        "-r",
-        "--resume",
-        default=None,
-        type=str,
-        help="path to latest checkpoint (default: None)",
-    )
-    args.add_argument(
-        "-d",
-        "--device",
-        default=None,
-        type=str,
-        help="indices of GPUs to enable (default: all)",
+            "loss": loss.item(),
+            "psnr": psnr_db,
+            "pred": wandb.Video(pred, fps=FRAME_INTERVAL, format="mp4"),
+            "gt": wandb.Video(gt, fps=FRAME_INTERVAL, format="mp4"),
+        },
     )
 
-    config = ConfigParser.from_args(args)
-    main(config)
+    del pred, gt, output, data
+
+wandb.finish()
