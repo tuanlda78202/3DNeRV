@@ -1,5 +1,0 @@
-dahuffman==0.4.1
-decord==0.6.0
-pytorch_msssim==0.2.1
-imageio==2.23.0
-pytorchvideo==0.1.5
