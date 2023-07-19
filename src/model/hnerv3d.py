@@ -6,20 +6,22 @@ from typing import List, Tuple
 
 
 def vmae_pretrained(
-    ckt_path=None,
+    ckpt_path=None,
     model_fn=vit_small_patch16_224,
     **kwargs,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vmae: nn.Module = model_fn(**kwargs)  # num_heads=3
 
-    if ckt_path is not None:
-        ckt = torch.load(ckt_path, map_location="cpu")
+    if ckpt_path is not None:
+        ckt = torch.load(ckpt_path, map_location="cpu")
         for model_key in ["model", "module"]:
             if model_key in ckt:
                 ckt = ckt[model_key]
                 break
         vmae.load_state_dict(ckt)
+
+        print("Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
 
     vmae.eval()
     vmae.to(device)
@@ -82,13 +84,13 @@ class HNeRVMae(nn.Module):
         act_fn=nn.GELU,
         out_fn=nn.Sigmoid,
         model_fn=vit_small_patch16_224,
-        ckt_path=None,
+        ckpt_path=None,
     ):
         super().__init__()
 
         # Encoder
         self.encoder = vmae_pretrained(
-            ckt_path, model_fn, all_frames=frame_interval, img_size=img_size
+            ckpt_path, model_fn, all_frames=frame_interval, img_size=img_size
         )
         self.hidden_dim = self.encoder.embed_dim
         patch_size = self.encoder.patch_embed.patch_size

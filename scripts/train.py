@@ -25,7 +25,8 @@ def main(config):
     logger = config.get_logger("train")
 
     # Dataset & DataLoader
-    dataset, dataloader = config.init_ftn("dataloader", module_data)
+    build_data = config.init_ftn("dataloader", module_data)
+    dataset, dataloader = build_data()
 
     # Model
     base_model = config.init_obj("arch", module_arch)
@@ -34,11 +35,11 @@ def main(config):
     # Global device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
-    model = torch.compile(base_model)
+    model = torch.compile(base_model.to(device))
 
-    # Criterion
-    criterion = getattr(module_loss, config["loss"])
-    metrics = [getattr(module_metric, met) for met in config["metrics"]]
+    # Criterion & Metrics
+    criterion = config.init_ftn("loss", module_loss)
+    metrics = config.init_ftn("metrics", module_metric)
 
     # Optimizer
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="config/nerv3d/ready720pmp4-flex3d-3M-300e.yaml",
+        default="config/nerv3d/beauty720pmp4-flex3d-3M-300e.yaml",
         type=str,
         help="config file path (default: None)",
     )

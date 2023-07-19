@@ -9,11 +9,11 @@ def psnr_one(pred, gt):
     return db.item()
 
 
-def psnr_batch(batch_pred, batch_gt, bs, fi):
+def psnr_batch(batch_pred, batch_gt, batch_size, frame_interval):
     psnr_list = []
 
-    for batch_idx in range(bs):
-        for fi_idx in range(fi):
+    for batch_idx in range(batch_size):
+        for fi_idx in range(frame_interval):
             psnr_list.append(
                 psnr_one(batch_pred[batch_idx][fi_idx], batch_gt[batch_idx][fi_idx])
             )

@@ -26,7 +26,7 @@ class NeRVBlock2D(nn.Module):
         return self.act(self.norm(self.ps(self.conv(x))))
 
 
-class NeRVBlock3D(nn.Module):
+class Base_NeRVBlock3D(nn.Module):
     def __init__(self, in_ch, out_ch, scale, ks=3, stride=1, padding=1, bias=True):
         super().__init__()
 
@@ -51,7 +51,7 @@ class NeRVBlock3D(nn.Module):
         return x
 
 
-class HNeRVMae(nn.Module):
+class Base_HNeRVMae(nn.Module):
     def __init__(self, bs, fi=None, c3d=False):
         super().__init__()
 

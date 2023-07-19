@@ -38,6 +38,10 @@ class NeRV3DTrainer(BaseTrainer):
         self.data_loader = data_loader
         self.metric_ftns = metric_ftns
 
+        self.batch_size = self.config["dataloader"]["args"]["batch_size"]
+        self.frame_interval = self.config["dataloader"]["args"]["frame_interval"]
+        self.valid_period = self.config["trainer"]["valid_period"]
+
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.data_loader)
@@ -67,7 +71,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         for batch_idx, data in enumerate(tqdm_batch):
             # BTHWC to BCTHW
-            data = data.permute(0, 4, 1, 2, 3)
+            data = data.permute(0, 4, 1, 2, 3).cuda()
             pred = self.model(data)
 
             # BCTHW to BTCHW
@@ -83,8 +87,8 @@ class NeRV3DTrainer(BaseTrainer):
             psnr = self.metric_ftns(
                 pred,
                 data,
-                bs=self.config["dataloader"]["args"]["batch_size"],
-                fi=self.config["dataset"]["args"]["frame_interval"],
+                batch_size=self.batch_size,
+                frame_interval=self.frame_interval,
             )
 
             tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr)
@@ -101,8 +105,8 @@ class NeRV3DTrainer(BaseTrainer):
 
         tqdm_batch.close()
 
-        if epoch != 0 and (epoch + 1) % 10 == 0:
-            self._valid_epoch()
+        if epoch != 0 and (epoch + 1) % self.valid_period == 0:
+            self._valid_epoch(self)
 
     @staticmethod
     def _valid_epoch(self):
@@ -120,7 +124,7 @@ class NeRV3DTrainer(BaseTrainer):
 
             valid_data = (
                 self.dataset[random_num].unsqueeze(0).permute(0, 4, 1, 2, 3).cuda()
-            )
+            ).cuda()
             valid_pred = self.model(valid_data)
 
             valid_data = torch.mul(valid_data, 255).type(torch.uint8)

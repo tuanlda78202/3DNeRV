@@ -53,10 +53,8 @@ class BaseTrainer:
 
         # Visualization tool
         if cfg_trainer["visual_tool"] == "wandb":
-            visual_config = {
-                "Architecture": config["arch"]["type"],
-                "trainer": cfg_trainer["type"],
-            }
+            visual_config = {"Architecture": config["arch"]["type"]}
+
             self.wandb = WandB(
                 config["name"],
                 cfg_trainer,
@@ -97,62 +95,16 @@ class BaseTrainer:
         """
         Full training logic
         """
-        not_improved_count = 0
         for epoch in range(self.start_epoch, self.epochs + 1):
-            result = self._train_epoch(epoch)
-
-            # Logged informations into log dict
-            log = {"epoch": epoch}
-            log.update(result)
-
-            # Logged informations to the screen
-            for key, value in log.items():
-                self.logger.info("    {:15s}: {}".format(str(key), value))
-
-            # Evaluate model performance according to configured metric, save best checkpoint as model_best
-            best = False
-            if self.mnt_mode != "off":
-                try:
-                    # check whether model performance improved or not, according to specified metric(mnt_metric)
-                    improved = (
-                        self.mnt_mode == "min" and log[self.mnt_metric] <= self.mnt_best
-                    ) or (
-                        self.mnt_mode == "max" and log[self.mnt_metric] >= self.mnt_best
-                    )
-                except KeyError:
-                    self.logger.warning(
-                        "Warning: Metric '{}' is not found. "
-                        "Model performance monitoring is disabled.".format(
-                            self.mnt_metric
-                        )
-                    )
-                    self.mnt_mode = "off"
-                    improved = False
-
-                if improved:
-                    self.mnt_best = log[self.mnt_metric]
-                    not_improved_count = 0
-                    best = True
-                else:
-                    not_improved_count += 1
-
-                if not_improved_count > self.early_stop:
-                    self.logger.info(
-                        "Validation performance didn't improve for {} epochs. "
-                        "Training stops.".format(self.early_stop)
-                    )
-                    break
+            self._train_epoch(epoch)
 
             if epoch % self.save_period == 0:
-                self._save_checkpoint(epoch, save_best=best)
+                self._save_checkpoint(epoch)
 
-        # self.wandb: WandB Class  -> self.wandb.write: WandB Library
-        # Launch multiple runs from one script?​
-        # run.finish(): Use this at the end of your run to finish logging for that run
         if self.wandb is not None:
             self.wandb.writer.finish()
 
-    def _save_checkpoint(self, epoch, save_best=False):
+    def _save_checkpoint(self, epoch):
         """
         Saving checkpoints
 
@@ -174,11 +126,6 @@ class BaseTrainer:
         filename = str(self.checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))
         torch.save(state, filename)
         self.logger.info("Saving checkpoint: {} ...".format(filename))
-
-        if save_best:
-            best_path = str(self.checkpoint_dir / "model_best.pth")
-            torch.save(state, best_path)
-            self.logger.info("Saving current best: model_best.pth ...")
 
     def _resume_checkpoint(self, resume_path):
         """
