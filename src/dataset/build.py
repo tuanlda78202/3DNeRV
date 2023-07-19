@@ -10,7 +10,6 @@ def build_dataset(name, data_path, frame_interval, crop_size=None):
             mode="train",
             frame_interval=frame_interval,
             crop_size=crop_size,
-            short_side_size=256,
         )
 
     elif name == "uvg-raw":
@@ -40,7 +39,7 @@ def build_dataloader(
         )
 
         dataloader = DataLoader(
-            dataset, batch_size=batch_size, shuffle=False, num_workers=6
+            dataset, batch_size=batch_size, shuffle=False, num_workers=0
         )
 
     elif name == "uvg-raw":

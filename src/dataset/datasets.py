@@ -16,21 +16,19 @@ class VideoDataset(Dataset):
         data_path,
         frame_interval,
         mode="train",
-        crop_size=224,
-        short_side_size=256,
+        crop_size=(720, 1280),
     ):
         self.data_path = data_path
         self.mode = mode
         self.frame_interval = frame_interval
         self.crop_size = crop_size
-        self.short_side_size = short_side_size
 
         self.video_loader = get_video_loader()
         self.vr = self.video_loader(self.data_path)
 
         self.data_transform = video_transforms.Compose(
             [
-                video_transforms.CenterCrop(size=(720, 1080)),
+                video_transforms.CenterCrop(size=crop_size),
                 volume_transforms.ClipToTensor(),
             ]
         )

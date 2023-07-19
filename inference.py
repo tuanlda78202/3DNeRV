@@ -2,7 +2,7 @@ from src.dataset.build import build_dataloader
 from tqdm import tqdm
 import torch.nn.functional as F
 from torch.optim import Adam
-from src.model.baseline import HNeRVMae
+from src.model.hnerv3d import HNeRVMae
 import torch
 import numpy as np
 from src.evaluation.metric import *
@@ -16,7 +16,7 @@ from src.evaluation.metric import *
 import random
 
 
-os.environ["WANDB_SILENT"] = "true"
+# os.environ["WANDB_SILENT"] = "true"
 
 SEED = 42
 torch.manual_seed(SEED)
@@ -26,31 +26,37 @@ torch.backends.cudnn.deterministic = False
 np.random.seed(SEED)
 
 # DataLoader
-BATCH_SIZE = 5
-FRAME_INTERVAL = 6
-CROP_SIZE = 640
+BATCH_SIZE = 3
+FRAME_INTERVAL = 4
 
 dataset, dataloader = build_dataloader(
     name="uvghd30",
-    data_path="data/yach.mp4",
+    data_path="data/beauty.mp4",
     batch_size=BATCH_SIZE,
     frame_interval=FRAME_INTERVAL,
-    crop_size=CROP_SIZE,
+    crop_size=(720, 1280),
 )
 
 # Model
-model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
-# print(summary(model, (3, FRAME_INTERVAL, CROP_SIZE, CROP_SIZE), batch_size=1))
+model = HNeRVMae(
+    img_size=(720, 1280),
+    frame_interval=4,
+    embed_dim=8,
+    decode_dim=314,
+    embed_size=(9, 16),
+    scales=[5, 4, 2, 2],
+    lower_width=6,
+    reduce=3,
+).cuda()
 
 optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
 
-
 start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "../ckpt/lr-cosine/yach-400e.pth"
+    model, optimizer, "ckpt/checkpoint-epoch199.pth"
 )
 
 
-wandb.init(project="vmae-nerv3d-1ke", name="lr-cosine-infer-yach640-400e")
+wandb.init(project="vmae-nerv3d-1ke", name="infer-flex3d-3M-beauty-hd-300e")
 
 model.eval()
 
@@ -65,11 +71,11 @@ for batch_idx, data in enumerate(dataloader):
     loss = F.mse_loss(pred, gt)
     psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
 
-    data = torch.mul(data, 255)
-    output = torch.mul(output, 255)
+    data = torch.mul(data, 255).type(torch.uint8)
+    output = torch.mul(output, 255).type(torch.uint8)
 
-    pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
-    gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, CROP_SIZE, CROP_SIZE)
+    pred = output.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1280)
+    gt = data.reshape(BATCH_SIZE, FRAME_INTERVAL, 3, 720, 1280)
 
     pred = pred.cpu().detach().numpy()
     gt = gt.cpu().detach().numpy()
@@ -78,8 +84,8 @@ for batch_idx, data in enumerate(dataloader):
         {
             "loss": loss.item(),
             "psnr": psnr_db,
-            "pred": wandb.Video(pred, fps=6, format="mp4"),
-            "gt": wandb.Video(gt, fps=6, format="mp4"),
+            "pred": wandb.Video(pred, fps=FRAME_INTERVAL, format="mp4"),
+            "gt": wandb.Video(gt, fps=FRAME_INTERVAL, format="mp4"),
         },
     )
 
