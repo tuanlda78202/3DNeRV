@@ -71,7 +71,7 @@ for ep in range(START_EPOCH, NUM_EPOCH + 1):
     for batch_idx, data in enumerate(tqdm_batch):
         # BTHWC to BCTHW
         data = data.permute(0, 4, 1, 2, 3).cuda()
-        output = compiled_model(data)
+        pred = compiled_model(data)
 
         pred = output
         gt = data.permute(0, 2, 1, 3, 4)  # BCTHW to BTCHW

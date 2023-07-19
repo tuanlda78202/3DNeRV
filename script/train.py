@@ -32,8 +32,10 @@ def main(config):
     base_model = config.init_obj("arch", module_arch)
     logger.info(base_model)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.compile(base_model.to(device))
+    # Global device
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    torch.set_default_device(device)
+    model = torch.compile(base_model)
 
     # Criterion
     criterion = getattr(module_loss, config["loss"])
@@ -50,7 +52,6 @@ def main(config):
         criterion,
         metrics,
         optimizer,
-        device=device,
         config=config,
         dataset=dataset,
         data_loader=dataloader,

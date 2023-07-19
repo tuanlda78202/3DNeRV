@@ -1,14 +1,11 @@
-import os
 import logging
 
-# os.environ["WANDB_SILENT"] = "True"
-# os.environ['WANDB_MODE'] = 'offline'
 logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)
+
 import numpy as np
 import torch
-from torchvision.utils import make_grid
 from base_trainer import BaseTrainer
 from tqdm import tqdm
 import wandb
@@ -26,7 +23,6 @@ class NeRV3DTrainer(BaseTrainer):
         metric_ftns,
         optimizer,
         config,
-        device,
         data_loader,
         valid_data_loader=None,
         lr_scheduler=None,
@@ -34,7 +30,6 @@ class NeRV3DTrainer(BaseTrainer):
     ):
         super().__init__(model, criterion, metric_ftns, optimizer, config, data_loader)
         self.config = config
-        self.device = device
         self.data_loader = data_loader
 
         if len_epoch is None:
@@ -52,10 +47,10 @@ class NeRV3DTrainer(BaseTrainer):
 
         # DataFrame metrics
         self.train_metrics = MetricTracker(
-            "loss", *[m.__name__ for m in self.metric_ftns], track=self.track
+            "loss", *[m.__name__ for m in self.metric_ftns], track=self.wandb
         )
         self.valid_metrics = MetricTracker(
-            "loss", *[m.__name__ for m in self.metric_ftns], track=self.track
+            "loss", *[m.__name__ for m in self.metric_ftns], track=self.wandb
         )
 
     def _train_epoch(self, epoch):
@@ -75,26 +70,17 @@ class NeRV3DTrainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
 
-        for batch_idx, loader in enumerate(tqdm_batch):
-            # Load to Device
-            if self.device == "cuda:0":
-                data = loader["img"].to(device=self.device)
-                data = data.type(torch.cuda.FloatTensor)
-                mask = loader["mask"].to(device=self.device)
-                mask = mask.type(torch.cuda.FloatTensor)
+        for batch_idx, data in enumerate(tqdm_batch):
+            # BTHWC to BCTHW
+            data = data.permute(0, 4, 1, 2, 3)
+            pred = self.model(data)
 
-            else:
-                data = loader["img"].to(device=self.device)
-                data = data.type(torch.FloatTensor)
-                mask = loader["mask"].to(device=self.device)
-                mask = mask.type(torch.FloatTensor)
+            # BCTHW to BTCHW
+            gt = data.permute(0, 2, 1, 3, 4)
+            loss = self.criterion(pred, gt)
 
             self.optimizer.zero_grad()
 
-            # x_map for metrics, list_maps for loss
-            x_map, list_maps = self.model(data)
-
-            loss = self.criterion(list_maps, mask)
             loss.backward()
             self.optimizer.step()
 
@@ -102,13 +88,6 @@ class NeRV3DTrainer(BaseTrainer):
             log_loss = loss.item()
 
             # Metrics, detach tensor auto-grad to numpy
-            if self.device == "cuda:0":
-                map_np, mask_np = (
-                    x_map.cpu().detach().numpy(),
-                    mask.cpu().detach().numpy(),
-                )
-            else:
-                map_np, mask_np = x_map.detach().numpy(), mask.detach().numpy()
 
             # Metrics
             # log_maxfm, log_wfm = maxfm(map_np, mask_np), wfm(map_np, mask_np)
@@ -123,7 +102,7 @@ class NeRV3DTrainer(BaseTrainer):
             wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm})
 
             # Logging
-            self.track.set_step((epoch - 1) * self.len_epoch + batch_idx)
+            self.wandb.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update("loss", log_loss)
 
             for met in self.metric_ftns:
@@ -193,7 +172,7 @@ class NeRV3DTrainer(BaseTrainer):
                     map_np, mask_np = x_fuse.detach().numpy(), mask.detach().numpy()
 
                 # Logging
-                self.track.set_step(
+                self.wandb.set_step(
                     (epoch - 1) * len(self.valid_data_loader) + batch_idx, "valid"
                 )
                 self.valid_metrics.update("loss", loss.item())
@@ -203,7 +182,7 @@ class NeRV3DTrainer(BaseTrainer):
 
                 # Log WandB, Predicted will show first
                 images = wandb.Image(make_grid(x_fuse[:8], nrow=4))
-                self.track.log({"Predicted": images}, step=None)
+                self.wandb.log({"Predicted": images}, step=None)
 
                 # Delete garbage
                 del images, loss, x_fuse, list_maps
@@ -211,21 +190,21 @@ class NeRV3DTrainer(BaseTrainer):
         # WandB Log Original + GT
         loader = next(iter(self.data_loader))
 
-        self.track.set_step(epoch, "valid")
+        self.wandb.set_step(epoch, "valid")
 
         # Grid 2 x 4
         original = wandb.Image(make_grid(loader["img"][:8], nrow=4))
         gt = wandb.Image(make_grid(loader["mask"][:8], nrow=4))
 
-        self.track.log({"Original": original}, step=None)
-        self.track.log({"Ground Truth": gt}, step=None)
+        self.wandb.log({"Original": original}, step=None)
+        self.wandb.log({"Ground Truth": gt}, step=None)
 
         # Delete garbage
         del original, gt
 
         # Add histogram of model parameters to the WandB
         for name, p in self.model.named_parameters():
-            self.track.add_histogram(name, p, bins="auto")
+            self.wandb.add_histogram(name, p, bins="auto")
 
         return self.valid_metrics.result()
 
