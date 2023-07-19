@@ -4,9 +4,11 @@ logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)
 
+import random
 import numpy as np
 import torch
-from base_trainer import BaseTrainer
+from .base_trainer import BaseTrainer
+from utils import inf_loop
 from tqdm import tqdm
 import wandb
 
@@ -23,14 +25,18 @@ class NeRV3DTrainer(BaseTrainer):
         metric_ftns,
         optimizer,
         config,
+        dataset,
         data_loader,
-        valid_data_loader=None,
         lr_scheduler=None,
         len_epoch=None,
     ):
-        super().__init__(model, criterion, metric_ftns, optimizer, config, data_loader)
+        super().__init__(
+            model, criterion, metric_ftns, optimizer, config, dataset, data_loader
+        )
         self.config = config
+        self.dataset = dataset
         self.data_loader = data_loader
+        self.metric_ftns = metric_ftns
 
         if len_epoch is None:
             # epoch-based training
@@ -40,18 +46,8 @@ class NeRV3DTrainer(BaseTrainer):
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
 
-        self.valid_data_loader = valid_data_loader
-        self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
-
-        # DataFrame metrics
-        self.train_metrics = MetricTracker(
-            "loss", *[m.__name__ for m in self.metric_ftns], track=self.wandb
-        )
-        self.valid_metrics = MetricTracker(
-            "loss", *[m.__name__ for m in self.metric_ftns], track=self.wandb
-        )
 
     def _train_epoch(self, epoch):
         """
@@ -68,7 +64,6 @@ class NeRV3DTrainer(BaseTrainer):
             unit="it",
         )
         self.model.train()
-        self.train_metrics.reset()
 
         for batch_idx, data in enumerate(tqdm_batch):
             # BTHWC to BCTHW
@@ -76,144 +71,76 @@ class NeRV3DTrainer(BaseTrainer):
             pred = self.model(data)
 
             # BCTHW to BTCHW
-            gt = data.permute(0, 2, 1, 3, 4)
-            loss = self.criterion(pred, gt)
+            data = data.permute(0, 2, 1, 3, 4)
+            loss = self.criterion(pred, data)
 
             self.optimizer.zero_grad()
 
             loss.backward()
             self.optimizer.step()
 
-            # Variable for logging
-            log_loss = loss.item()
-
-            # Metrics, detach tensor auto-grad to numpy
-
             # Metrics
-            # log_maxfm, log_wfm = maxfm(map_np, mask_np), wfm(map_np, mask_np)
+            psnr = self.metric_ftns(
+                pred,
+                data,
+                bs=self.config["dataloader"]["args"]["batch_size"],
+                fi=self.config["dataset"]["args"]["frame_interval"],
+            )
 
-            log_mae = mae(map_np, mask_np)
-            log_sm = sm(map_np, mask_np)
-
-            # Progress bar
-            tqdm_batch.set_postfix(loss=log_loss, mae=log_mae, sm=log_sm)
+            tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr)
 
             # WandB
-            wandb.log({"loss": log_loss, "mae": log_mae, "sm": log_sm})
+            wandb.log({"loss": loss.item(), "psnr": psnr})
 
-            # Logging
-            self.wandb.set_step((epoch - 1) * self.len_epoch + batch_idx)
-            self.train_metrics.update("loss", log_loss)
+            self.lr_scheduler.step()
 
-            for met in self.metric_ftns:
-                self.train_metrics.update(met.__name__, met(map_np, mask_np))
-
-            if batch_idx % self.log_step == 0:
-                self.logger.debug(
-                    "Train Epoch: {} {} Loss: {:.6f}".format(
-                        epoch, self._progress(batch_idx), loss.item()
-                    )
-                )
-
-            del loss, log_loss, log_mae, log_sm, x_map, list_maps
+            del data, pred, loss, psnr
 
             if batch_idx == self.len_epoch:
                 break
 
         tqdm_batch.close()
 
-        log = self.train_metrics.result()
+        if epoch != 0 and (epoch + 1) % 10 == 0:
+            self._valid_epoch()
 
-        if self.do_validation:
-            val_log = self._valid_epoch(epoch)
-            log.update(**{"val_" + k: v for k, v in val_log.items()})
-
-        if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
-
-        return log
-
-    def _valid_epoch(self, epoch):
+    @staticmethod
+    def _valid_epoch(self):
         """
         Validate after training an epoch
 
         :param epoch: Integer, current training epoch.
-        :return: A log that contains information about validation
+        :return: WandB log video that contains information about validation
         """
         self.model.eval()
         self.valid_metrics.reset()
 
         with torch.no_grad():
-            for batch_idx, loader in enumerate(self.valid_data_loader):
-                # Load to Device
-                if self.device == "cuda:0":
-                    data = loader["img"].to(device=self.device)
-                    data = data.type(torch.cuda.FloatTensor)
-                    mask = loader["mask"].to(device=self.device)
-                    mask = mask.type(torch.cuda.FloatTensor)
+            random_num = random.randint(0, len(self.dataset))
 
-                else:
-                    data = loader["img"].to(device=self.device)
-                    data = data.type(torch.FloatTensor)
-                    mask = loader["mask"].to(device=self.device)
-                    mask = mask.type(torch.FloatTensor)
+            valid_data = (
+                self.dataset[random_num].unsqueeze(0).permute(0, 4, 1, 2, 3).cuda()
+            )
+            valid_pred = self.model(valid_data)
 
-                # Forward
-                x_fuse, list_maps = self.model(data)
-                loss = self.criterion(list_maps, mask)
+            valid_data = torch.mul(valid_data, 255).type(torch.uint8)
+            valid_pred = torch.mul(valid_pred, 255).type(torch.uint8)
 
-                # Metrics, detach tensor auto-grad to numpy
-                if self.device == "cuda:0":
-                    map_np, mask_np = (
-                        x_fuse.cpu().detach().numpy(),
-                        mask.cpu().detach().numpy(),
-                    )
-                else:
-                    map_np, mask_np = x_fuse.detach().numpy(), mask.detach().numpy()
+            # TCHW
+            valid_data = (
+                valid_data.permute(0, 2, 1, 3, 4).squeeze(0).cpu().detach().numpy()
+            )
+            valid_pred = valid_pred.squeeze(0).cpu().detach().numpy()
 
-                # Logging
-                self.wandb.set_step(
-                    (epoch - 1) * len(self.valid_data_loader) + batch_idx, "valid"
-                )
-                self.valid_metrics.update("loss", loss.item())
+            self.wandb.log(
+                {
+                    "pred": wandb.Video(valid_pred, fps=4, format="mp4"),
+                    "data": wandb.Video(valid_data, fps=4, format="mp4"),
+                }
+            )
 
-                for met in self.metric_ftns:
-                    self.valid_metrics.update(met.__name__, met(map_np, mask_np))
+            del valid_data, valid_pred
 
-                # Log WandB, Predicted will show first
-                images = wandb.Image(make_grid(x_fuse[:8], nrow=4))
-                self.wandb.log({"Predicted": images}, step=None)
-
-                # Delete garbage
-                del images, loss, x_fuse, list_maps
-
-        # WandB Log Original + GT
-        loader = next(iter(self.data_loader))
-
-        self.wandb.set_step(epoch, "valid")
-
-        # Grid 2 x 4
-        original = wandb.Image(make_grid(loader["img"][:8], nrow=4))
-        gt = wandb.Image(make_grid(loader["mask"][:8], nrow=4))
-
-        self.wandb.log({"Original": original}, step=None)
-        self.wandb.log({"Ground Truth": gt}, step=None)
-
-        # Delete garbage
-        del original, gt
-
-        # Add histogram of model parameters to the WandB
-        for name, p in self.model.named_parameters():
-            self.wandb.add_histogram(name, p, bins="auto")
-
-        return self.valid_metrics.result()
-
-    def _progress(self, batch_idx):
-        base = "[{}/{} ({:.0f}%)]"
-        if hasattr(self.data_loader, "n_samples"):
-            current = batch_idx * self.data_loader.batch_size
-            total = self.data_loader.n_samples
-        else:
-            current = batch_idx
-            total = self.len_epoch
-        return base.format(current, total, 100.0 * current / total)
+            # Add histogram of model parameters to the WandB
+            for name, p in self.model.named_parameters():
+                self.wandb.add_histogram(name, p, bins="auto")

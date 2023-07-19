@@ -27,6 +27,7 @@ class BaseTrainer:
         metric_ftns,
         optimizer,
         config,
+        dataset,
         data_loader,
         lr_scheduler=None,
         len_epoch=None,

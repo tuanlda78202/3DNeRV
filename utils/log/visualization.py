@@ -53,18 +53,6 @@ class WandB:
 
         self.timer = datetime.now()
 
-    def set_step(self, step, mode="train"):
-        self.mode = mode
-        self.step = step
-
-        if step == 0:
-            self.timer = datetime.now()
-
-        else:
-            duration = datetime.now() - self.timer
-            self.log({"steps_per_sec": 1 / (duration.total_seconds() + 1e6)})
-            self.timer = datetime.now()
-
     def __getattr__(self, name):
         """
         If visualization is configured to use:

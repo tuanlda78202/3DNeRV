@@ -49,6 +49,12 @@ def init_wandb(
     return wandb_lib.init(project=project, entity=entity, name=name, config=config)
 
 
+def inf_loop(data_loader):
+    """wrapper function for endless data loader."""
+    for loader in repeat(data_loader):
+        yield from loader
+
+
 ##########
 def Quantize_tensor(img_embed, quant_bit):
     out_min = img_embed.min(dim=1, keepdim=True)[0]

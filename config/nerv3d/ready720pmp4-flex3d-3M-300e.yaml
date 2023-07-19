@@ -59,7 +59,7 @@ trainer:
   save_period: 100
   verbosity: 1
 
-  monitor: "min val_loss",
+  monitor: "min val_loss"
   early_stop: 10,
 
   visual_tool: wandb
