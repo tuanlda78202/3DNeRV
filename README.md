@@ -3,7 +3,7 @@
   - [Folder Structure](#folder-structure)
   - [Model Zoo](#model-zoo)
   - [Usage](#usage)
-    - [Config](#config)
+    - [Configuration](#configuration)
     - [Training](#training)
     - [Testing](#testing)
   - [Contributors](#contributors)
@@ -72,7 +72,7 @@ Running private repository online notebook:
 git clone https://your_personal_token@github.com/tuanlda78202/nerv3d.git
 cd nerv3d
 ```
-### Config
+### Configuration
 
 <details>
 
