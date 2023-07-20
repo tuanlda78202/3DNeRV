@@ -52,25 +52,3 @@ class WandB:
         self.mode = ""
 
         self.timer = datetime.now()
-
-    def __getattr__(self, name):
-        """
-        If visualization is configured to use:
-            return add_data() methods of WandB with additional information (step, tag) added.
-        Otherwise:
-            return a blank function handle that does nothing
-        """
-        add_data = getattr(self.writer, name, None)
-
-        def wrapper(data: Dict[str, Any], step="Use self.step", *args, **kwargs):
-            if add_data is not None:
-                # add mode(train/valid) tag
-                tag = "{}/{}".format(list(data.keys())[0], self.mode)
-                add_data(
-                    {tag: data[list(data.keys())[0]]},
-                    self.step if step is not None else step,
-                    *args,
-                    **kwargs
-                )
-
-        return wrapper

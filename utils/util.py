@@ -30,7 +30,7 @@ def init_wandb(
     wandb_lib,
     project,
     entity,
-    api_key_file="./configs/api",
+    api_key_file,
     dir="./saved",
     name=None,
     config=None,

@@ -93,7 +93,6 @@ class BaseTrainer:
 
         :param epoch: current epoch number
         :param log: logging information of the epoch
-        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
         """
         arch = type(self.model).__name__
         state = {
@@ -106,9 +105,14 @@ class BaseTrainer:
         }
 
         filename = str(
-            str(self.checkpoint_dir / self.name_exp + "ckpt-e{}.pth".format(epoch))
+            str(self.checkpoint_dir)
+            + "/"
+            + str(self.name_exp)
+            + "ckpt-e{}.pth".format(epoch)
         )
+
         torch.save(state, filename)
+
         self.logger.info("Saving checkpoint: {} ...".format(filename))
 
     def _resume_checkpoint(self, resume_path):
@@ -121,7 +125,6 @@ class BaseTrainer:
         self.logger.info("Loading checkpoint: {} ...".format(resume_path))
         checkpoint = torch.load(resume_path)
         self.start_epoch = checkpoint["epoch"] + 1
-        self.mnt_best = checkpoint["monitor_best"]
 
         # load architecture params from checkpoint.
         if checkpoint["config"]["arch"] != self.config["arch"]:

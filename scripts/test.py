@@ -1,14 +1,21 @@
+import sys
+import os
+
+sys.path.append(os.getcwd())
+os.environ["WANDB_DIR"] = "./saved"
+
 import argparse
 import torch
 import wandb
 import numpy as np
 from tqdm import tqdm
 import src.dataset as module_data
-import model.model as module_arch
+import src.model as module_arch
 from config.parse_config import ConfigParser
 import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
 import src.evaluation.metric as module_metric
+from utils.log import WandB
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -21,42 +28,52 @@ def main(config):
     logger = config.get_logger("test")
 
     # Config
-    batch_size = config["data_loader"]["args"]["batch_size"]
-    frame_interval = config["data_loader"]["args"]["frame_interval"]
+    name_wandb = "infer-" + str(config["name"])
+    batch_size = config["dataloader"]["args"]["batch_size"]
+    frame_interval = config["dataloader"]["args"]["frame_interval"]
 
     # Dataset & DataLoader
-    build_data = config.init_ftn(
-        "dataloader", module_data, batch_size=5, frame_interval=4
-    )
+    build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
-    # Model
-    model = config.init_obj("arch", module_arch)
+    del dataset
 
-    # Global device
+    # Model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
-    model = torch.compile(model.to(device))
+    model = config.init_obj("arch", module_arch).to(device)
+    model = torch.compile(model)  # Just for torch.compile() training
 
+    # CKPT
     logger.info("Loading checkpoint: {} ...".format(config.resume))
     checkpoint = torch.load(config.resume)
-    state_dict = checkpoint["state_dict"]
-    model.load_state_dict(state_dict)
+    model.load_state_dict(checkpoint["state_dict"])
 
     # Criterion & Metrics
     metrics = config.init_ftn("metrics", module_metric)
 
     model.eval()
 
+    wandb.init(project="nerv3d", entity="tuanlda78202", name=name_wandb, config=config)
+
+    tqdm_batch = tqdm(
+        iterable=dataloader,
+        desc="Inference UVG",
+        total=len(dataloader),
+        unit="it",
+    )
+
     with torch.no_grad():
         psnr_video = []
-        for batch_idx, data in enumerate(dataloader):
+        for batch_idx, data in enumerate(tqdm_batch):
             data = data.permute(0, 4, 1, 2, 3).cuda()
             pred = model(data)
 
             # PSNR
             data = data.permute(0, 2, 1, 3, 4)
-            psnr_batch = metrics(pred, data, bs=batch_size, fi=frame_interval)
+            psnr_batch = metrics(
+                pred, data, batch_size=batch_size, frame_interval=frame_interval
+            )
 
             data = torch.mul(data, 255).type(torch.uint8)
             pred = torch.mul(pred, 255).type(torch.uint8)
@@ -66,6 +83,8 @@ def main(config):
 
             pred = pred.cpu().detach().numpy()
             data = data.cpu().detach().numpy()
+
+            tqdm_batch.set_postfix(psnr=psnr_batch)
 
             wandb.log(
                 {
@@ -79,19 +98,9 @@ def main(config):
 
             del pred, data
 
-    wandb.log({"psnr_video": sum(psnr_video) / len(psnr_video)})
+        wandb.log({"psnr_video": sum(psnr_video) / len(psnr_video)})
 
-    wandb.finish()
-
-    # setup data_loader instances
-    data_loader = getattr(module_data, config["data_loader"]["type"])(
-        config["data_loader"]["args"]["data_dir"],
-        batch_size=512,
-        shuffle=False,
-        validation_split=0.0,
-        training=False,
-        num_workers=2,
-    )
+        wandb.finish()
 
 
 if __name__ == "__main__":
@@ -103,10 +112,11 @@ if __name__ == "__main__":
         type=str,
         help="config file path (default: None)",
     )
+
     args.add_argument(
         "-r",
         "--resume",
-        default="saved/models/Beauty-720pMP4-Flex3D-2.67M-300e/0720_004706/checkpoint-epoch299.pth",
+        default="../ckpt/720p/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e-ckpte300.pth",
         type=str,
         help="path to latest checkpoint (default: None)",
     )

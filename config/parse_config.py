@@ -65,7 +65,7 @@ class ConfigParser:
             resume = None
             cfg_fname = Path(args.config)
 
-        config = load_yaml(cfg_fname)
+        config = load_yaml(args.config)  # Load from default training config
 
         if args.config and resume:
             config.update(load_yaml(args.config))
