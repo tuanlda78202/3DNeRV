@@ -1,5 +1,4 @@
 # 3DNeRV - Cube-wise Neural Representation for Videos
----
 - [3DNeRV - Cube-wise Neural Representation for Videos](#3dnerv---cube-wise-neural-representation-for-videos)
   - [Folder Structure](#folder-structure)
   - [Model Zoo](#model-zoo)
