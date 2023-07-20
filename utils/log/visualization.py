@@ -42,6 +42,7 @@ class WandB:
         self.writer = init_wandb(
             self.writer,
             api_key_file=cfg_trainer["api_key_file"],
+            mode=cfg_trainer["mode"],
             project=cfg_trainer["project"],
             entity=cfg_trainer["entity"],
             name=name,

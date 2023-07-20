@@ -6,18 +6,25 @@ dataloader:
   args:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       # EXPERIMENTS
-    frame_interval: 4                                  # MEMORY
     crop_size: [720, 1280]                             
+    num_workers: 0 
 
     batch_size: 2                                      # MEMORY
-    num_workers: 0      
+    frame_interval: 4                                  # MEMORY
+
+metrics:
+  type: psnr_batch
+
+  args:
+    batch_size: 2                                   # MEMORY  
+    frame_interval: 4                               # MEMORY
 
 arch:
   type: HNeRVMae
 
   args:
     img_size: [720, 1280]
-    frame_interval: 4       
+    frame_interval: 4                   # MEMORY      
     
     embed_dim: 8 
     embed_size: [9, 16]
@@ -37,14 +44,6 @@ loss:
   args:
     loss_type: "L2"
     batch_average: False
-
-metrics:
-  type: psnr_batch
-
-  args:
-    batch_size: 2                                   # MEMORY  
-    frame_interval: 4                               # MEMORY
-
 
 optimizer:
   type: Adam
@@ -71,6 +70,7 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
+  mode: "offline"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202

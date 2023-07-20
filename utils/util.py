@@ -31,6 +31,7 @@ def init_wandb(
     project,
     entity,
     api_key_file,
+    mode="online",
     dir="./saved",
     name=None,
     config=None,
@@ -44,6 +45,7 @@ def init_wandb(
     api_key_value = open(api_key_file, "r").read().strip()
     os.environ["WANDB_API_KEY"] = api_key_value
     os.environ["WANDB_DIR"] = dir
+    os.environ["WANDB_MODE"] = mode
 
     # name: user_name in WandB
     return wandb_lib.init(project=project, entity=entity, name=name, config=config)

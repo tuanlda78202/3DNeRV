@@ -36,7 +36,7 @@ def main(config):
     # Global device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
-    model = model.to(device)  # torch.compile(model.to(device))
+    model = model.to(device)
 
     # Criterion & Metrics
     criterion = config.init_ftn("loss", module_loss)
