@@ -38,8 +38,6 @@ nerv3d/
 └── utils/
     ├── log/ 
     └── utils.py
-
-
 ```
 ## Model Zoo 
 <summary></summary>
