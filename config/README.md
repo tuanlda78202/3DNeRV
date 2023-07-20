@@ -19,4 +19,4 @@ The file name is divided to five parts. All parts and components are connected w
   
 * {`testing` `dataset` `information`} (optional): Testing dataset name for models trained on one dataset but tested on another. If not mentioned, it means the model was trained and tested on the same dataset type.
 
-**Example**: `configs/nerv3d/uvg-mp4-ready-720p_3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e.yaml`
+**Example**: `config/uvg-720p/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e.yaml`
