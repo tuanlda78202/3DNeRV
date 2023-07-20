@@ -39,7 +39,6 @@ class BaseYUV:
         if dst_format == "rgb":
             if rgb is None:
                 rgb = ycbcr420_to_rgb(y, uv, order=1)
-
             return rgb
         assert dst_format == "420"
         if y is None:

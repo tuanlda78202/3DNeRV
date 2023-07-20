@@ -1,7 +1,7 @@
-name: beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e                  # EXPERIMENTS
+name: beauty-raw3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e                  # EXPERIMENTS
 
 trainer:
-  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
+  name: "beauty-raw3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
   resume: False 
   
   epochs: 300
@@ -12,6 +12,7 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
+  mode: "offline"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
