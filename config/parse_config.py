@@ -17,7 +17,6 @@ class ConfigParser:
         :param config: Dict containing configurations, hyper-parameters for training
         :param resume: String, path to the checkpoint being loaded.
         :param modification: Dict key-chain:value, specifying position values to be replaced from config dict.
-        :param run_id: Unique Identifier for training processes. Used to save checkpoints and training log. Timestamp is being used as default
         """
 
         # Load config file and apply modification
@@ -28,14 +27,7 @@ class ConfigParser:
         save_dir = Path(self.config["trainer"]["save_dir"])
 
         exp_name = self.config["name"]
-
-        run_id = datetime.now().strftime(r"%m%d_%H%M%S")
-
-        self._save_dir = save_dir / "models" / exp_name / run_id
-
-        # make directory for saving checkpoints and log.
-        exist_ok = run_id == ""
-        self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
+        self._save_dir = save_dir / "models" / exp_name
 
         # save updated config file to the checkpoint dir
         write_yaml(self.config, self.save_dir / "config.yaml")
