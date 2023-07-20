@@ -1,4 +1,4 @@
-name: beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: Beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
 
 dataloader:
   type: build_dataloader
@@ -7,7 +7,7 @@ dataloader:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       # EXPERIMENTS
     crop_size: [720, 1280]                             
-    num_workers: 0 
+    num_workers: 0  
 
     batch_size: 2                                      # MEMORY
     frame_interval: 4                                  # MEMORY
@@ -23,7 +23,7 @@ arch:
   type: HNeRVMae
 
   args:
-    img_size: [720, 1280]
+    img_size: [720, 1280] 
     frame_interval: 4                   # MEMORY      
     
     embed_dim: 8 
