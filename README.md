@@ -76,7 +76,7 @@ cd nerv3d
 
 <details>
 
-<summary>YAML</summary>
+<summary>YAML Format</summary>
 
 ```yaml
 name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
