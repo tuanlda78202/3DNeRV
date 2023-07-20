@@ -1,20 +1,18 @@
-# NeRV3D 
----
-- [NeRV3D](#nerv3d)
-  - [Folder Structure](#folder-structure)
-  - [Model Zoo](#model-zoo)
-  - [Usage](#usage)
-    - [Config YAML format](#config-yaml-format)
-    - [Training](#training)
-    - [Testing](#testing)
-  - [Contributors](#contributors)
+
+- [Folder Structure](#folder-structure)
+- [Model Zoo](#model-zoo)
+- [Usage](#usage)
+  - [Config format](#config-format)
+  - [Training](#training)
+  - [Testing](#testing)
+- [Contributors](#contributors)
 
 
 ## Folder Structure
 
 ```
 nerv3d/
-├── configs/ 
+│── configs/ 
 │   ├── README.md - config name style
 │   ├── uvg-720p/ 
 │   └── uvg-1080p/ 
@@ -55,7 +53,7 @@ nerv3d/
     <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">D-NeRV</a> (CVPR'23)</td>
     <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">HNeRV</a> (CVPR'23)</td>
     <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">HiNeRV</a> (NIPS'23)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">NeRV3D</a> (OURS)</td>
+    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">NeRV3D</a> (Ours)</td>
   </tr>
 </table>
 
@@ -64,7 +62,7 @@ nerv3d/
 Install the required packages:
 
 ```
-pip install -rrequirements.txt
+pip install -r requirements.txt
 ```
 <!-- pipreqs for get requirements.txt -->
 
@@ -75,11 +73,11 @@ Running private repository on Kaggle:
 git clone https://your_personal_token@github.com/tuanlda78202/nerv3d.git
 cd nerv3d
 ```
-### Config YAML format
+### Config format
 
 <details>
 
-<summary>Config files are in YAML format</summary>
+<summary>YAML format</summary>
 
 ```yaml
 name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
