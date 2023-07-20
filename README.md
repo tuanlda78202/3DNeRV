@@ -1,11 +1,12 @@
-
-- [Folder Structure](#folder-structure)
-- [Model Zoo](#model-zoo)
-- [Usage](#usage)
-  - [Config format](#config-format)
-  - [Training](#training)
-  - [Testing](#testing)
-- [Contributors](#contributors)
+# 3DNeRV - Cube-wise Neural Representation for Videos
+- [3DNeRV - Cube-wise Neural Representation for Videos](#3dnerv---cube-wise-neural-representation-for-videos)
+  - [Folder Structure](#folder-structure)
+  - [Model Zoo](#model-zoo)
+  - [Usage](#usage)
+    - [Config](#config)
+    - [Training](#training)
+    - [Testing](#testing)
+  - [Contributors](#contributors)
 
 
 ## Folder Structure
@@ -74,11 +75,11 @@ Running private repository online notebook:
 git clone https://your_personal_token@github.com/tuanlda78202/nerv3d.git
 cd nerv3d
 ```
-### Config format
+### Config
 
 <details>
 
-<summary>YAML format</summary>
+<summary>YAML</summary>
 
 ```yaml
 name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
