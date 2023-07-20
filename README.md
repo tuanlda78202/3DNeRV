@@ -1,4 +1,5 @@
 # 3DNeRV - Cube-wise Neural Representation for Videos
+---
 - [3DNeRV - Cube-wise Neural Representation for Videos](#3dnerv---cube-wise-neural-representation-for-videos)
   - [Folder Structure](#folder-structure)
   - [Model Zoo](#model-zoo)
@@ -7,7 +8,6 @@
     - [Training](#training)
     - [Testing](#testing)
   - [Contributors](#contributors)
-
 
 ## Folder Structure
 
@@ -33,7 +33,7 @@ nerv3d/
 │   ├── model/ 
 │   └── trainer/ 
 │        ├── base_trainer.py
-│        └──nerv3d_trainer.py
+│        └── nerv3d_trainer.py
 │ 
 └── utils/
     ├── log/ 
