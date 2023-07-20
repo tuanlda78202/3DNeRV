@@ -12,6 +12,7 @@
 
 ```
 nerv3d/
+│
 │── configs/ 
 │   ├── README.md - config name style
 │   ├── uvg-720p/ 
@@ -66,7 +67,7 @@ pip install -r requirements.txt
 ```
 <!-- pipreqs for get requirements.txt -->
 
-Running private repository on Kaggle:
+Running private repository online notebook:
 1. [Generate your token](https://github.com/settings/tokens)
 2. Get repo address from `github.com/.../...git`: 
 ```bash
