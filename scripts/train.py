@@ -36,7 +36,7 @@ def main(config):
     # Global device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
-    model = torch.compile(model.to(device))
+    model = model.to(device)  # torch.compile(model.to(device))
 
     # Criterion & Metrics
     criterion = config.init_ftn("loss", module_loss)
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="config/nerv3d/beauty720pmp4-flex3d-3M-300e.yaml",
+        default="config/uvg-mp4-720p/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e.yaml",
         type=str,
         help="config file path (default: None)",
     )

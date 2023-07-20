@@ -1,4 +1,4 @@
-name: Beauty-720pMP4-Flex3D-2.67M-300e
+name: beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
 
 dataloader:
   type: build_dataloader
@@ -7,7 +7,7 @@ dataloader:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       # EXPERIMENTS
     frame_interval: 4                                  # MEMORY
-    crop_size: [720, 1280]
+    crop_size: [720, 1280]                             
 
     batch_size: 2                                      # MEMORY
     num_workers: 0      
@@ -67,14 +67,14 @@ trainer:
   valid_period: 10
 
   save_dir: saved/
-  save_period: 100
+  save_period: 1
   verbosity: 1
 
   visual_tool: wandb
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty720pMP4-Flex3D-2.67M-300e"              # EXPERIMENTS
+  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
 
 
 eval: 

@@ -3,6 +3,7 @@ import torch
 from ptflops import get_model_complexity_info
 from torchsummary import summary
 
+"""
 with torch.cuda.device(0):
     model = HNeRVMae(
         img_size=(720, 1280),
@@ -30,3 +31,4 @@ with torch.cuda.device(0):
     print("{:<30}  {:<8}".format("Number of parameters: ", params))
 
     print(summary(model, (3, 4, 720, 1280), batch_size=1, device="cuda"))
+"""

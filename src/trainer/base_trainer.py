@@ -41,6 +41,7 @@ class BaseTrainer:
         self.optimizer = optimizer
 
         cfg_trainer = config["trainer"]
+        self.name_exp = config["name"]
         self.epochs = cfg_trainer["epochs"]
         self.save_period = cfg_trainer["save_period"]
         self.start_epoch = 0
@@ -104,7 +105,9 @@ class BaseTrainer:
             "config": self.config,
         }
 
-        filename = str(self.checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))
+        filename = str(
+            str(self.checkpoint_dir / self.name_exp + "ckpt-e{}.pth".format(epoch))
+        )
         torch.save(state, filename)
         self.logger.info("Saving checkpoint: {} ...".format(filename))
 

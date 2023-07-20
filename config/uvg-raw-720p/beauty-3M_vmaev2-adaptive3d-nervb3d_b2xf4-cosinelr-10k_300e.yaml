@@ -1,0 +1,79 @@
+name: beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e                  # EXPERIMENTS
+
+trainer:
+  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
+  resume: False 
+  
+  epochs: 300
+  valid_period: 10
+
+  save_dir: saved/
+  save_period: 100
+  verbosity: 1
+
+  visual_tool: wandb
+  project: nerv3d
+  api_key_file: "./config/api/tuanlda78202"
+  entity: tuanlda78202
+
+dataloader:
+  type: build_dataloader
+
+  args:
+    name: "uvg-raw"
+    data_path: "../uvg-raw/beauty.yuv"                       # EXPERIMENTS
+    frame_interval: 4                                  # MEMORY
+    crop_size: [720, 1280]                             
+
+    batch_size: 2                                      # MEMORY
+    num_workers: 6                                           
+
+arch:
+  type: HNeRVMae
+
+  args:
+    img_size: [720, 1280]
+    frame_interval: 4       
+    
+    embed_dim: 8 
+    embed_size: [9, 16]
+    decode_dim: 314 # 3M
+
+    lower_kernel: 1
+    upper_kernel: 5
+    scales: [5, 4, 2, 2]
+    reduce: 3
+    lower_width: 6
+
+    ckpt_path: "../ckpt/vit_s_k710_dl_from_giant.pth"
+
+loss:
+  type: loss_fn
+
+  args:
+    loss_type: "L2"
+    batch_average: False
+
+metrics:
+  type: psnr_batch
+
+  args:
+    batch_size: 2                                   # MEMORY  
+    frame_interval: 4                               # MEMORY
+
+
+optimizer:
+  type: Adam
+
+  args: 
+    lr: 0.001 
+    betas: [0.9, 0.99]
+
+lr_scheduler:
+  type: CosineAnnealingLR
+
+  args:
+    T_max: 0.000001     # 1e-6
+    eta_min: 0.0
+
+
