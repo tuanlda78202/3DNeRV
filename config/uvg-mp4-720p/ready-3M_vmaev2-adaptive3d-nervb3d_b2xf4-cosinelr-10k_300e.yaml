@@ -1,11 +1,11 @@
-name: Beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
 
 dataloader:
   type: build_dataloader
 
   args:
     name: "uvghd30"
-    data_path: "data/beauty.mp4"                       # EXPERIMENTS
+    data_path: "data/ready.mp4"                       # EXPERIMENTS
     crop_size: [720, 1280]                             
     num_workers: 0  
 
@@ -70,10 +70,9 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "offline"
+  mode: "online"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
-
+  name: "ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
 

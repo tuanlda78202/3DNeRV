@@ -11,6 +11,7 @@ from .base_trainer import BaseTrainer
 from utils import inf_loop
 from tqdm import tqdm
 import wandb
+import gc
 
 
 class NeRV3DTrainer(BaseTrainer):
@@ -73,15 +74,16 @@ class NeRV3DTrainer(BaseTrainer):
             # BTHWC to BCTHW
             data = data.permute(0, 4, 1, 2, 3).cuda()
             pred = self.model(data)
-
             # BCTHW to BTCHW
             data = data.permute(0, 2, 1, 3, 4)
+
             loss = self.criterion(pred, data)
 
             self.optimizer.zero_grad()
 
             loss.backward()
             self.optimizer.step()
+            self.lr_scheduler.step()
 
             # Metrics
             psnr = self.metric_ftns(
@@ -92,13 +94,11 @@ class NeRV3DTrainer(BaseTrainer):
             )
 
             tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr)
-
-            # WandB
             wandb.log({"loss": loss.item(), "psnr": psnr})
 
-            self.lr_scheduler.step()
-
             del data, pred, loss, psnr
+            gc.collect()
+            torch.cuda.empty_cache()
 
             if batch_idx == self.len_epoch:
                 break
@@ -143,8 +143,3 @@ class NeRV3DTrainer(BaseTrainer):
             )
 
             del valid_data, valid_pred
-
-            # Add histogram of model parameters to the WandB
-            for name, para in self.model.named_parameters():
-                para_np = para.data.cpu().numpy()
-                wandb.log({name: wandb.Histogram(para_np)})

@@ -1,0 +1,86 @@
+name: Beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+dataloader:
+    type: build_dataloader
+    args:
+        name: uvghd30
+        data_path: data/beauty.mp4
+        crop_size:
+        - 720
+        - 1280
+        num_workers: 0
+        batch_size: 3
+        frame_interval: 4
+metrics:
+    type: psnr_batch
+    args:
+        batch_size: 2
+        frame_interval: 4
+arch:
+    type: HNeRVMae
+    args:
+        img_size:
+        - 720
+        - 1280
+        frame_interval: 4
+        embed_dim: 8
+        embed_size:
+        - 9
+        - 16
+        decode_dim: 314
+        lower_kernel: 1
+        upper_kernel: 5
+        scales:
+        - 5
+        - 4
+        - 2
+        - 2
+        reduce: 3
+        lower_width: 6
+        ckpt_path: ../ckpt/vit_s_k710_dl_from_giant.pth
+loss:
+    type: loss_fn
+    args:
+        loss_type: L2
+        batch_average: false
+optimizer:
+    type: Adam
+    args:
+        lr: 0.001
+        betas:
+        - 0.9
+        - 0.99
+lr_scheduler:
+    type: CosineAnnealingLR
+    args:
+        T_max: 1.0e-06
+        eta_min: 0.0
+trainer:
+    resume: false
+    epochs: 300
+    valid_period: 10
+    save_dir: saved/
+    save_period: 1
+    verbosity: 1
+    visual_tool: wandb
+    mode: offline
+    project: nerv3d
+    api_key_file: ./config/api/tuanlda78202
+    entity: tuanlda78202
+    name: beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+eval:
+    eval_only: false
+    eval_freq: 10
+    eval_fps: false
+    quant_model_bit: 8
+    quant_embed_bit: 6
+    quant_axis: 0
+    dump_images: false
+    dump_videos: false
+    encoder_file: ''
+log:
+    debug: false
+    print-freq: 50
+    weight: None
+    overwrite: false
+    outf: unify
+    suffix: ''
