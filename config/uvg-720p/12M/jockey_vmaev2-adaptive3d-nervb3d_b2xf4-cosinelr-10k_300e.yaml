@@ -1,11 +1,11 @@
-name: Bosphorus-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: Jockey-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
 
 dataloader:
   type: build_dataloader
 
   args:
     name: "uvghd30"
-    data_path: "data/bosphorus.mp4"                       # EXPERIMENTS
+    data_path: "data/jockey.mp4"                       # EXPERIMENTS
     crop_size: [720, 1280]                             
     num_workers: 0  
 
@@ -28,7 +28,7 @@ arch:
     
     embed_dim: 8 
     embed_size: [9, 16]
-    decode_dim: 314
+    decode_dim: 662
 
     lower_kernel: 1
     upper_kernel: 5
@@ -74,4 +74,4 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "bosphorus-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
+  name: "jockey-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS

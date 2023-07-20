@@ -1,4 +1,4 @@
-name: Beauty720_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
 
 dataloader:
   type: build_dataloader
@@ -36,7 +36,7 @@ arch:
     reduce: 3
     lower_width: 6
 
-    ckpt_path: "data/vit_s_k710_dl_from_giant.pth"
+    ckpt_path: "data/vmae_sdg.pth"
 
 loss:
   type: loss_fn

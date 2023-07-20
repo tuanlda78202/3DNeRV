@@ -15,7 +15,6 @@ from config.parse_config import ConfigParser
 import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
 import src.evaluation.metric as module_metric
-from utils.log import WandB
 
 np.random.seed(42)
 torch.manual_seed(42)

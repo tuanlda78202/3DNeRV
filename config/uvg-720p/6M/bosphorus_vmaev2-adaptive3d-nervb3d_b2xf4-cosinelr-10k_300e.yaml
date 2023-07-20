@@ -28,7 +28,7 @@ arch:
     
     embed_dim: 8 
     embed_size: [9, 16]
-    decode_dim: 314
+    decode_dim: 463
 
     lower_kernel: 1
     upper_kernel: 5

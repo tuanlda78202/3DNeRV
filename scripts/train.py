@@ -1,6 +1,5 @@
 import sys
 import os
-import warnings
 import numpy as np
 import torch
 import argparse
@@ -68,7 +67,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="config/uvg-720p/ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e.yaml",
+        default=None,  # config/uvg-720p/3M/beauty_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e.yaml
         type=str,
         help="config file path (default: None)",
     )

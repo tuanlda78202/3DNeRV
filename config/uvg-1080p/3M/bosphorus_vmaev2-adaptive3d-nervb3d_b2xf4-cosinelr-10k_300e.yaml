@@ -6,7 +6,7 @@ dataloader:
   args:
     name: "uvghd30"
     data_path: "data/bosphorus.mp4"                       # EXPERIMENTS
-    crop_size: [720, 1280]                             
+    crop_size: [1080, 1920]                             
     num_workers: 0  
 
     batch_size: 2                                      # MEMORY
@@ -28,11 +28,11 @@ arch:
     
     embed_dim: 8 
     embed_size: [9, 16]
-    decode_dim: 314
+    decode_dim: 305
 
     lower_kernel: 1
     upper_kernel: 5
-    scales: [5, 4, 2, 2]
+    scales: [5, 4, 3, 2]
     reduce: 3
     lower_width: 6
 
