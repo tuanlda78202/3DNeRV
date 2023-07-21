@@ -80,13 +80,8 @@ class NeRV3DTrainer(BaseTrainer):
 
             self.optimizer.zero_grad()
 
-            # torch.cuda.synchronize()
-            # t0 = time.time()
             loss.backward()
-            # torch.cuda.synchronize()
-            # t0 = time.time()
             self.optimizer.step()
-            # print("Opt step + LR step: ", time.time() - t0)
 
             self.lr_scheduler.step()
 
@@ -99,7 +94,13 @@ class NeRV3DTrainer(BaseTrainer):
             )
 
             tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr)
-            wandb.log({"loss": loss.item(), "psnr": psnr})
+            wandb.log(
+                {
+                    "loss": loss.item(),
+                    "psnr": psnr,
+                    "lr": self.lr_scheduler.get_last_lr()[0],
+                }
+            )
 
             del data, pred, loss, psnr
             gc.collect()

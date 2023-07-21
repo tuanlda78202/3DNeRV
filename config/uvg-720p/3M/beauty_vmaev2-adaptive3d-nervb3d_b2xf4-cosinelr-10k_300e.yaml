@@ -1,4 +1,4 @@
-name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e
 
 dataloader:
   type: build_dataloader
@@ -56,8 +56,8 @@ lr_scheduler:
   type: CosineAnnealingLR
 
   args:
-    T_max: 0.000001     # 1e-6
-    eta_min: 0.0
+    T_max: 20000 # ~ num_epochs * len(dataloader)
+    eta_min: 0.000001     # 1e-6
 
 trainer:
   resume: False 
