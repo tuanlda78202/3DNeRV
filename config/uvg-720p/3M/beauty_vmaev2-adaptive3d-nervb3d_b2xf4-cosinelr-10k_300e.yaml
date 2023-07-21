@@ -7,7 +7,7 @@ dataloader:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       # EXPERIMENTS
     crop_size: [720, 1280]                             
-    num_workers: 0  
+    num_workers: 6  
 
     batch_size: 2                                      # MEMORY
     frame_interval: 4                                  # MEMORY

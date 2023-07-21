@@ -7,7 +7,7 @@ dataloader:
     name: "uvghd30"
     data_path: "data/ready.mp4"                       # EXPERIMENTS
     crop_size: [720, 1280]                             
-    num_workers: 0  
+    num_workers: 6  
 
     batch_size: 2                                      # MEMORY
     frame_interval: 4                                  # MEMORY
@@ -36,7 +36,7 @@ arch:
     reduce: 3
     lower_width: 6
 
-    ckpt_path: "../ckpt/vit_s_k710_dl_from_giant.pth"
+    ckpt_path: "data/vmae_sdg.pth"
 
 loss:
   type: loss_fn
@@ -70,7 +70,7 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "offline"
+  mode: "online"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202

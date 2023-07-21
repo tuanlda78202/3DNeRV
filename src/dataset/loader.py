@@ -24,7 +24,7 @@ def get_video_loader(
         if _client is not None and "s3:" in video_path:
             video_path = io.BytesIO(_client.get(video_path))
 
-        vr = VideoReader(video_path, num_threads=1, ctx=cpu(0))
+        vr = VideoReader(video_path, num_threads=12, ctx=cpu(0))  # 10400F: 6C, 12T
         return vr
 
     return _loader

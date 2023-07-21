@@ -4,8 +4,8 @@ logger = logging.getLogger("wandb")
 logger.setLevel(logging.ERROR)
 logger.setLevel(logging.WARNING)
 
+import time
 import random
-import numpy as np
 import torch
 from .base_trainer import BaseTrainer
 from utils import inf_loop
@@ -52,7 +52,6 @@ class NeRV3DTrainer(BaseTrainer):
             self.len_epoch = len_epoch
 
         self.lr_scheduler = lr_scheduler
-        self.log_step = int(np.sqrt(data_loader.batch_size))
 
     def _train_epoch(self, epoch):
         """
@@ -74,15 +73,21 @@ class NeRV3DTrainer(BaseTrainer):
             # BTHWC to BCTHW
             data = data.permute(0, 4, 1, 2, 3).cuda()
             pred = self.model(data)
+
             # BCTHW to BTCHW
             data = data.permute(0, 2, 1, 3, 4)
-
             loss = self.criterion(pred, data)
 
             self.optimizer.zero_grad()
 
+            # torch.cuda.synchronize()
+            # t0 = time.time()
             loss.backward()
+            # torch.cuda.synchronize()
+            # t0 = time.time()
             self.optimizer.step()
+            # print("Opt step + LR step: ", time.time() - t0)
+
             self.lr_scheduler.step()
 
             # Metrics
@@ -113,7 +118,6 @@ class NeRV3DTrainer(BaseTrainer):
         """
         Validate after training an epoch
 
-        :param epoch: Integer, current training epoch.
         :return: WandB log video that contains information about validation
         """
         self.model.eval()
@@ -143,3 +147,5 @@ class NeRV3DTrainer(BaseTrainer):
             )
 
             del valid_data, valid_pred
+            gc.collect()
+            torch.cuda.empty_cache()

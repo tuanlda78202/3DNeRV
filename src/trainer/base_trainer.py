@@ -1,6 +1,5 @@
 import torch
 from abc import abstractmethod
-from numpy import inf
 from utils.log import WandB
 
 """
