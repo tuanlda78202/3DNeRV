@@ -12,10 +12,9 @@
 
 ```
 nerv3d/
-<<<<<<< HEAD
-  │
   │── configs/ 
   │   ├── README.md - config name style
+  │   ├── parse_config.py
   │   ├── uvg-720p/ 
   │   └── uvg-1080p/ 
   │
@@ -35,40 +34,11 @@ nerv3d/
   │   │    ├── build.py
   │   │    └── datasets.py
   │   ├── evaluation/ 
-  │   ├── model/ 
-  │   └── trainer/ 
-  │        ├── base_trainer.py
-  │        └── nerv3d_trainer.py
-  │ 
-  └── utils/
-      ├── log/ 
-      └── utils.py
-=======
-  │
-  │── configs/ 
-  │   ├── README.md - config name style
-  │   ├── uvg-720p/ 
-  │   └── uvg-1080p/ 
-  │
-  │── data/
-  │   ├── *.mp4 - UVG FHD dataset
-  │   └── vmae_sdg.pth - VideoMAE ViT-Small distill from Giant
-  │
-  │── scripts/
-  │   ├── train.py
-  │   └── test.py
-  │
-  │── src/
-  │   │── backbone/
-  │   │    └── videomaev2.py
-  │   ├── dataset/ 
-  │   │    ├── build.py
-  │   │    └── datasets.py
-  │   ├── evaluation/
   │   │    ├── loss.py
-  │   │    └── metric.py 
-  │   ├── model/
-  │   │    └── hnerv3d.py
+  │   │    └── metrics.py  
+  │   ├── model/ 
+  │   │    ├── hnerv3d.py
+  │   │    └── macs.py  
   │   └── trainer/ 
   │        ├── base_trainer.py
   │        └── nerv3d_trainer.py
@@ -76,7 +46,6 @@ nerv3d/
   └── utils/
       ├── log/ 
       └── utils.py
->>>>>>> 8c5dd7afac2f10b544c2bbb6b841cf32ca4c7243
 ```
 ## Model Zoo 
 <summary></summary>
