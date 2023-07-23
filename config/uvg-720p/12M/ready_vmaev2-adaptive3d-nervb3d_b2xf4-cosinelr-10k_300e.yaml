@@ -1,4 +1,4 @@
-name: Ready-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: Ready-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e
 
 dataloader:
   type: build_dataloader
@@ -7,7 +7,7 @@ dataloader:
     name: "uvghd30"
     data_path: "data/ready.mp4"                       # EXPERIMENTS
     crop_size: [720, 1280]                             
-    num_workers: 0  
+    num_workers: 6  
 
     batch_size: 2                                      # MEMORY
     frame_interval: 4                                  # MEMORY
@@ -70,9 +70,9 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "offline"
+  mode: "online"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
+  name: "ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"              # EXPERIMENTS
 

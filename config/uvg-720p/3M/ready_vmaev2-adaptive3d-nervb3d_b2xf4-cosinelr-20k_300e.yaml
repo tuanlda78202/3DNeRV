@@ -74,5 +74,5 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
+  name: "ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"              # EXPERIMENTS
 

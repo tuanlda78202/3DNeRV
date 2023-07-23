@@ -70,8 +70,8 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "offline"
+  mode: "online"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              # EXPERIMENTS
+  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"              # EXPERIMENTS

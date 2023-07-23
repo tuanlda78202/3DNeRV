@@ -21,6 +21,9 @@ nerv3d/
 │── data/ - UVG dataset & VMAE checkpoint
 │
 │── scripts/
+│   ├── uvg/ - Bash scripts auto training & testing 
+│   ├── train.py 
+│   └── test.py 
 │
 │── src/
 │   │── backbone/
@@ -79,7 +82,7 @@ cd nerv3d
 <summary>YAML Format</summary>
 
 ```yaml
-name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e
+name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e
 
 dataloader:
   type: build_dataloader
@@ -88,7 +91,7 @@ dataloader:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       
     crop_size: [720, 1280]                             
-    num_workers: 0  
+    num_workers: 6  
 
     batch_size: 2                                      
     frame_interval: 4                                  
@@ -151,11 +154,11 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "offline"
+  mode: "online"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-10k_300e"              
+  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"              
 ```
 
 </details>
@@ -165,6 +168,10 @@ Modify the configurations in `.yaml` config files, then run:
 
 ```bash
 python scripts/train.py --config [CONFIG]
+```
+If you want training and testing multiple videos, run:
+```bash
+sh scripts/pipleline.sh
 ```
 
 ### Testing
