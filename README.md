@@ -1,5 +1,5 @@
-# 3DNeRV - Cube-wise Neural Representation for Videos
-- [3DNeRV - Cube-wise Neural Representation for Videos](#3dnerv---cube-wise-neural-representation-for-videos)
+# 3DNeRV
+- [3DNeRV](#3dnerv)
   - [Folder Structure](#folder-structure)
   - [Model Zoo](#model-zoo)
   - [Usage](#usage)
@@ -12,34 +12,71 @@
 
 ```
 nerv3d/
-│
-│── configs/ 
-│   ├── README.md - config name style
-│   ├── uvg-720p/ 
-│   └── uvg-1080p/ 
-│
-│── data/ - UVG dataset & VMAE checkpoint
-│
-│── scripts/
-│   ├── uvg/ - Bash scripts auto training & testing 
-│   ├── train.py 
-│   └── test.py 
-│
-│── src/
-│   │── backbone/
-│   │    └── videomaev2.py
-│   ├── dataset/ 
-│   │    ├── build.py
-│   │    └── datasets.py
-│   ├── evaluation/ 
-│   ├── model/ 
-│   └── trainer/ 
-│        ├── base_trainer.py
-│        └── nerv3d_trainer.py
-│ 
-└── utils/
-    ├── log/ 
-    └── utils.py
+<<<<<<< HEAD
+  │
+  │── configs/ 
+  │   ├── README.md - config name style
+  │   ├── uvg-720p/ 
+  │   └── uvg-1080p/ 
+  │
+  │── data/
+  │   ├── *.mp4 - UVG FHD dataset
+  │   └── vmae_sdg.pth - VideoMAE ViT-Small distill from Giant
+  │
+  │── scripts/
+  │   ├── uvg/ - Bash scripts auto training & testing 
+  │   ├── train.py 
+  │   └── test.py 
+  │
+  │── src/
+  │   │── backbone/
+  │   │    └── videomaev2.py
+  │   ├── dataset/ 
+  │   │    ├── build.py
+  │   │    └── datasets.py
+  │   ├── evaluation/ 
+  │   ├── model/ 
+  │   └── trainer/ 
+  │        ├── base_trainer.py
+  │        └── nerv3d_trainer.py
+  │ 
+  └── utils/
+      ├── log/ 
+      └── utils.py
+=======
+  │
+  │── configs/ 
+  │   ├── README.md - config name style
+  │   ├── uvg-720p/ 
+  │   └── uvg-1080p/ 
+  │
+  │── data/
+  │   ├── *.mp4 - UVG FHD dataset
+  │   └── vmae_sdg.pth - VideoMAE ViT-Small distill from Giant
+  │
+  │── scripts/
+  │   ├── train.py
+  │   └── test.py
+  │
+  │── src/
+  │   │── backbone/
+  │   │    └── videomaev2.py
+  │   ├── dataset/ 
+  │   │    ├── build.py
+  │   │    └── datasets.py
+  │   ├── evaluation/
+  │   │    ├── loss.py
+  │   │    └── metric.py 
+  │   ├── model/
+  │   │    └── hnerv3d.py
+  │   └── trainer/ 
+  │        ├── base_trainer.py
+  │        └── nerv3d_trainer.py
+  │ 
+  └── utils/
+      ├── log/ 
+      └── utils.py
+>>>>>>> 8c5dd7afac2f10b544c2bbb6b841cf32ca4c7243
 ```
 ## Model Zoo 
 <summary></summary>
@@ -61,20 +98,18 @@ nerv3d/
 
 ## Usage
 
-Install the required packages:
-
-```
-pip install -r requirements.txt
-```
-<!-- pipreqs for get requirements.txt -->
-
-Running private repository online notebook:
+If you run private repository on online notebook:
 1. [Generate your token](https://github.com/settings/tokens)
 2. Get repo address from `github.com/.../...git`: 
 ```bash
 git clone https://your_personal_token@github.com/tuanlda78202/nerv3d.git
 cd nerv3d
 ```
+3. Install the required packages:
+```
+pip install -r requirements.txt
+```
+<!-- pipreqs for get requirements.txt -->
 ### Configuration
 
 <details>
