@@ -30,7 +30,7 @@ class ConfigParser:
         self._save_dir = save_dir / "models" / exp_name
 
         exist_ok = exp_name == ""
-        self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
+        self.save_dir.mkdir(parents=True, exist_ok=True)
 
         # save updated config file to the checkpoint dir
         # write_yaml(self.config, self.save_dir / "config.yaml")
