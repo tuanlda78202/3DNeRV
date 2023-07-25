@@ -1,0 +1,77 @@
+name: Shake-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e
+
+dataloader:
+  type: build_dataloader
+
+  args:
+    name: "uvghd30"
+    data_path: "data/shake.mp4"                       
+    crop_size: [1080, 1920]                             
+    num_workers: 6                                     # CPU
+
+    batch_size: 2                                      # MEMORY
+    frame_interval: 4                                  # MEMORY
+
+metrics:
+  type: psnr_batch
+
+  args:
+    batch_size: 2                                   # MEMORY  
+    frame_interval: 4                               # MEMORY
+
+arch:
+  type: HNeRVMae
+
+  args:
+    img_size: [1080, 1920] 
+    frame_interval: 4                   # MEMORY      
+    
+    embed_dim: 8 
+    embed_size: [9, 16]
+    decode_dim: 305
+
+    lower_kernel: 1
+    upper_kernel: 5
+    scales: [5, 4, 3, 2]
+    reduce: 3
+    lower_width: 6
+
+    ckpt_path: "data/vmae_sdg.pth"
+
+loss:
+  type: loss_fn
+
+  args:
+    loss_type: "L2"
+    batch_average: False
+
+optimizer:
+  type: Adam
+
+  args: 
+    lr: 0.001 
+    betas: [0.9, 0.99]
+
+lr_scheduler:
+  type: CosineAnnealingLR
+
+  args:
+    T_max: 20000 # ~ num_epochs * len(dataloader)
+    eta_min: 0.000001     # 1e-6
+
+trainer:
+  resume: False 
+  
+  epochs: 300
+  valid_period: 10
+
+  save_dir: saved/
+  save_period: 100
+  verbosity: 1
+
+  visual_tool: wandb
+  mode: "online"
+  project: nerv3d
+  api_key_file: "./config/api/tuanlda78202"
+  entity: tuanlda78202
+  name: "shake-1080p_3M-vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"            

@@ -40,7 +40,7 @@ class BaseTrainer:
         self.optimizer = optimizer
 
         cfg_trainer = config["trainer"]
-        self.name_exp = config["name"]
+        self.name_exp = cfg_trainer["name"]
         self.epochs = cfg_trainer["epochs"]
         self.save_period = cfg_trainer["save_period"]
         self.start_epoch = 0
@@ -52,7 +52,7 @@ class BaseTrainer:
 
         if cfg_trainer["visual_tool"] == "wandb":
             self.wandb = WandB(
-                config["name"],
+                self.name_exp,
                 cfg_trainer,
                 self.logger,
                 cfg_trainer["visual_tool"],
@@ -103,7 +103,12 @@ class BaseTrainer:
             "config": self.config,
         }
 
-        filename = str(str(self.checkpoint_dir) + "/" + "e{}.pth".format(epoch))
+        filename = str(
+            str(self.checkpoint_dir)
+            + "/"
+            + self.name_exp
+            + " - ckpt_e{}.pth".format(epoch)
+        )
 
         torch.save(state, filename)
 

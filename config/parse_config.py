@@ -26,7 +26,7 @@ class ConfigParser:
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config["trainer"]["save_dir"])
 
-        exp_name = self.config["name"]
+        exp_name = self.config["trainer"]["name"]
         self._save_dir = save_dir / "models" / exp_name
 
         exist_ok = exp_name == ""

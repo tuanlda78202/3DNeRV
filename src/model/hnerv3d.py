@@ -11,7 +11,7 @@ def vmae_pretrained(
     **kwargs,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vmae: nn.Module = model_fn(**kwargs)  # num_heads=3
+    vmae: nn.Module = model_fn(**kwargs)  # num_heads = 3
 
     if ckpt_path is not None:
         ckt = torch.load(ckpt_path, map_location="cpu")
