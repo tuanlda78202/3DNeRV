@@ -10,7 +10,6 @@ pytorch_msssim==0.2.1
 PyYAML==6.0.1
 scipy==1.11.1
 timm==0.4.12
-torch==2.0.1
 torchsummary==1.5.1
 torchvision==0.15.0
 tqdm==4.65.0
