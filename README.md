@@ -94,8 +94,8 @@ dataloader:
   args:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       
-    crop_size: [720, 1280]                             
-    num_workers: 6  
+    crop_size: [1080, 1920]                             
+    num_workers: 6                                    
 
     batch_size: 2                                      
     frame_interval: 4                                  
@@ -104,23 +104,23 @@ metrics:
   type: psnr_batch
 
   args:
-    batch_size: 2                                     
+    batch_size: 2                                   
     frame_interval: 4                               
 
 arch:
   type: HNeRVMae
 
   args:
-    img_size: [720, 1280] 
-    frame_interval: 4                        
+    img_size: [1080, 1920] 
+    frame_interval: 4                      
     
     embed_dim: 8 
     embed_size: [9, 16]
-    decode_dim: 314
+    decode_dim: 634
 
     lower_kernel: 1
     upper_kernel: 5
-    scales: [5, 4, 2, 2]
+    scales: [5, 4, 3, 2]
     reduce: 3
     lower_width: 6
 
@@ -144,8 +144,8 @@ lr_scheduler:
   type: CosineAnnealingLR
 
   args:
-    T_max: 0.000001     
-    eta_min: 0.0
+    T_max: 20000 
+    eta_min: 0.000001    
 
 trainer:
   resume: False 
@@ -162,7 +162,7 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"              
+  name: "beauty-1080p_12M-vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"                  
 ```
 
 </details>
