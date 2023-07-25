@@ -36,7 +36,7 @@ arch:
     reduce: 3
     lower_width: 6
 
-    ckpt_path: "../ckpt/vit_s_k710_dl_from_giant.pth"
+    ckpt_path: "data/vmae_sdg.pth"
 
 loss:
   type: loss_fn
