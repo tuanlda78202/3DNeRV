@@ -25,12 +25,19 @@ from src.trainer.nerv3d_trainer import NeRV3DTrainer
 def main(config):
     logger = config.get_logger("train")
 
+    # Hypar
+    BATCH_SIZE = config["dataloader"]["args"]["batch_size"]
+    FRAME_INTERVAL = config["dataloader"]["args"]["frame_interval"]
+    IMG_SIZE = config["dataloader"]["args"]["crop_size"]
+
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
     # Model
-    model = config.init_obj("arch", module_arch)
+    model = config.init_obj(
+        "arch", module_arch, img_size=IMG_SIZE, frame_interval=FRAME_INTERVAL
+    )
     logger.info(model)
 
     # Global device
@@ -40,7 +47,9 @@ def main(config):
 
     # Criterion & Metrics
     criterion = config.init_ftn("loss", module_loss)
-    metrics = config.init_ftn("metrics", module_metric)
+    metrics = config.init_ftn(
+        "metrics", module_metric, batch_size=BATCH_SIZE, frame_interval=FRAME_INTERVAL
+    )
 
     # Optimizer
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
