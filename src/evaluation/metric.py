@@ -9,7 +9,7 @@ def psnr_one(pred, gt):
     return db.item()
 
 
-def psnr_batch(batch_pred, batch_gt, batch_size=None, frame_interval=None):
+def psnr_batch(batch_pred, batch_gt, batch_size, frame_interval):
     psnr_list = []
 
     for batch_idx in range(batch_size):

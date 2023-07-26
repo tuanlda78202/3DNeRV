@@ -16,11 +16,16 @@ metrics:
   type: psnr_batch
 
   args:
+    batch_size: 2                                   # MEMORY  
+    frame_interval: 4                               # MEMORY
 
 arch:
   type: HNeRVMae
 
-  args:    
+  args:
+    img_size: [720, 1280] 
+    frame_interval: 4                   # MEMORY      
+    
     embed_dim: 8 
     embed_size: [9, 16]
     decode_dim: 314
