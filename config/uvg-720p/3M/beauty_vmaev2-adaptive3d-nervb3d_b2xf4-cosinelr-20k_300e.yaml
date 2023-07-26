@@ -14,7 +14,9 @@ dataloader:
 
 metrics:
   type: psnr_batch
-  
+
+  args:
+
 arch:
   type: HNeRVMae
 
