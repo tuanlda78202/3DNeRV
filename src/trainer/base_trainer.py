@@ -107,7 +107,7 @@ class BaseTrainer:
             str(self.checkpoint_dir)
             + "/"
             + self.name_exp
-            + " - ckpt_{}e.pth".format(epoch + 1)
+            + "-ckpt{}e.pth".format(epoch + 1)
         )
 
         torch.save(state, filename)
