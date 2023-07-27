@@ -15,6 +15,7 @@ from src.compression.dcabac import *
 import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
 import src.evaluation.metric as module_metric
+from src.model.hnerv3d import *
 
 
 np.random.seed(42)
@@ -51,6 +52,23 @@ def main(config):
     # dcabac_encoder(model)
 
     # Decoder
+    decoder_model = dcabac_decoder(HNeRVMaeDecoder(), path="src/compression/beauty.bin")
+
+    for batch_idx, data in enumerate(dataloader):
+        data = data.permute(0, 4, 1, 2, 3).cuda()
+
+        features = pretrained_mae.forward_features(data)
+        output = decoder_model(features)
+
+        # PSNR
+        pred = output
+        gt = data.permute(0, 2, 1, 3, 4)
+
+        loss = F.mse_loss(pred, gt)
+        psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
+        print(loss, psnr_db)
+
+        del pred, gt, output, data
 
 
 if __name__ == "__main__":
