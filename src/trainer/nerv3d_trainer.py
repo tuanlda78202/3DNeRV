@@ -94,6 +94,7 @@ class NeRV3DTrainer(BaseTrainer):
             )
 
             tqdm_batch.set_postfix(loss=loss.item(), psnr=psnr)
+
             wandb.log(
                 {
                     "loss": loss.item(),
@@ -102,9 +103,9 @@ class NeRV3DTrainer(BaseTrainer):
                 }
             )
 
-            del data, pred, loss, psnr
-            gc.collect()
-            torch.cuda.empty_cache()
+            # del data, pred, loss, psnr
+            # gc.collect()
+            # torch.cuda.empty_cache()
 
             if batch_idx == self.len_epoch:
                 break
@@ -147,6 +148,6 @@ class NeRV3DTrainer(BaseTrainer):
                 }
             )
 
-            del valid_data, valid_pred
-            gc.collect()
-            torch.cuda.empty_cache()
+            # del valid_data, valid_pred
+            # gc.collect()
+            # torch.cuda.empty_cache()

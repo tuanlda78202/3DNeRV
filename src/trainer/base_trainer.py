@@ -103,12 +103,7 @@ class BaseTrainer:
             "config": self.config,
         }
 
-        filename = str(
-            str(self.checkpoint_dir)
-            + "/"
-            + self.name_exp
-            + "-ckpt{}e.pth".format(epoch + 1)
-        )
+        filename = str(str(self.checkpoint_dir) + "/" + "{}e.pth".format(epoch + 1))
 
         torch.save(state, filename)
 

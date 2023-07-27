@@ -1,29 +1,29 @@
 #!/bin/bash
 
 # Beauty
-python scripts/train.py --config config/uvg-1080p/3M/beauty_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/beauty_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/beauty.yaml
+python scripts/test.py --config config/uvg-1080p/3M/beauty.yaml --resume saved/models/beauty-1080p_3M/300e.pth
 
 # HoneyBee
-python scripts/train.py --config config/uvg-1080p/3M/bee_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/bee_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/bee-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/bee-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/bee.yaml
+python scripts/test.py --config config/uvg-1080p/3M/bee.yaml --resume saved/models/bee-1080p_3M/300e.pth
 
 # Bosphorus
-python scripts/train.py --config config/uvg-1080p/3M/bosphorus_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/bosphorus_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/bosphorus-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/bosphorus-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/bosphorus.yaml
+python scripts/test.py --config config/uvg-1080p/3M/bosphorus.yaml --resume saved/models/bosphorus-1080p_3M/300e.pth
 
 # Jockey
-python scripts/train.py --config config/uvg-1080p/3M/jockey_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/jockey_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/jockey-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/jockey-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/jockey.yaml
+python scripts/test.py --config config/uvg-1080p/3M/jockey.yaml --resume saved/models/jockey-1080p_3M/300e.pth
 
 # ReadySetGo
-python scripts/train.py --config config/uvg-1080p/3M/ready_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/ready_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/ready-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/ready.yaml
+python scripts/test.py --config config/uvg-1080p/3M/ready.yaml --resume saved/models/ready-1080p_3M/300e.pth
 
 # ShakenDry
-python scripts/train.py --config config/uvg-1080p/3M/shake_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/shake_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/shake-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/shake-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/shake.yaml
+python scripts/test.py --config config/uvg-1080p/3M/shake.yaml --resume saved/models/shake-1080p_3M/300e.pth
 
 # YachtRide
-python scripts/train.py --config config/uvg-1080p/3M/yacht_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
-python scripts/test.py --config config/uvg-1080p/3M/yacht_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml --resume saved/models/yacht-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e/yacht-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpt300e.pth
+python scripts/train.py --config config/uvg-1080p/3M/yacht.yaml
+python scripts/test.py --config config/uvg-1080p/3M/yacht.yaml --resume saved/models/yacht-1080p_3M/300e.pth

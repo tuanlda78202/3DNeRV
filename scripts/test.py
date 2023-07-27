@@ -27,7 +27,7 @@ def main(config):
     logger = config.get_logger("test")
 
     # Config
-    name_wandb = "infer-" + str(config["name"])
+    name_wandb = "infer-" + str(config["trainer"]["name"])
     batch_size = config["dataloader"]["args"]["batch_size"]
     frame_interval = config["dataloader"]["args"]["frame_interval"]
 
@@ -35,7 +35,7 @@ def main(config):
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
-    del dataset
+    # del dataset
 
     # Model
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -95,7 +95,7 @@ def main(config):
 
             psnr_video.append(psnr_batch)
 
-            del pred, data
+            # del pred, data
 
         wandb.log({"psnr_video": sum(psnr_video) / len(psnr_video)})
 

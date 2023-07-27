@@ -86,41 +86,40 @@ pip install -r requirements.txt
 <summary>YAML Format</summary>
 
 ```yaml
-name: Beauty-HD_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e
-
+# Intel Xeon Platinum 9282 + NVIDIA A100-PCIE-40GB Config
 dataloader:
   type: build_dataloader
 
   args:
     name: "uvghd30"
     data_path: "data/beauty.mp4"                       
-    crop_size: [1080, 1920]                             
-    num_workers: 6                                    
+    crop_size: [720, 1280]                             
+    num_workers: 6                                     # CPU
 
-    batch_size: 2                                      
-    frame_interval: 4                                  
+    batch_size: 2                                      # MEMORY
+    frame_interval: 4                                  # MEMORY
 
 metrics:
   type: psnr_batch
 
   args:
-    batch_size: 2                                   
-    frame_interval: 4                               
+    batch_size: 2                                   # MEMORY  
+    frame_interval: 4                               # MEMORY
 
 arch:
   type: HNeRVMae
 
   args:
-    img_size: [1080, 1920] 
-    frame_interval: 4                      
+    img_size: [720, 1280] 
+    frame_interval: 4                   # MEMORY      
     
     embed_dim: 8 
     embed_size: [9, 16]
-    decode_dim: 634
+    decode_dim: 662
 
     lower_kernel: 1
     upper_kernel: 5
-    scales: [5, 4, 3, 2]
+    scales: [5, 4, 2, 2]
     reduce: 3
     lower_width: 6
 
@@ -144,8 +143,8 @@ lr_scheduler:
   type: CosineAnnealingLR
 
   args:
-    T_max: 20000 
-    eta_min: 0.000001    
+    T_max: 20000     
+    eta_min: 0.000001
 
 trainer:
   resume: False 
@@ -162,7 +161,7 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty-1080p_12M-vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e"                  
+  name: "beauty-720p_12M"                         
 ```
 
 </details>
@@ -173,6 +172,7 @@ Modify the configurations in `.yaml` config files, then run:
 ```bash
 python scripts/train.py --config [CONFIG]
 ```
+
 If you want training and testing multiple videos, run:
 ```bash
 sh scripts/pipleline.sh
