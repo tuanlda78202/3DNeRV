@@ -41,7 +41,6 @@ def main(config):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
     model = config.init_obj("arch", module_arch).to(device)
-    # model = torch.compile(model)  # Just for torch.compile() training
 
     # CKPT
     logger.info("Loading checkpoint: {} ...".format(config.resume))

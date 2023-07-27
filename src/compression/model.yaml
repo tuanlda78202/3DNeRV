@@ -1,38 +1,19 @@
-# DeepCABAC compression module
-import deepCABAC
-from torch.optim import Adam
-from src.model.baseline import HNeRVMae
-from src.evaluation.evaluation import resume_checkpoint
-import time
-from tqdm import tqdm
-import numpy as np
-
-BATCH_SIZE = 5
-FRAME_INTERVAL = 6
-CROP_SIZE = 640
-
-model = HNeRVMae(bs=BATCH_SIZE, fi=FRAME_INTERVAL, c3d=True).cuda()
-optimizer = Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.99))
-
-start_epoch, model, optimizer = resume_checkpoint(
-    model, optimizer, "/home/tuanlda78202/ckpt/beauty-epoch399.pth"
-)
-
-model.eval()
-model_dict = model.state_dict().copy()
-
-nerv3d_list = [
-    "blk3d_1.conv.weight",
-    "blk3d_1.conv.bias",
-    "blk3d_2.conv.weight",
-    "blk3d_2.conv.bias",
-    "blk3d_3.conv.weight",
-    "blk3d_3.conv.bias",
-    "blk3d_4.conv.weight",
-    "blk3d_4.conv.bias",
+decoder: [
+    "decoder.0.conv.weight",
+    "decoder.0.conv.bias",
+    "decoder.1.conv.weight",
+    "decoder.1.conv.bias",
+    "decoder.2.conv.weight",
+    "decoder.2.conv.bias",
+    "decoder.3.conv.weight",
+    "decoder.3.conv.bias",
+    "decoder.4.conv.weight",
+    "decoder.4.conv.bias",
+    "head_proj.weight",
+    "head_proj.bias"
 ]
 
-model_key = [
+embedding: [
     "encoder.patch_embed.proj.weight",
     "encoder.patch_embed.proj.bias",
     "encoder.blocks.0.norm1.weight",
@@ -195,51 +176,6 @@ model_key = [
     "encoder.fc_norm.bias",
     "encoder.head.weight",
     "encoder.head.bias",
-    "blk1.conv.weight",
-    "blk1.conv.bias",
-    "blk2.conv.weight",
-    "blk2.conv.bias",
-    "blk3.conv.weight",
-    "blk3.conv.bias",
-    "blk4.conv.weight",
-    "blk4.conv.bias",
-    "final2d.weight",
-    "final2d.bias",
-    "blk3d_1.conv.weight",
-    "blk3d_1.conv.bias",
-    "blk3d_2.conv.weight",
-    "blk3d_2.conv.bias",
-    "blk3d_3.conv.weight",
-    "blk3d_3.conv.bias",
-    "blk3d_4.conv.weight",
-    "blk3d_4.conv.bias",
-    "final3d.weight",
-    "final3d.bias",
+    "proj.0.weight",
+    "proj.0.bias"
 ]
-
-for key in model_key:
-    if key not in nerv3d_list:
-        del model_dict[key]
-
-encoder = deepCABAC.Encoder()
-
-interv = 0.1
-stepsize = 2 ** (-0.5 * 15)
-stepsize_other = 2 ** (-0.5 * 19)
-_lambda = 0.0
-
-# Just for model decoder (not included embedding mae)
-t0 = time.time()
-for name, param in tqdm(model_dict.items()):
-    param = param.cpu().numpy()
-    if ".weight" in name:
-        encoder.encodeWeightsRD(param, interv, stepsize, _lambda)
-    else:
-        encoder.encodeWeightsRD(param, interv, stepsize_other, _lambda)
-print(time.time() - t0)
-
-stream = encoder.finish().tobytes()
-print("Compressed size: {:2f} MB".format(1e-6 * len(stream)))
-
-# with open("data/beauty.bin", "wb") as f:
-#  f.write(stream)
