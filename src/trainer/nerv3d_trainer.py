@@ -125,7 +125,7 @@ class NeRV3DTrainer(BaseTrainer):
         self.model.eval()
 
         with torch.no_grad():
-            random_num = random.randint(1, len(self.dataset))
+            random_num = random.randint(10, len(self.dataset) - 10)
 
             valid_data = (
                 self.dataset[random_num].unsqueeze(0).permute(0, 4, 1, 2, 3).cuda()
