@@ -68,7 +68,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default=None,  # config/uvg-720p/3M/beauty_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml
+        default=None,
         type=str,
         help="config file path (default: None)",
     )
