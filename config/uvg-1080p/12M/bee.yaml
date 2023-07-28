@@ -71,4 +71,4 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "bee-1080p_12M-vmaev2"            
+  name: "bee-1080p_12M"            

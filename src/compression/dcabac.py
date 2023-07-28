@@ -5,8 +5,6 @@ import numpy as np
 from utils import load_yaml
 from tqdm import tqdm
 
-def extract_embedding(model):
-    
 
 def dcabac_encoder(
     model,

@@ -52,8 +52,20 @@ def main(config):
     # dcabac_encoder(model)
 
     # Decoder
-    decoder_model = dcabac_decoder(HNeRVMaeDecoder(), path="src/compression/beauty.bin")
+    feat_model = model(mode="embedding")
+    for batch_idx, data in enumerate(dataloader):
+        data = data.permute(0, 4, 1, 2, 3).cuda()
 
+        embedding = feat_model(data)
+        print(embedding.shape)
+
+    """"
+    decoder_model = dcabac_decoder(
+        HNeRVMaeDecoder(HNeRVMae()), bin_path="src/compression/beauty.bin"
+    )
+    print(model)
+    """
+    """
     for batch_idx, data in enumerate(dataloader):
         data = data.permute(0, 4, 1, 2, 3).cuda()
 
@@ -69,6 +81,7 @@ def main(config):
         print(loss, psnr_db)
 
         del pred, gt, output, data
+    """
 
 
 if __name__ == "__main__":
