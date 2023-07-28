@@ -5,13 +5,17 @@
 ######################################################################################################################
 ## 1080p - 12M
 
+# HoneyBee
+#python scripts/train.py --config config/uvg-1080p/12M/bee.yaml
+python scripts/test.py --config config/uvg-1080p/12M/bee.yaml --resume saved/models/bee-1080p_12M-vmaev2/300e.pth
+
 # Beauty
-python scripts/train.py --config config/uvg-1080p/12M/beauty.yaml
+python scripts/train.py --config config/uvg-1080p/12M/beauty.yaml --resume saved/models/beauty-1080p_12M/100e.pth
 python scripts/test.py --config config/uvg-1080p/12M/beauty.yaml --resume saved/models/beauty-1080p_12M/300e.pth
 
 # HoneyBee
-python scripts/train.py --config config/uvg-1080p/12M/bee.yaml
-python scripts/test.py --config config/uvg-1080p/12M/bee.yaml --resume saved/models/bee-1080p_12M/300e.pth
+#python scripts/train.py --config config/uvg-1080p/12M/bee.yaml
+# python scripts/test.py --config config/uvg-1080p/12M/bee.yaml --resume saved/models/bee-1080p_12M-vmaev2/300e.pth
 
 # Bosphorus
 python scripts/train.py --config config/uvg-1080p/12M/bosphorus.yaml
