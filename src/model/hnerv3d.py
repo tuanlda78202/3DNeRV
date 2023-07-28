@@ -172,6 +172,27 @@ class HNeRVMae(nn.Module):
         x = self.out(self.head_norm(self.head_proj(x)))
 
         return x.permute(0, 2, 1, 3, 4)
+    
+
+class HNeRVMaeEncoder(nn.Module):
+    def __init__(self, model: HNeRVMae):
+        super().__init__()
+        self.encoder = model.encoder
+        self.proj = model.proj
+
+        self.hidden_dim = model.hidden_dim
+        self.hidden_t = model.hidden_t
+        self.hidden_h = model.hidden_h
+        self.hidden_w = model.hidden_w
+
+    def forward(self, x: torch.Tensor):
+        x = self.encoder.forward_features(x)
+        B, _, _ = x.shape
+        x = x.reshape(B, self.hidden_dim, self.hidden_t, self.hidden_h, self.hidden_w)
+        
+        x = self.proj(x)
+
+        return x # embedding
 
 
 class HNeRVMaeDecoder(nn.Module):
