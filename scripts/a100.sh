@@ -18,7 +18,7 @@ python scripts/test.py --config config/uvg-1080p/12M/beauty.yaml --resume saved/
 # python scripts/test.py --config config/uvg-1080p/12M/bee.yaml --resume saved/models/bee-1080p_12M-vmaev2/300e.pth
 
 # Bosphorus
-python scripts/train.py --config config/uvg-1080p/12M/bosphorus.yaml
+python scripts/train.py --config config/uvg-1080p/12M/bosphorus.yaml --resume saved/models/bosphorus-1080p_12M/100e.pth
 python scripts/test.py --config config/uvg-1080p/12M/bosphorus.yaml --resume saved/models/bosphorus-1080p_12M/300e.pth
 
 # Jockey
