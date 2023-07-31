@@ -16,7 +16,8 @@ import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
 import src.evaluation.metric as module_metric
 from src.model.hnerv3d import *
-
+from utils import load_yaml
+from torchsummary import summary
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -48,16 +49,29 @@ def main(config):
     model.load_state_dict(checkpoint["state_dict"])
     model.eval()
 
-    # Encoder
-    # dcabac_encoder(model)
+    # DeepCABAC
+    model_dict = model.state_dict().copy()
+    ckpt_dict = load_yaml("src/compression/model.yaml")
+    decoder_dict, embedding_dict = ckpt_dict["decoder"], ckpt_dict["embedding"]
 
-    # Decoder
-    feat_model = model(mode="embedding")
+    for key in embedding_dict:
+        if key not in decoder_dict:
+            del model_dict[key]
+
+    decoder_model = HNeRVMaeDecoder(HNeRVMae())
+    # print(summary(decoder_model, (144, 16)))
+
+    dcabac(model, decoder_model)
+
+    feature_encoder = HNeRVMaeEncoder(model).cuda()
+    # DeepCABAC Decoder
+
     for batch_idx, data in enumerate(dataloader):
         data = data.permute(0, 4, 1, 2, 3).cuda()
 
-        embedding = feat_model(data)
-        print(embedding.shape)
+        feature = feature_encoder(data)
+
+        print(feature.shape)
 
     """"
     decoder_model = dcabac_decoder(

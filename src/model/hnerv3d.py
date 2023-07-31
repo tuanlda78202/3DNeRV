@@ -172,7 +172,7 @@ class HNeRVMae(nn.Module):
         x = self.out(self.head_norm(self.head_proj(x)))
 
         return x.permute(0, 2, 1, 3, 4)
-    
+
 
 class HNeRVMaeEncoder(nn.Module):
     def __init__(self, model: HNeRVMae):
@@ -189,10 +189,10 @@ class HNeRVMaeEncoder(nn.Module):
         x = self.encoder.forward_features(x)
         B, _, _ = x.shape
         x = x.reshape(B, self.hidden_dim, self.hidden_t, self.hidden_h, self.hidden_w)
-        
+
         x = self.proj(x)
 
-        return x # embedding
+        return x  # embedding
 
 
 class HNeRVMaeDecoder(nn.Module):
