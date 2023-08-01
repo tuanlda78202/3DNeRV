@@ -16,7 +16,6 @@ import src.model.hnerv3d as module_arch
 import src.evaluation.metric as module_metric
 from src.model.hnerv3d import *
 from src.compression.compression import *
-from collections import defaultdict
 
 np.random.seed(42)
 torch.manual_seed(42)
