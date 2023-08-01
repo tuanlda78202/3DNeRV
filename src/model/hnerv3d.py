@@ -189,7 +189,6 @@ class HNeRVMaeEncoder(nn.Module):
         x = self.encoder.forward_features(x)
         B, _, _ = x.shape
         x = x.reshape(B, self.hidden_dim, self.hidden_t, self.hidden_h, self.hidden_w)
-
         x = self.proj(x)
 
         return x  # embedding
@@ -208,7 +207,8 @@ class HNeRVMaeDecoder(nn.Module):
         self.embed_h, self.embed_w = model.embed_h, model.embed_w
 
     def forward(self, embedding: torch.Tensor):
-        B, _, _ = embedding.shape
+        B = embedding.shape[0]
+
         embedding = embedding.reshape(
             B, self.embed_dim, self.frame_interval, self.embed_h, self.embed_w
         )

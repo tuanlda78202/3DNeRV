@@ -11,13 +11,12 @@ import numpy as np
 from tqdm import tqdm
 import src.model as module_arch
 from config.parse_config import ConfigParser
-from src.compression.dcabac import *
 import src.dataset.build as module_data
 import src.model.hnerv3d as module_arch
 import src.evaluation.metric as module_metric
 from src.model.hnerv3d import *
-from utils import load_yaml
-from torchsummary import summary
+from utils import load_yaml, state
+import nnc
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -27,75 +26,105 @@ torch.backends.cudnn.deterministic = False
 
 
 def main(config):
+    # Config
     logger = config.get_logger("test")
+
+    name_wandb = "compress-" + str(config["trainer"]["name"])
+    batch_size = config["dataloader"]["args"]["batch_size"]
+    frame_interval = config["dataloader"]["args"]["frame_interval"]
+    compress = config["compression"]
 
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
-    del dataset
-
     # Model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
-    model = config.init_obj("arch", module_arch).to(device)
+    full_model = config.init_obj("arch", module_arch).to(device)
 
     # Criterion & Metrics
     metrics = config.init_ftn("metrics", module_metric)
 
     # CKPT
     logger.info("Loading checkpoint: {} ...".format(config.resume))
-    checkpoint = torch.load(config.resume)
-    model.load_state_dict(checkpoint["state_dict"])
-    model.eval()
+    full_model.load_state_dict(torch.load(config.resume)["state_dict"])
+    full_model.eval()
 
-    # DeepCABAC
-    model_dict = model.state_dict().copy()
-    ckpt_dict = load_yaml("src/compression/model.yaml")
-    decoder_dict, embedding_dict = ckpt_dict["decoder"], ckpt_dict["embedding"]
+    # Encoder
+    encoder_state = state(full_model, raw_decoder_path=compress["raw_decoder_path"])
+    encoder_model = HNeRVMaeEncoder(HNeRVMae())
+    encoder_model.load_state_dict(encoder_state)
+    encoder_model.eval()
 
-    for key in embedding_dict:
-        if key not in decoder_dict:
-            del model_dict[key]
-
-    decoder_model = HNeRVMaeDecoder(HNeRVMae())
-    # print(summary(decoder_model, (144, 16)))
-
-    dcabac(model, decoder_model)
-
-    feature_encoder = HNeRVMaeEncoder(model).cuda()
-    # DeepCABAC Decoder
-
-    for batch_idx, data in enumerate(dataloader):
-        data = data.permute(0, 4, 1, 2, 3).cuda()
-
-        feature = feature_encoder(data)
-
-        print(feature.shape)
-
-    """"
-    decoder_model = dcabac_decoder(
-        HNeRVMaeDecoder(HNeRVMae()), bin_path="src/compression/beauty.bin"
+    # Compression
+    nnc.compress_model(
+        compress["raw_decoder_path"],
+        bitstream_path=compress["stream_path"],
+        qp=compress["qp"],
     )
-    print(model)
-    """
-    """
-    for batch_idx, data in enumerate(dataloader):
-        data = data.permute(0, 4, 1, 2, 3).cuda()
+    nnc.decompress_model(
+        compress["stream_path"], model_path=compress["compressed_decoder_path"]
+    )
 
-        features = pretrained_mae.forward_features(data)
-        output = decoder_model(features)
+    # Decoder Reconstruct
+    decoder_model = HNeRVMaeDecoder(HNeRVMae())
+    decoder_model.load_state_dict(torch.load(compress["compressed_decoder_path"]))
+    decoder_model.eval()
 
-        # PSNR
-        pred = output
-        gt = data.permute(0, 2, 1, 3, 4)
+    # Training
+    wandb.init(project="nerv3d", entity="tuanlda78202", name=name_wandb, config=config)
 
-        loss = F.mse_loss(pred, gt)
-        psnr_db = psnr_batch(pred, gt, bs=BATCH_SIZE, fi=FRAME_INTERVAL)
-        print(loss, psnr_db)
+    tqdm_batch = tqdm(
+        iterable=dataloader,
+        desc="Compress UVG",
+        total=len(dataloader),
+        unit="it",
+    )
 
-        del pred, gt, output, data
-    """
+    with torch.no_grad():
+        psnr_video = []
+
+        for batch_idx, data in enumerate(tqdm_batch):
+            data = data.permute(0, 4, 1, 2, 3).cuda()
+
+            embedding = encoder_model(data)
+
+            pred = decoder_model(embedding)
+
+            data = data.permute(0, 2, 1, 3, 4)
+            pred = pred.permute(0, 2, 1, 3, 4)
+
+            psnr_batch = metrics(
+                pred, data, batch_size=batch_size, frame_interval=frame_interval
+            )
+
+            data = torch.mul(data, 255).type(torch.uint8)
+            pred = torch.mul(pred, 255).type(torch.uint8)
+
+            # pred = pred.reshape(batch_size, frame_interval, 3, 720, 1280)
+            # data = data.reshape(batch_size, frame_interval, 3, 720, 1280)
+
+            pred = pred.cpu().detach().numpy()
+            data = data.cpu().detach().numpy()
+
+            tqdm_batch.set_postfix(psnr=psnr_batch)
+
+            wandb.log(
+                {
+                    "psnr_batch": psnr_batch,
+                    "pred": wandb.Video(pred, fps=4, format="mp4"),
+                    "data": wandb.Video(data, fps=4, format="mp4"),
+                },
+            )
+
+            psnr_video.append(psnr_batch)
+
+            del pred, data
+
+        wandb.log({"psnr_video": sum(psnr_video) / len(psnr_video)})
+
+        wandb.finish()
 
 
 if __name__ == "__main__":
@@ -103,7 +132,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="src/compression/test.yaml",  # check.yaml
+        default="beauty.yaml",  # check.yaml
         type=str,
         help="config file path (default: None)",
     )
@@ -111,7 +140,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-r",
         "--resume",
-        default="../ckpt/720p/bee-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_ckpte300.pth",
+        default="../ckpt/720p/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_ckpte300.pth",
         type=str,
         help="path to latest checkpoint (default: None)",
     )
