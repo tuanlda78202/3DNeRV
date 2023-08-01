@@ -72,3 +72,13 @@ trainer:
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
   name: "bee-1080p_12M"            
+
+compression:
+  compress_dir: compressed/12M/bee/
+  embedding_path: "compressed/12M/bee/embedding.ncc"
+  raw_decoder_path: "compressed/12M/bee/raw_decoder.pt"
+  stream_path: "compressed/12M/bee/stream.nnc"
+  compressed_decoder_path: "compressed/12M/bee/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38  

@@ -74,3 +74,13 @@ trainer:
   entity: tuanlda78202
   name: "ready-1080p_6M"        
 
+compression:
+  compress_dir: compressed/6M/ready/
+  embedding_path: "compressed/6M/ready/embedding.ncc"
+  raw_decoder_path: "compressed/6M/ready/raw_decoder.pt"
+  stream_path: "compressed/6M/ready/stream.nnc"
+  compressed_decoder_path: "compressed/6M/ready/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38         
+

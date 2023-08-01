@@ -72,4 +72,14 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "yacht-1080p_6M"         
+  name: "yacht-1080p_6M"      
+
+compression:
+  compress_dir: compressed/6M/yacht/
+  embedding_path: "compressed/6M/yacht/embedding.ncc"
+  raw_decoder_path: "compressed/6M/yacht/raw_decoder.pt"
+  stream_path: "compressed/6M/yacht/stream.nnc"
+  compressed_decoder_path: "compressed/6M/yacht/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38      

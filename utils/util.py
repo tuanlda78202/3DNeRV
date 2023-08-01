@@ -51,27 +51,6 @@ def init_wandb(
     return wandb_lib.init(project=project, entity=entity, name=name, config=config)
 
 
-def state(full_model, raw_decoder_path):
-    # State Dict
-    encoder_state, decoder_state = (
-        full_model.state_dict().copy(),
-        full_model.state_dict().copy(),
-    )
-
-    ckpt_dict = load_yaml("config/model.yaml")
-    decoder_list, encoder_list = ckpt_dict["decoder"], ckpt_dict["encoder"]
-
-    for key in decoder_list:
-        del encoder_state[key]  # Encoder (VMAE + Adaptive3D -> Embedding)
-
-    for key in encoder_list:
-        del decoder_state[key]  # Decoder
-
-    torch.save(decoder_state, raw_decoder_path)
-
-    return encoder_state
-
-
 def inf_loop(data_loader):
     """wrapper function for endless data loader."""
     for loader in repeat(data_loader):

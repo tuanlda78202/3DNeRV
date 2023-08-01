@@ -76,11 +76,12 @@ trainer:
 
 compression:
   compress_dir: compressed/beauty-720p_3M/
-  embedding_path: "compressed/beauty-720p_3M/embedding.bin"
+  embedding_path: "compressed/beauty-720p_3M/embedding.ncc"
   raw_decoder_path: "compressed/beauty-720p_3M/raw_decoder.pt"
   stream_path: "compressed/beauty-720p_3M/stream.nnc"
   compressed_decoder_path: "compressed/beauty-720p_3M/compressed_decoder.pt"
 
-  qp: -24
+  model_qp: -38
+  embed_qp: -38
 
 

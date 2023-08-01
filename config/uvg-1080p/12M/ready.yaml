@@ -72,5 +72,15 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "ready-1080p_12M"         
+  name: "ready-1080p_12M"   
+
+compression:
+  compress_dir: compressed/12M/ready/
+  embedding_path: "compressed/12M/ready/embedding.ncc"
+  raw_decoder_path: "compressed/12M/ready/raw_decoder.pt"
+  stream_path: "compressed/12M/ready/stream.nnc"
+  compressed_decoder_path: "compressed/12M/ready/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38               
 

@@ -73,3 +73,13 @@ trainer:
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
   name: "yacht-1080p_3M"            
+
+compression:
+  compress_dir: compressed/3M/yacht/
+  embedding_path: "compressed/3M/yacht/embedding.ncc"
+  raw_decoder_path: "compressed/3M/yacht/raw_decoder.pt"
+  stream_path: "compressed/3M/yacht/stream.nnc"
+  compressed_decoder_path: "compressed/3M/yacht/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38     

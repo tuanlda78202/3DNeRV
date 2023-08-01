@@ -72,4 +72,14 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "bee-1080p_3M"            
+  name: "bee-1080p_3M"      
+
+compression:
+  compress_dir: compressed/3M/bee/
+  embedding_path: "compressed/3M/bee/embedding.ncc"
+  raw_decoder_path: "compressed/3M/bee/raw_decoder.pt"
+  stream_path: "compressed/3M/bee/stream.nnc"
+  compressed_decoder_path: "compressed/3M/bee/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38       

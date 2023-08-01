@@ -73,3 +73,13 @@ trainer:
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
   name: "jockey-1080p_6M"        
+
+compression:
+  compress_dir: compressed/6M/jockey/
+  embedding_path: "compressed/6M/jockey/embedding.ncc"
+  raw_decoder_path: "compressed/6M/jockey/raw_decoder.pt"
+  stream_path: "compressed/6M/jockey/stream.nnc"
+  compressed_decoder_path: "compressed/6M/jockey/compressed_decoder.pt"
+
+  model_qp: -38
+  embed_qp: -38 
