@@ -21,7 +21,7 @@ def vmae_pretrained(
                 break
         vmae.load_state_dict(ckt)
 
-        print("Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
+        # print("Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
 
     vmae.eval()
     vmae.to(device)
@@ -66,7 +66,7 @@ class NeRVBlock3D(nn.Module):
         return x
 
 
-class HNeRVMae(nn.Module):
+class NeRV3D(nn.Module):
     def __init__(
         self,
         img_size: Tuple = (720, 1280),
@@ -174,8 +174,8 @@ class HNeRVMae(nn.Module):
         return x.permute(0, 2, 1, 3, 4)
 
 
-class HNeRVMaeEncoder(nn.Module):
-    def __init__(self, model: HNeRVMae):
+class NeRV3DEncoder(nn.Module):
+    def __init__(self, model: NeRV3D):
         super().__init__()
         self.encoder = model.encoder
         self.proj = model.proj
@@ -194,8 +194,8 @@ class HNeRVMaeEncoder(nn.Module):
         return x  # embedding
 
 
-class HNeRVMaeDecoder(nn.Module):
-    def __init__(self, model: HNeRVMae):
+class NeRV3DDecoder(nn.Module):
+    def __init__(self, model: NeRV3D):
         super().__init__()
         self.decoder = model.decoder
         self.head_proj = model.head_proj

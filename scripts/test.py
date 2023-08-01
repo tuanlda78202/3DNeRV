@@ -13,7 +13,7 @@ import src.dataset as module_data
 import src.model as module_arch
 from config.parse_config import ConfigParser
 import src.dataset.build as module_data
-import src.model.hnerv3d as module_arch
+import src.model.nerv3d as module_arch
 import src.evaluation.metric as module_metric
 
 np.random.seed(42)

@@ -16,7 +16,7 @@ from torchsummary import summary
 from ptflops import get_model_complexity_info
 from config.parse_config import ConfigParser
 import src.dataset.build as module_data
-import src.model.hnerv3d as module_arch
+import src.model.nerv3d as module_arch
 import src.evaluation.loss as module_loss
 import src.evaluation.metric as module_metric
 from src.trainer.nerv3d_trainer import NeRV3DTrainer

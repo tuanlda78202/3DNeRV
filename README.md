@@ -37,7 +37,7 @@ nerv3d/
   │   │    ├── loss.py
   │   │    └── metrics.py  
   │   ├── model/ 
-  │   │    ├── hnerv3d.py
+  │   │    ├── nerv3d.py
   │   │    └── macs.py  
   │   └── trainer/ 
   │        ├── base_trainer.py
@@ -107,7 +107,7 @@ metrics:
     frame_interval: 4                               # MEMORY
 
 arch:
-  type: HNeRVMae
+  type: NeRV3D
 
   args:
     img_size: [720, 1280] 

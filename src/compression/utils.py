@@ -1,7 +1,7 @@
 import torch
 import nnc
 from utils import load_yaml
-from src.model.hnerv3d import *
+from src.model.nerv3d import *
 from collections import defaultdict
 from tqdm import tqdm
 
@@ -23,7 +23,7 @@ def state(full_model, raw_decoder_path):
 
     torch.save(decoder_state, raw_decoder_path)
 
-    encoder_model = HNeRVMaeEncoder(HNeRVMae())
+    encoder_model = NeRV3DEncoder(NeRV3D())
     encoder_model.load_state_dict(encoder_state)
     encoder_model.eval()
 
@@ -36,7 +36,7 @@ def dcabac_compress(raw_decoder_path, stream_path, qp, compressed_decoder_path):
     )
     nnc.decompress_model(stream_path, model_path=compressed_decoder_path)
 
-    decoder_model = HNeRVMaeDecoder(HNeRVMae())
+    decoder_model = NeRV3DDecoder(NeRV3D())
     decoder_model.load_state_dict(torch.load(compressed_decoder_path))
     decoder_model.eval()
 

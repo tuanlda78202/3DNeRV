@@ -1,9 +1,9 @@
-from src.model.hnerv3d import HNeRVMae
+from src.model.nerv3d import NeRV3D
 import torch
 from ptflops import get_model_complexity_info
 
 with torch.cuda.device(0):
-    model = HNeRVMae(
+    model = NeRV3D(
         img_size=(720, 1280),
         frame_interval=4,
         embed_dim=8,

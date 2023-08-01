@@ -18,7 +18,7 @@ metrics:
     frame_interval: 4                               # MEMORY
 
 arch:
-  type: HNeRVMae
+  type: NeRV3D
 
   args:
     img_size: [1080, 1920] 

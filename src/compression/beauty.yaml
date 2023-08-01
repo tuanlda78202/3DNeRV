@@ -18,7 +18,7 @@ metrics:
     frame_interval: 4                               # MEMORY
 
 arch:
-  type: HNeRVMae
+  type: NeRV3D
 
   args:
     img_size: [720, 1280] 
@@ -68,7 +68,7 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "online"
+  mode: "offline"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202

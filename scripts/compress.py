@@ -12,10 +12,10 @@ from tqdm import tqdm
 import src.model as module_arch
 from config.parse_config import ConfigParser
 import src.dataset.build as module_data
-import src.model.hnerv3d as module_arch
+import src.model.nerv3d as module_arch
 import src.evaluation.metric as module_metric
-from src.model.hnerv3d import *
-from src.compression.compression import *
+from src.model.nerv3d import *
+from src.compression.utils import *
 
 np.random.seed(42)
 torch.manual_seed(42)
