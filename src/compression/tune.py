@@ -30,7 +30,6 @@ def main(config):
     logger = config.get_logger("test")
 
     # GLOBAL VARIABLES
-    NAME = "compress-" + str(config["trainer"]["name"])
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]
     IMG_SIZE = config["arch"]["args"]["img_size"]
@@ -56,74 +55,71 @@ def main(config):
     # EED
     encoder_model = state(full_model, compress["raw_decoder_path"])
 
-    embedding, embed_bit = embedding_compress(
-        dataloader, encoder_model, compress["embedding_path"], compress["embed_qp"]
-    )
+    for num in range(-50, -38, 2):
+        NAME = "tune-qp-" + str(config["trainer"]["name"] + "-" + str(num))
 
-    decoder_model, decoder_bit = dcabac_compress(
-        compress["raw_decoder_path"],
-        compress["stream_path"],
-        compress["model_qp"],
-        compress["compressed_decoder_path"],
-    )
+        embedding, embed_bit = embedding_compress(
+            dataloader, encoder_model, compress["embedding_path"], num
+        )
 
-    # Training
-    wandb.init(
-        project="nerv3d", entity="tuanlda78202", name=NAME, mode=MODE, config=config
-    )
+        decoder_model, decoder_bit = dcabac_compress(
+            compress["raw_decoder_path"],
+            compress["stream_path"],
+            num,
+            compress["compressed_decoder_path"],
+        )
 
-    tqdm_batch = tqdm(
-        iterable=dataloader,
-        desc="Compress UVG",
-        total=len(dataloader),
-        unit="it",
-    )
+        # Training
+        wandb.init(
+            project="nerv3d",
+            entity="tuanlda78202",
+            name=NAME,
+            mode="online",
+            config=config,
+        )
 
-    with torch.no_grad():
-        psnr_video = []
+        tqdm_batch = tqdm(
+            iterable=dataloader,
+            desc="Compress UVG",
+            total=len(dataloader),
+            unit="it",
+        )
 
-        for batch_idx, data in enumerate(tqdm_batch):
-            data = data.permute(0, 4, 1, 2, 3).cuda()
+        with torch.no_grad():
+            psnr_video = []
 
-            embed = torch.from_numpy(embedding[str(batch_idx)]).cuda()
-            pred = decoder_model(embed)
+            for batch_idx, data in enumerate(tqdm_batch):
+                data = data.permute(0, 4, 1, 2, 3).cuda()
 
-            data = data.permute(0, 2, 1, 3, 4)
-            pred = pred.permute(0, 2, 1, 3, 4)
+                embed = torch.from_numpy(embedding[str(batch_idx)]).cuda()
+                pred = decoder_model(embed)
 
-            psnr_batch = metrics(pred, data, batch_size=BS, frame_interval=FI)
+                data = data.permute(0, 2, 1, 3, 4)
+                pred = pred.permute(0, 2, 1, 3, 4)
 
-            data = torch.mul(data, 255).type(torch.uint8)
-            pred = torch.mul(pred, 255).type(torch.uint8)
+                psnr_batch = metrics(pred, data, batch_size=BS, frame_interval=FI)
 
-            tqdm_batch.set_postfix(psnr=psnr_batch)
+                data = torch.mul(data, 255).type(torch.uint8)
+                pred = torch.mul(pred, 255).type(torch.uint8)
+
+                tqdm_batch.set_postfix(psnr=psnr_batch)
+
+                wandb.log({"psnr_batch": psnr_batch})
+
+                psnr_video.append(psnr_batch)
+
+                del pred, data
 
             wandb.log(
                 {
-                    "psnr_batch": psnr_batch,
-                    "pred": wandb.Video(
-                        pred.cpu().detach().numpy(), fps=4, format="mp4"
-                    ),
-                    "data": wandb.Video(
-                        data.cpu().detach().numpy(), fps=4, format="mp4"
-                    ),
-                },
+                    "avg_psnr": sum(psnr_video) / len(psnr_video),
+                    "bpp": (embed_bit + decoder_bit)
+                    * 8
+                    / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
+                }
             )
 
-            psnr_video.append(psnr_batch)
-
-            del pred, data
-
-        wandb.log(
-            {
-                "PSNR": sum(psnr_video) / len(psnr_video),
-                "BPP": (embed_bit + decoder_bit)
-                * 8
-                / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
-            }
-        )
-
-        wandb.finish()
+            wandb.finish()
 
 
 if __name__ == "__main__":

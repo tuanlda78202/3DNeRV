@@ -3,22 +3,22 @@ dataloader:
 
   args:
     name: "uvghd30"
-    data_path: "data/beauty.mp4"                       
+    data_path: "data/ready.mp4"                       
     crop_size: [720, 1280]                             
-    num_workers: 6                                    # CPU
+    num_workers: 6                                     # CPU
 
-    batch_size: 1                                      # MEMORY
+    batch_size: 2                                      # MEMORY
     frame_interval: 4                                  # MEMORY
 
 metrics:
   type: psnr_batch
 
   args:
-    batch_size: 1                                   # MEMORY  
+    batch_size: 2                                   # MEMORY  
     frame_interval: 4                               # MEMORY
 
 arch:
-  type: NeRV3D
+  type: HNeRVMae
 
   args:
     img_size: [720, 1280] 
@@ -68,11 +68,11 @@ trainer:
   verbosity: 1
 
   visual_tool: wandb
-  mode: "offline"
+  mode: "online"
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "demo"
+  name: "demo"            
 
 compression:
   compress_dir: compression/demo/
@@ -83,5 +83,3 @@ compression:
 
   model_qp: -38
   embed_qp: -38
-
-
