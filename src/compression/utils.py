@@ -30,9 +30,12 @@ def state(full_model, raw_decoder_path):
     return encoder_model
 
 
-def dcabac_compress(raw_decoder_path, stream_path, qp, compressed_decoder_path):
+def dcabac_compress(raw_decoder_path, stream_path, mqp, compressed_decoder_path):
     bit_stream = nnc.compress_model(
-        raw_decoder_path, bitstream_path=stream_path, qp=qp, return_bitstream=True
+        raw_decoder_path,
+        bitstream_path=stream_path,
+        qp=int(mqp),
+        return_bitstream=True,
     )
     nnc.decompress_model(stream_path, model_path=compressed_decoder_path)
 
@@ -43,7 +46,7 @@ def dcabac_compress(raw_decoder_path, stream_path, qp, compressed_decoder_path):
     return decoder_model, len(bit_stream)
 
 
-def embedding_compress(dataloader, encoder_model, embedding_path, qp):
+def embedding_compress(dataloader, encoder_model, embedding_path, eqp):
     embedding = defaultdict()
 
     tqdm_batch = tqdm(
@@ -61,7 +64,7 @@ def embedding_compress(dataloader, encoder_model, embedding_path, qp):
     bit_stream = nnc.compress(
         parameter_dict=embedding,
         bitstream_path=embedding_path,
-        qp=qp,
+        qp=eqp,
         return_bitstream=True,
     )
 

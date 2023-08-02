@@ -81,7 +81,7 @@ compression:
   stream_path: "compression/testing/compressed_decoder.nnc"
   compressed_decoder_path: "compression/testing/compressed_decoder_converted.pt"
 
-  model_qp: -24
-  embed_qp: -24
+  model_qp: -38
+  embed_qp: -38
 
 

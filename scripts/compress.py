@@ -4,6 +4,7 @@ import os
 sys.path.append(os.getcwd())
 os.environ["WANDB_DIR"] = "./saved"
 
+import collections
 import argparse
 import torch
 import wandb
@@ -127,6 +128,7 @@ def main(config):
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="Inference with NeRV3D")
+
     args.add_argument(
         "-c",
         "--config",
@@ -142,14 +144,22 @@ if __name__ == "__main__":
         type=str,
         help="path to latest checkpoint (default: None)",
     )
-    args.add_argument(
-        "-d",
-        "--device",
-        default=None,
-        type=str,
-        help="indices of GPUs to enable (default: all)",
-    )
 
-    config = ConfigParser.from_args(args)
+    CustomArgs = collections.namedtuple("CustomArgs", "flags type target")
+
+    options = [
+        CustomArgs(
+            ["-m", "--mqp"],
+            type=int,
+            target="compression;model_qp",
+        ),
+        CustomArgs(
+            ["-e", "--eqp"],
+            type=int,
+            target="compression;embed_qp",
+        ),
+    ]
+
+    config = ConfigParser.from_args(args, options)
 
     main(config)
