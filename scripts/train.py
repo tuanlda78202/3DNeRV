@@ -63,7 +63,7 @@ def main(config):
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="NeRV3D Training")
+    args = argparse.ArgumentParser(description="Training NeRV3D")
 
     args.add_argument(
         "-c",
@@ -92,13 +92,7 @@ if __name__ == "__main__":
     CustomArgs = collections.namedtuple("CustomArgs", "flags type target")
 
     options = [
-        CustomArgs(
-            ["--fi", "--frame_interval"], type=int, target="dataset;args;frame_interval"
-        ),
-        CustomArgs(
-            ["--bs", "--batch_size"], type=int, target="dataloader;args;batch_size"
-        ),
-        CustomArgs(["--ep", "--epochs"], type=int, target="trainer;epochs"),
+        CustomArgs(["-vp", "--valid_period"], type=int, target="trainer;valid_period")
     ]
 
     config = ConfigParser.from_args(args, options)

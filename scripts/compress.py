@@ -30,13 +30,15 @@ def main(config):
     logger = config.get_logger("test")
 
     # GLOBAL VARIABLES
-    NAME = "compress-" + str(config["trainer"]["name"])
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]
     IMG_SIZE = config["arch"]["args"]["img_size"]
     MODE = config["trainer"]["mode"]
     DIR = config["compression"]["compress_dir"]
     compress = config["compression"]
+    NAME = (
+        "compress_qp" + str(compress["model_qp"]) + "_" + str(config["trainer"]["name"])
+    )
     make_dir(DIR)
 
     # Dataset & DataLoader
@@ -127,7 +129,7 @@ def main(config):
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="Inference with NeRV3D")
+    args = argparse.ArgumentParser(description="NeRV3D Compression")
 
     args.add_argument(
         "-c",

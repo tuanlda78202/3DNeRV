@@ -60,7 +60,7 @@ trainer:
   resume: False 
   
   epochs: 300
-  valid_period: 10
+  valid_period: 100
 
   save_dir: saved/
   save_period: 100
