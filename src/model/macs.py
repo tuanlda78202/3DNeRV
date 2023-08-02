@@ -35,7 +35,8 @@ with torch.cuda.device(0):
     print("{:<30}  {:<8}".format("Number of parameters 3M model: ", params_3m))
 
     wandb.log({"macs_3m": macs_3m, "params_3m": params_3m})
-    #############################################################################
+
+    ###############################################################################
     model_6m = NeRV3D(
         img_size=(1080, 1920),
         frame_interval=4,
@@ -59,7 +60,8 @@ with torch.cuda.device(0):
     print("{:<30}  {:<8}".format("Number of parameters 6M model: ", params_6m))
 
     wandb.log({"macs_6m": macs_6m, "params_6m": params_6m})
-    #############################################################################
+
+    ###############################################################################
     model_12m = NeRV3D(
         img_size=(1080, 1920),
         frame_interval=4,

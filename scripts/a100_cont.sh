@@ -20,4 +20,4 @@ python scripts/test.py --config config/uvg-1080p/6M/jockey.yaml --resume saved/m
 
 ## NNC Compression (scripts/compress-uvg-1080p)
 
-## MS-SSIM evaluation
+## MS-SSIM evaluation (run all exp video rescontruction for re-testing)
