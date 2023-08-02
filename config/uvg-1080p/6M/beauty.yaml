@@ -75,11 +75,11 @@ trainer:
   name: "beauty-1080p_6M"            
 
 compression:
-  compress_dir: compressed/6M/beauty/
-  embedding_path: "compressed/6M/beauty/embedding.ncc"
-  raw_decoder_path: "compressed/6M/beauty/raw_decoder.pt"
-  stream_path: "compressed/6M/beauty/stream.nnc"
-  compressed_decoder_path: "compressed/6M/beauty/compressed_decoder.pt"
+  compress_dir: compression/6M/beauty/
+  embedding_path: "compression/6M/beauty/compressed_embedding.ncc"
+  raw_decoder_path: "compression/6M/beauty/raw_decoder.pt"
+  stream_path: "compression/6M/beauty/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/6M/beauty/compressed_decoder_converted.pt"
 
   model_qp: -38
   embed_qp: -38          

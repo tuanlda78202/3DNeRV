@@ -72,16 +72,16 @@ trainer:
   project: nerv3d
   api_key_file: "./config/api/tuanlda78202"
   entity: tuanlda78202
-  name: "beauty-720p_3M"
+  name: "testing"
 
 compression:
-  compress_dir: compressed/beauty-720p_3M/
-  embedding_path: "compressed/beauty-720p_3M/embedding.ncc"
-  raw_decoder_path: "compressed/beauty-720p_3M/raw_decoder.pt"
-  stream_path: "compressed/beauty-720p_3M/stream.nnc"
-  compressed_decoder_path: "compressed/beauty-720p_3M/compressed_decoder.pt"
+  compress_dir: compression/testing/
+  embedding_path: "compression/testing/compressed_embedding.ncc"
+  raw_decoder_path: "compression/testing/raw_decoder.pt"
+  stream_path: "compression/testing/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/testing/compressed_decoder_converted.pt"
 
-  model_qp: -38
-  embed_qp: -38
+  model_qp: -24
+  embed_qp: -24
 
 

@@ -75,11 +75,11 @@ trainer:
   name: "bosphorus-1080p_12M"      
 
 compression:
-  compress_dir: compressed/12M/bosphorus/
-  embedding_path: "compressed/12M/bosphorus/embedding.ncc"
-  raw_decoder_path: "compressed/12M/bosphorus/raw_decoder.pt"
-  stream_path: "compressed/12M/bosphorus/stream.nnc"
-  compressed_decoder_path: "compressed/12M/bosphorus/compressed_decoder.pt"
+  compress_dir: compression/12M/bosphorus/
+  embedding_path: "compression/12M/bosphorus/compressed_embedding.ncc"
+  raw_decoder_path: "compression/12M/bosphorus/raw_decoder.pt"
+  stream_path: "compression/12M/bosphorus/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/12M/bosphorus/compressed_decoder_converted.pt"
 
   model_qp: -38
-  embed_qp: -38  
+  embed_qp: -38       

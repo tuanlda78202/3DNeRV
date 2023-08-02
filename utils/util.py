@@ -55,3 +55,10 @@ def inf_loop(data_loader):
     """wrapper function for endless data loader."""
     for loader in repeat(data_loader):
         yield from loader
+
+
+def make_dir(path):
+    isExist = os.path.exists(path)
+
+    if not isExist:
+        os.makedirs(path)

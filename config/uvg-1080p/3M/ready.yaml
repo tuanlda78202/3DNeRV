@@ -75,12 +75,12 @@ trainer:
   name: "ready-1080p_3M"
 
 compression:
-  compress_dir: compressed/3M/ready/
-  embedding_path: "compressed/3M/ready/embedding.ncc"
-  raw_decoder_path: "compressed/3M/ready/raw_decoder.pt"
-  stream_path: "compressed/3M/ready/stream.nnc"
-  compressed_decoder_path: "compressed/3M/ready/compressed_decoder.pt"
+  compress_dir: compression/3M/ready/
+  embedding_path: "compression/3M/ready/compressed_embedding.ncc"
+  raw_decoder_path: "compression/3M/ready/raw_decoder.pt"
+  stream_path: "compression/3M/ready/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/3M/ready/compressed_decoder_converted.pt"
 
   model_qp: -38
-  embed_qp: -38         
+  embed_qp: -38     
 

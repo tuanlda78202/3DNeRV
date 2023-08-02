@@ -74,11 +74,11 @@ trainer:
   name: "bee-1080p_12M"            
 
 compression:
-  compress_dir: compressed/12M/bee/
-  embedding_path: "compressed/12M/bee/embedding.ncc"
-  raw_decoder_path: "compressed/12M/bee/raw_decoder.pt"
-  stream_path: "compressed/12M/bee/stream.nnc"
-  compressed_decoder_path: "compressed/12M/bee/compressed_decoder.pt"
+  compress_dir: compression/12M/bee/
+  embedding_path: "compression/12M/bee/compressed_embedding.ncc"
+  raw_decoder_path: "compression/12M/bee/raw_decoder.pt"
+  stream_path: "compression/12M/bee/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/12M/bee/compressed_decoder_converted.pt"
 
   model_qp: -38
-  embed_qp: -38  
+  embed_qp: -38       

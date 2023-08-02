@@ -16,6 +16,7 @@ import src.model.nerv3d as module_arch
 import src.evaluation.metric as module_metric
 from src.model.nerv3d import *
 from src.compression.utils import *
+from utils.util import make_dir
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -27,11 +28,15 @@ torch.backends.cudnn.deterministic = False
 def main(config):
     logger = config.get_logger("test")
 
+    # GLOBAL VARIABLES
     NAME = "compress-" + str(config["trainer"]["name"])
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]
     IMG_SIZE = config["arch"]["args"]["img_size"]
+    MODE = config["trainer"]["mode"]
+    DIR = config["compression"]["compress_dir"]
     compress = config["compression"]
+    make_dir(DIR)
 
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
@@ -62,7 +67,9 @@ def main(config):
     )
 
     # Training
-    wandb.init(project="nerv3d", entity="tuanlda78202", name=NAME, config=config)
+    wandb.init(
+        project="nerv3d", entity="tuanlda78202", name=NAME, mode=MODE, config=config
+    )
 
     tqdm_batch = tqdm(
         iterable=dataloader,

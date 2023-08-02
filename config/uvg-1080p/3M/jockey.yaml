@@ -75,11 +75,11 @@ trainer:
   name: "jockey-1080p_3M"            
 
 compression:
-  compress_dir: compressed/3M/jockey/
-  embedding_path: "compressed/3M/jockey/embedding.ncc"
-  raw_decoder_path: "compressed/3M/jockey/raw_decoder.pt"
-  stream_path: "compressed/3M/jockey/stream.nnc"
-  compressed_decoder_path: "compressed/3M/jockey/compressed_decoder.pt"
+  compress_dir: compression/3M/jockey/
+  embedding_path: "compression/3M/jockey/compressed_embedding.ncc"
+  raw_decoder_path: "compression/3M/jockey/raw_decoder.pt"
+  stream_path: "compression/3M/jockey/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/3M/jockey/compressed_decoder_converted.pt"
 
   model_qp: -38
-  embed_qp: -38  
+  embed_qp: -38       
