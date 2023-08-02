@@ -56,7 +56,7 @@ def main(config):
     encoder_model = state(full_model, compress["raw_decoder_path"])
 
     for num in range(-50, -38, 2):
-        NAME = "tune-qp-" + str(config["trainer"]["name"] + "-" + str(num))
+        NAME = "tune_qp-" + str(config["trainer"]["name"] + "_" + str(num))
 
         embedding, embed_bit = embedding_compress(
             dataloader, encoder_model, compress["embedding_path"], num

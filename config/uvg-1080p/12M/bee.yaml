@@ -10,12 +10,18 @@ dataloader:
     batch_size: 1                                      # MEMORY
     frame_interval: 4                                  # MEMORY
 
-metrics:
+psnr:
   type: psnr_batch
 
   args:
     batch_size: 1                                   # MEMORY  
     frame_interval: 4                               # MEMORY
+
+msssim:
+  type: msssim_batch
+
+  args:
+    batch_size: 1                                   # MEMORY  
 
 arch:
   type: NeRV3D

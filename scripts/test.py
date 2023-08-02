@@ -35,20 +35,15 @@ def main(config):
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
-    # del dataset
-
     # Model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
     model = config.init_obj("arch", module_arch).to(device)
+    model.load_state_dict(torch.load(config.resume)["state_dict"])
 
-    # CKPT
-    logger.info("Loading checkpoint: {} ...".format(config.resume))
-    checkpoint = torch.load(config.resume)
-    model.load_state_dict(checkpoint["state_dict"])
-
-    # Criterion & Metrics
-    metrics = config.init_ftn("metrics", module_metric)
+    # Metrics
+    psnr_metric = config.init_ftn("psnr", module_metric)
+    msssim_metric = config.init_ftn("msssim", module_metric)
 
     model.eval()
 
@@ -62,41 +57,48 @@ def main(config):
     )
 
     with torch.no_grad():
-        psnr_video = []
+        psnr_video, msssim_video = [], []
         for batch_idx, data in enumerate(tqdm_batch):
             data = data.permute(0, 4, 1, 2, 3).cuda()
             pred = model(data)
 
-            # PSNR
+            # PSNR & MS-SSIM
             data = data.permute(0, 2, 1, 3, 4)
-            psnr_batch = metrics(
+
+            psnr_batch = psnr_metric(
                 pred, data, batch_size=batch_size, frame_interval=frame_interval
             )
+
+            msssim_batch = msssim_metric(pred, data, batch_size=batch_size)
 
             data = torch.mul(data, 255).type(torch.uint8)
             pred = torch.mul(pred, 255).type(torch.uint8)
 
-            pred = pred.reshape(batch_size, frame_interval, 3, 720, 1280)
-            data = data.reshape(batch_size, frame_interval, 3, 720, 1280)
-
             pred = pred.cpu().detach().numpy()
             data = data.cpu().detach().numpy()
 
-            tqdm_batch.set_postfix(psnr=psnr_batch)
+            tqdm_batch.set_postfix(psnr=psnr_batch, msssim=msssim_batch)
 
             wandb.log(
                 {
                     "psnr_batch": psnr_batch,
+                    "msssim_batch": msssim_batch,
                     "pred": wandb.Video(pred, fps=4, format="mp4"),
                     "data": wandb.Video(data, fps=4, format="mp4"),
                 },
             )
 
             psnr_video.append(psnr_batch)
+            msssim_video.append(msssim_batch)
 
             # del pred, data
 
-        wandb.log({"psnr_video": sum(psnr_video) / len(psnr_video)})
+        wandb.log(
+            {
+                "psnr_video": sum(psnr_video) / len(psnr_video),
+                "msssim_video": sum(msssim_video) / len(msssim_video),
+            }
+        )
 
         wandb.finish()
 
@@ -106,7 +108,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default=None,  # "config/uvg-720p/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e.yaml",
+        default=None,
         type=str,
         help="config file path (default: None)",
     )
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-r",
         "--resume",
-        default=None,  # "../ckpt/720p/beauty-3M_vmaev2-adaptive3d-nervb3d_b2xf4-cosinelr-20k_300e-ckpte300.pth",
+        default=None,
         type=str,
         help="path to latest checkpoint (default: None)",
     )

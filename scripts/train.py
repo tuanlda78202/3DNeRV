@@ -40,7 +40,7 @@ def main(config):
 
     # Criterion & Metrics
     criterion = config.init_ftn("loss", module_loss)
-    metrics = config.init_ftn("metrics", module_metric)
+    metrics = config.init_ftn("psnr", module_metric)
 
     # Optimizer
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())

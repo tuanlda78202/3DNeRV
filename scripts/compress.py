@@ -53,7 +53,8 @@ def main(config):
     full_model.eval()
 
     # Metrics
-    metrics = config.init_ftn("metrics", module_metric)
+    psnr_metric = config.init_ftn("psnr", module_metric)
+    msssim_metric = config.init_ftn("msssim", module_metric)
 
     # EED
     encoder_model = state(full_model, compress["raw_decoder_path"])
@@ -82,7 +83,7 @@ def main(config):
     )
 
     with torch.no_grad():
-        psnr_video = []
+        psnr_video, msssim_video = [], []
 
         for batch_idx, data in enumerate(tqdm_batch):
             data = data.permute(0, 4, 1, 2, 3).cuda()
@@ -93,7 +94,8 @@ def main(config):
             data = data.permute(0, 2, 1, 3, 4)
             pred = pred.permute(0, 2, 1, 3, 4)
 
-            psnr_batch = metrics(pred, data, batch_size=BS, frame_interval=FI)
+            psnr_batch = psnr_metric(pred, data, batch_size=BS, frame_interval=FI)
+            msssim_batch = msssim_metric(pred, data, batch_size=BS)
 
             data = torch.mul(data, 255).type(torch.uint8)
             pred = torch.mul(pred, 255).type(torch.uint8)
@@ -113,13 +115,15 @@ def main(config):
             )
 
             psnr_video.append(psnr_batch)
+            msssim_video.append(msssim_batch)
 
             del pred, data
 
         wandb.log(
             {
-                "PSNR": sum(psnr_video) / len(psnr_video),
-                "BPP": (embed_bit + decoder_bit)
+                "psnr": sum(psnr_video) / len(psnr_video),
+                "msssim": sum(msssim_video) / len(msssim_video),
+                "bpp": (embed_bit + decoder_bit)
                 * 8
                 / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
             }
