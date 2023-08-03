@@ -102,17 +102,7 @@ def main(config):
 
             tqdm_batch.set_postfix(psnr=psnr_batch)
 
-            wandb.log(
-                {
-                    "psnr_batch": psnr_batch,
-                    "pred": wandb.Video(
-                        pred.cpu().detach().numpy(), fps=4, format="mp4"
-                    ),
-                    "data": wandb.Video(
-                        data.cpu().detach().numpy(), fps=4, format="mp4"
-                    ),
-                },
-            )
+            wandb.log({"psnr_batch": psnr_batch, "msssim_batch": msssim_batch})
 
             psnr_video.append(psnr_batch)
             msssim_video.append(msssim_batch)

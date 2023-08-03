@@ -69,14 +69,14 @@ class NeRVBlock3D(nn.Module):
 class NeRV3D(nn.Module):
     def __init__(
         self,
-        img_size: Tuple = (720, 1280),
+        img_size: Tuple = (1080, 1920),
         frame_interval: int = 4,
         embed_dim: int = 8,
         embed_size: Tuple = (9, 16),
-        decode_dim: int = 314,
+        decode_dim: int = 305,  # 440 # 634
         lower_kernel: int = 1,
         upper_kernel: int = 5,
-        scales: List = [5, 4, 2, 2],
+        scales: List = [5, 4, 3, 2],
         reduce: float = 3,
         lower_width: int = 6,
         bias: bool = True,
