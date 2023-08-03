@@ -16,6 +16,10 @@ python scripts/test.py --config config/uvg-1080p/6M/bosphorus.yaml --resume save
 python scripts/train.py --config config/uvg-1080p/6M/jockey.yaml
 python scripts/test.py --config config/uvg-1080p/6M/jockey.yaml --resume saved/models/jockey-1080p_6M/300e.pth
 
+# Bosphorus 3M
+python scripts/train.py --config config/uvg-1080p/3M/bosphorus.yaml
+python scripts/test.py --config config/uvg-1080p/3M/bosphorus.yaml --resume saved/models/bosphorus-1080p_3M/300e.pth
+
 ## 7 video 3M (scripts/train-uvg-1080p/3m_300e.sh)
 
 ## NNC Compression (scripts/compress-uvg-1080p)

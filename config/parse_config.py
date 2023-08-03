@@ -44,9 +44,6 @@ class ConfigParser:
         if not isinstance(args, tuple):
             args = args.parse_args()
 
-        if args.device == "cuda":
-            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
         if args.resume is not None:
             resume = Path(args.resume)
             cfg_fname = resume.parent / "config.yaml"

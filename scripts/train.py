@@ -1,5 +1,6 @@
 import sys
 import os
+
 import time
 import numpy as np
 import torch
@@ -79,14 +80,6 @@ if __name__ == "__main__":
         default=None,
         type=str,
         help="path to latest checkpoint (default: None)",
-    )
-
-    args.add_argument(
-        "-d",
-        "--device",
-        default="cuda",
-        type=str,
-        help="type of device",
     )
 
     CustomArgs = collections.namedtuple("CustomArgs", "flags type target")
