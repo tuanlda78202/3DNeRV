@@ -33,6 +33,7 @@ def main(config):
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]
     IMG_SIZE = config["arch"]["args"]["img_size"]
+    DECODER_DIM = config["arch"]["args"]["decode_dim"]
     MODE = config["trainer"]["mode"]
     DIR = config["compression"]["compress_dir"]
     compress = config["compression"]
@@ -68,6 +69,7 @@ def main(config):
         compress["stream_path"],
         compress["model_qp"],
         compress["compressed_decoder_path"],
+        decoder_dim=DECODER_DIM,
     )
 
     # Training

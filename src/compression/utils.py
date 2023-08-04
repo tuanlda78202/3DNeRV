@@ -30,7 +30,9 @@ def state(full_model, raw_decoder_path):
     return encoder_model
 
 
-def dcabac_compress(raw_decoder_path, stream_path, mqp, compressed_decoder_path):
+def dcabac_compress(
+    raw_decoder_path, stream_path, mqp, compressed_decoder_path, decoder_dim
+):
     bit_stream = nnc.compress_model(
         raw_decoder_path,
         bitstream_path=stream_path,
@@ -39,7 +41,7 @@ def dcabac_compress(raw_decoder_path, stream_path, mqp, compressed_decoder_path)
     )
     nnc.decompress_model(stream_path, model_path=compressed_decoder_path)
 
-    decoder_model = NeRV3DDecoder(NeRV3D())
+    decoder_model = NeRV3DDecoder(NeRV3D(decode_dim=decoder_dim))
     decoder_model.load_state_dict(torch.load(compressed_decoder_path))
     decoder_model.eval()
 
