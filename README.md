@@ -1,12 +1,26 @@
-# 3DNeRV
-- [3DNeRV](#3dnerv)
+# 3DNeRV: A Cube-wise Neural Representaion for Videos
+
+| ![Pixel-wise, Image-wise, Patch-wise and Cube-wise prediction](https://github.com/tuanlda78202/) | 
+|:--:| 
+| Pixel-wise, Image-wise, Patch-wise and Cube-wise prediction|
+
+- [3DNeRV: A Cube-wise Neural Representaion for Videos](#3dnerv-a-cube-wise-neural-representaion-for-videos)
+  - [Abstract](#abstract)
   - [Folder Structure](#folder-structure)
-  - [Model Zoo](#model-zoo)
   - [Usage](#usage)
+    - [Installation](#installation)
     - [Configuration](#configuration)
     - [Training](#training)
     - [Testing](#testing)
+    - [Compress](#compress)
   - [Contributors](#contributors)
+
+## Abstract 
+Implicit Neural Representations (INRs) conceptualize videos as neural networks and have recently demonstrated potential as an simple yet promising solution for video compression, converting the intricate issue of video compression into model compression. Their efficiency and fast decoding abilities hold the potential to replace traditional compression methods. However, current approaches are predominantly confined to the pixel, image, or patch-wise levels, and failing to fully exploit spatio-temporal information and struggling with the reconstruction of video frames from fixed and time-agnostic embeddings. Addressing these limitations, we introduce Cube-wise Neural Representation for Videos (3DNeRV) in this paper, where cubes generated from a learnable 3D encoder, to capture spatio-temporal information in video data and uses it as an embedding input for the decoder. Additionally, we propose 3DNeRV-Block, capable of extracting rich temporal and spatial features from the cube embedding using Conv3D, enables fast encoding and high-resolution video reconstruction, particularly excelling in the extraction of temporal information across frames. Our method has been evaluated on the UVG dataset and significantly outperforms all previous INR methods for video reconstruction tasks, achieves state-of-the-art results with significant improvement (+7.11 PSNR increase over HNeRV). We highlight the effectiveness and simplicity of our approach by applying it to DeepCABAC, dominates all previous neural video compression methods, resulting in a 54.82\% bitrate saving over VTM 15.0. This marks a milestone as the first INRs method to outperform deep neural video compression methods and mainstream video coding standards, including H.266. Moreover, our method showcases advantages in decoding, scalability, and adaptability across various deployment scenarios.
+
+| ![3DNeRV architecture](https://github.com/tuanlda78202/) | 
+|:--:| 
+| 3DNeRV architecture|
 
 ## Folder Structure
 
@@ -23,7 +37,7 @@ nerv3d/
   │   └── vmae_sdg.pth - VideoMAE ViT-Small distill from Giant
   │
   │── scripts/
-  │   ├── uvg/ - Bash scripts auto training & testing 
+  │   ├── */ - Bash scripts for training, testing and compress
   │   ├── train.py 
   │   └── test.py 
   │
@@ -37,8 +51,7 @@ nerv3d/
   │   │    ├── loss.py
   │   │    └── metrics.py  
   │   ├── model/ 
-  │   │    ├── nerv3d.py
-  │   │    └── macs.py  
+  │   │    └── nerv3d.py
   │   └── trainer/ 
   │        ├── base_trainer.py
   │        └── nerv3d_trainer.py
@@ -47,38 +60,30 @@ nerv3d/
       ├── log/ 
       └── utils.py
 ```
-## Model Zoo 
-<summary></summary>
-
-<table style="margin-left:auto;margin-right:auto;font-size:1.4vw;padding:10px 10px;text-align:center;vertical-align:center;">
-  <tr>
-    <td colspan="7" style="font-weight:bold;">Neural Representation for Videos</td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/u2net/README.md">NeRV</a> (NIPS'21)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">E-NeRV</a> (ECCV'22)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">FFNeRV</a> (arXiv'22)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">D-NeRV</a> (CVPR'23)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">HNeRV</a> (CVPR'23)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">HiNeRV</a> (NIPS'23)</td>
-    <td><a href="https://github.com/tuanlda78202/CVP/blob/main/configs/dis/README.md">NeRV3D</a> (Ours)</td>
-  </tr>
-</table>
 
 ## Usage
 
-If you run private repository on online notebook:
-1. [Generate your token](https://github.com/settings/tokens)
-2. Get repo address from `github.com/.../...git`: 
+### Installation
+
+1. Clone the repository
 ```bash
-git clone https://your_personal_token@github.com/tuanlda78202/nerv3d.git
+git clone https://github.com/tuanlda78202/nerv3d.git
 cd nerv3d
 ```
-3. Install the required packages:
+2. Install the required packages:
 ```
 pip install -r requirements.txt
 ```
 <!-- pipreqs for get requirements.txt -->
+
+For `NNCodec` with compression task, you need install follow these instructions:
+```bash
+git clone https://github.com/fraunhoferhhi/nncodec
+cd nncodec
+pip install wheel
+pip install -r requirements.txt
+pip install .
+```
 ### Configuration
 
 <details>
@@ -172,15 +177,14 @@ Modify the configurations in `.yaml` config files, then run:
 ```bash
 python scripts/train.py --config [CONFIG]
 ```
-
-If you want training and testing multiple videos, run:
-```bash
-sh scripts/pipleline.sh
-```
-
 ### Testing
 ```bash
-python scripts/test.py --config [CONFIG]
+python scripts/test.py --config [CONFIG] --resume [CKPT]
+```
+
+### Compress
+```bash
+python scripts/compess.py --config [CONFIG] --resume [CKPT]
 ```
 
 ## Contributors 
