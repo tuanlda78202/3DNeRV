@@ -1,9 +1,8 @@
-# 3DNeRV: A Cube-wise Neural Representaion for Videos
+# 3DNeRV
 
-| <img src="https://github.com/tuanlda78202/nerv3d/blob/main/utils/assets/overview.jpeg" width="800"/> | 
-|:--:| 
-| Pixel-wise, Image-wise, Patch-wise and Cube-wise prediction |
-
+> "3DNeRV: A Cube-wise Neural Representaion for Videos" (accepted at AAAI'24) <br>
+> [Tuan LDA](https://tuanlda78202.github.io)<sup>1, 2</sup>, [Minh Nguyen](https://github.com/minhngt62)<sup>1, 2</sup>, [Thang Nguyen](https://scholar.google.com/citations?user=gFtI-8QAAAAJ&hl)<sup>2</sup><br>
+> <sup>1</sup>Hanoi University of Science and Technology, <sup>2</sup>Viettel High Tech<br>
 
 - [3DNeRV: A Cube-wise Neural Representaion for Videos](#3dnerv-a-cube-wise-neural-representaion-for-videos)
   - [Abstract](#abstract)
