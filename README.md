@@ -1,8 +1,9 @@
 # 3DNeRV: A Cube-wise Neural Representaion for Videos
 
-| ![Pixel-wise, Image-wise, Patch-wise and Cube-wise prediction](https://github.com/tuanlda78202/) | 
+| <img src="https://github.com/tuanlda78202/nerv3d/blob/main/utils/assets/overview.jpeg" width="800"/> | 
 |:--:| 
-| Pixel-wise, Image-wise, Patch-wise and Cube-wise prediction|
+| Pixel-wise, Image-wise, Patch-wise and Cube-wise prediction |
+
 
 - [3DNeRV: A Cube-wise Neural Representaion for Videos](#3dnerv-a-cube-wise-neural-representaion-for-videos)
   - [Abstract](#abstract)
@@ -18,9 +19,9 @@
 ## Abstract 
 Implicit Neural Representations (INRs) conceptualize videos as neural networks and have recently demonstrated potential as an simple yet promising solution for video compression, converting the intricate issue of video compression into model compression. Their efficiency and fast decoding abilities hold the potential to replace traditional compression methods. However, current approaches are predominantly confined to the pixel, image, or patch-wise levels, and failing to fully exploit spatio-temporal information and struggling with the reconstruction of video frames from fixed and time-agnostic embeddings. Addressing these limitations, we introduce Cube-wise Neural Representation for Videos (3DNeRV) in this paper, where cubes generated from a learnable 3D encoder, to capture spatio-temporal information in video data and uses it as an embedding input for the decoder. Additionally, we propose 3DNeRV-Block, capable of extracting rich temporal and spatial features from the cube embedding using Conv3D, enables fast encoding and high-resolution video reconstruction, particularly excelling in the extraction of temporal information across frames. Our method has been evaluated on the UVG dataset and significantly outperforms all previous INR methods for video reconstruction tasks, achieves state-of-the-art results with significant improvement (+7.11 PSNR increase over HNeRV). We highlight the effectiveness and simplicity of our approach by applying it to DeepCABAC, dominates all previous neural video compression methods, resulting in a 54.82\% bitrate saving over VTM 15.0. This marks a milestone as the first INRs method to outperform deep neural video compression methods and mainstream video coding standards, including H.266. Moreover, our method showcases advantages in decoding, scalability, and adaptability across various deployment scenarios.
 
-| ![3DNeRV architecture](https://github.com/tuanlda78202/) | 
+| <img src="https://github.com/tuanlda78202/nerv3d/blob/main/utils/assets/model.png" width="800"/> | 
 |:--:| 
-| 3DNeRV architecture|
+|3DNeRV architecture |
 
 ## Folder Structure
 
