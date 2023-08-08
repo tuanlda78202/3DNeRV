@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
+import time
 
 
 def vmae_pretrained(
@@ -213,7 +214,13 @@ class NeRV3DDecoder(nn.Module):
             B, self.embed_dim, self.frame_interval, self.embed_h, self.embed_w
         )
 
+        dec_start = time.time()
+
         embedding = self.decoder(embedding)
         embedding = self.head_norm(self.head_proj(embedding))
+        output = self.out(embedding)
 
-        return self.out(embedding)
+        torch.cuda.synchronize()
+        dec_time = time.time() - dec_start
+
+        return output

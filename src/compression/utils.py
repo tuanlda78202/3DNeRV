@@ -30,24 +30,6 @@ def state(full_model, raw_decoder_path):
     return encoder_model
 
 
-def dcabac_compress(
-    raw_decoder_path, stream_path, mqp, compressed_decoder_path, decoder_dim
-):
-    bit_stream = nnc.compress_model(
-        raw_decoder_path,
-        bitstream_path=stream_path,
-        qp=int(mqp),
-        return_bitstream=True,
-    )
-    nnc.decompress_model(stream_path, model_path=compressed_decoder_path)
-
-    decoder_model = NeRV3DDecoder(NeRV3D(decode_dim=decoder_dim))
-    decoder_model.load_state_dict(torch.load(compressed_decoder_path))
-    decoder_model.eval()
-
-    return decoder_model, len(bit_stream)
-
-
 def embedding_compress(dataloader, encoder_model, embedding_path, eqp):
     embedding = defaultdict()
 
@@ -73,3 +55,32 @@ def embedding_compress(dataloader, encoder_model, embedding_path, eqp):
     embedding = nnc.decompress(embedding_path, return_model_information=True)
 
     return embedding[0], len(bit_stream)
+
+
+def dcabac_compress(
+    raw_decoder_path, stream_path, mqp, compressed_decoder_path, decoder_dim
+):
+    bit_stream = nnc.compress_model(
+        raw_decoder_path,
+        bitstream_path=stream_path,
+        qp=int(mqp),
+        return_bitstream=True,
+    )
+    nnc.decompress_model(stream_path, model_path=compressed_decoder_path)
+
+    decoder_model = NeRV3DDecoder(NeRV3D(decode_dim=decoder_dim))
+    decoder_model.load_state_dict(torch.load(compressed_decoder_path))
+    decoder_model.eval()
+
+    return decoder_model, len(bit_stream)
+
+
+def dcabac_decoding(embedding_path, stream_path, compressed_decoder_path, decoder_dim):
+    embedding = nnc.decompress(embedding_path, return_model_information=True)
+
+    nnc.decompress_model(stream_path, model_path=compressed_decoder_path)
+    decoder_model = NeRV3DDecoder(NeRV3D(decode_dim=decoder_dim))
+    decoder_model.load_state_dict(torch.load(compressed_decoder_path))
+    decoder_model.eval()
+
+    return embedding[0], decoder_model.cuda()
