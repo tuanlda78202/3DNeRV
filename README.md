@@ -1,10 +1,10 @@
 # 3DNeRV
 
 > "3DNeRV: A Cube-wise Neural Representaion for Videos" (accepted at AAAI'24) <br>
-> [Tuan LDA](https://tuanlda78202.github.io)<sup>1, 2</sup>, [Minh Nguyen](https://github.com/minhngt62)<sup>1, 2</sup>, [Thang Nguyen](https://scholar.google.com/citations?user=gFtI-8QAAAAJ&hl)<sup>2</sup><br>
+> [Tuan LDA](https://tuanlda78202.github.io)<sup>1, 2</sup>, [Minh Nguyen](https://github.com/minhngt62)<sup>1, 2</sup>, [Thang Nguyen](https://scholar.google.com/citations?user=1NjryzEAAAAJ&hl=en&oi=ao)<sup>2</sup><br>
 > <sup>1</sup>Hanoi University of Science and Technology, <sup>2</sup>Viettel High Tech<br>
 
-- [3DNeRV: A Cube-wise Neural Representaion for Videos](#3dnerv-a-cube-wise-neural-representaion-for-videos)
+- [3DNeRV](#3dnerv)
   - [Abstract](#abstract)
   - [Folder Structure](#folder-structure)
   - [Usage](#usage)
