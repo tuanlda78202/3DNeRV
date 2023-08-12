@@ -223,4 +223,4 @@ class NeRV3DDecoder(nn.Module):
         torch.cuda.synchronize()
         dec_time = time.time() - dec_start
 
-        return output
+        return output, dec_time

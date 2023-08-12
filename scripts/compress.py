@@ -91,7 +91,7 @@ def main(config):
             data = data.permute(0, 4, 1, 2, 3).cuda()
 
             embed = torch.from_numpy(embedding[str(batch_idx)]).cuda()
-            pred = decoder_model(embed)
+            pred, _ = decoder_model(embed)
 
             data = data.permute(0, 2, 1, 3, 4)
             pred = pred.permute(0, 2, 1, 3, 4)

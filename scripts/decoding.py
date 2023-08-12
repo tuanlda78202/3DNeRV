@@ -8,6 +8,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from config.parse_config import ConfigParser
+import src.dataset.build as module_data
 from src.model.nerv3d import *
 from src.compression.utils import *
 
@@ -20,6 +21,10 @@ torch.backends.cudnn.deterministic = False
 
 def main(config):
     logger = config.get_logger("test")
+
+    # Dataset
+    build_data = config.init_ftn("dataloader", module_data)
+    dataset, dataloader = build_data()
 
     # Embedding & Decoder
     embedding, decoder_model = dcabac_decoding(
@@ -36,10 +41,21 @@ def main(config):
         unit="it",
     )
 
+    total_time = []
     with torch.no_grad():
         for idx in enumerate(tqdm_batch):
             embed = torch.from_numpy(embedding[str(idx)]).cuda()
-            pred = decoder_model(embed)
+            pred, dec_time = decoder_model(embed)
+
+            total_time.append(dec_time)
+
+    print(
+        "FPS: {}".format(
+            len(dataset)
+            * config["dataloader"]["args"]["frame_interval"]
+            / sum(total_time)
+        )
+    )
 
 
 if __name__ == "__main__":
@@ -59,14 +75,6 @@ if __name__ == "__main__":
         default=None,
         type=str,
         help="path to latest checkpoint (default: None)",
-    )
-
-    args.add_argument(
-        "-f",
-        "--frames",
-        default=600,
-        type=int,
-        help="Number of frames",
     )
 
     config = ConfigParser.from_args(args)
