@@ -1,10 +1,10 @@
 # 3DNeRV
 
 > "3DNeRV: A Cube-wise Neural Representaion for Videos" (accepted at AAAI'24) <br>
-> [Tuan LDA](https://tuanlda78202.github.io)<sup>1, 2</sup>, [Minh Nguyen](https://github.com/minhngt62)<sup>1, 2</sup>, [Thang Nguyen](https://scholar.google.com/citations?user=gFtI-8QAAAAJ&hl)<sup>2</sup><br>
+> [Tuan LDA](https://tuanlda78202.github.io)<sup>1, 2</sup>, [Minh Nguyen](https://github.com/minhngt62)<sup>1, 2</sup>, [Thang Nguyen](https://scholar.google.com/citations?user=1NjryzEAAAAJ&hl=en&oi=ao)<sup>2</sup><br>
 > <sup>1</sup>Hanoi University of Science and Technology, <sup>2</sup>Viettel High Tech<br>
 
-- [3DNeRV: A Cube-wise Neural Representaion for Videos](#3dnerv-a-cube-wise-neural-representaion-for-videos)
+- [3DNeRV](#3dnerv)
   - [Abstract](#abstract)
   - [Folder Structure](#folder-structure)
   - [Usage](#usage)
@@ -13,6 +13,9 @@
     - [Training](#training)
     - [Testing](#testing)
     - [Compress](#compress)
+    - [Decoding](#decoding)
+  - [Citation](#citation)
+  - [Contact](#contact)
   - [Contributors](#contributors)
 
 ## Abstract 
@@ -186,6 +189,24 @@ python scripts/test.py --config [CONFIG] --resume [CKPT]
 ```bash
 python scripts/compess.py --config [CONFIG] --resume [CKPT]
 ```
+
+### Decoding
+```bash
+python scripts/decoding.py --config [CONFIG] --resume [CKPT]
+```
+## Citation
+If you find our work useful in your research, please cite:
+```
+@InProceedings{tuan3dnerv2024,
+      title={3DNeRV}: Neural Representations for Videos}, 
+      author={Tuan LDA, Minh Nguyen and Thang Nguyen},
+      year={2024},
+      booktitle={AAAI},
+}
+```
+
+## Contact
+If you have any questions, please feel free to email the [authors.](tuan.lda204929@sis.edu.vn)
 
 ## Contributors 
 <a href="https://github.com/tuanlda78202/MLR/graphs/contributors">
