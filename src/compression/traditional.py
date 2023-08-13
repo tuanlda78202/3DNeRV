@@ -1,5 +1,3 @@
-# Quantization + Huffman coding
-
 from copy import deepcopy
 from dahuffman import HuffmanCodec
 import numpy as np
@@ -78,7 +76,7 @@ def dequantize_tensor(quantization_data):
     return reconstructed_tensor
 
 
-######################################################################################
+# Quantize and Huffman encode the model
 def quantize_model(model, args):
     if args.quant_model_bit == -1:
         return model, None
