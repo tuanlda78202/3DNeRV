@@ -233,7 +233,6 @@ def normal_compression(
     decoder_dim,
     frame_interval,
 ):
-    """
     # Embedding
     embedding_list = []
 
@@ -250,7 +249,7 @@ def normal_compression(
         embedding_list.append(feature.cpu().detach().numpy())
 
     torch.save(torch.Tensor(embedding_list), traditional_embedding_path)
-    """
+
     # Decoder
     decoder_model = NeRV3DDecoder(
         NeRV3D(frame_interval=frame_interval, decode_dim=decoder_dim)

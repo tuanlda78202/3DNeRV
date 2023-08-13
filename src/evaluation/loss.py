@@ -20,9 +20,8 @@ def loss_fn(pred, target, loss_type="L2", batch_average=True):
         ) + 0.7 * (1 - ssim(pred, target, data_range=1, size_average=False))
 
     elif loss_type == "Fusion2":
-        loss = 0.3 * F.l1_loss(pred, target, reduction="none").flatten(1).mean(
-            1
-        ) + 0.7 * (1 - ssim(pred, target, data_range=1, size_average=False))
+        loss = 0.3 * F.l1_loss(pred, target, reduction="none").flatten(1).mean(1)
+        +0.7 * (1 - ssim(pred, target, data_range=1, size_average=False))
 
     elif loss_type == "Fusion3":
         loss = 0.5 * F.mse_loss(pred, target, reduction="none").flatten(1).mean(
