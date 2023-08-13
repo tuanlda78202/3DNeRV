@@ -102,7 +102,6 @@ class NeRV3D(nn.Module):
         self.frame_interval = frame_interval
         self.embed_h, self.embed_w = embed_size
 
-        # num_patches = self.hidden_t * self.hidden_h * self.hidden_w
         self.hidden_t = frame_interval // tubelet_size
         self.hidden_h, self.hidden_w = (
             img_size[0] // patch_size[0],

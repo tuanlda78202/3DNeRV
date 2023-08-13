@@ -34,7 +34,7 @@ def main(config):
     FI = config["dataloader"]["args"]["frame_interval"]
     IMG_SIZE = config["arch"]["args"]["img_size"]
     DECODER_DIM = config["arch"]["args"]["decode_dim"]
-    MODE = config["trainer"]["mode"]
+    WBMODE = config["trainer"]["mode"]
     DIR = config["compression"]["compress_dir"]
     compress = config["compression"]
     NAME = (
@@ -58,23 +58,35 @@ def main(config):
     msssim_metric = config.init_ftn("msssim", module_metric)
 
     # EED
-    encoder_model = state(full_model, compress["raw_decoder_path"])
+    encoder_model = state(full_model, compress["raw_decoder_path"], frame_interval=FI)
 
-    embedding, embed_bit = embedding_compress(
-        dataloader, encoder_model, compress["embedding_path"], compress["embed_qp"]
-    )
+    # Compression
+    if compress["method"] == "normal":
+        embedding, decoder_model, total_bits = normal_compression(
+            dataloader,
+            encoder_model,
+            compress["raw_decoder_path"],
+            compress["traditional_embedding_path"],
+            decoder_dim=DECODER_DIM,
+            frame_interval=FI,
+        )
 
-    decoder_model, decoder_bit = dcabac_compress(
-        compress["raw_decoder_path"],
-        compress["stream_path"],
-        compress["model_qp"],
-        compress["compressed_decoder_path"],
-        decoder_dim=DECODER_DIM,
-    )
+    elif config["compression"]["method"] == "dcabac":
+        embedding, embed_bit = embedding_compress(
+            dataloader, encoder_model, compress["embedding_path"], compress["embed_qp"]
+        )
+
+        decoder_model, decoder_bit = dcabac_compress(
+            compress["raw_decoder_path"],
+            compress["stream_path"],
+            compress["model_qp"],
+            compress["compressed_decoder_path"],
+            decoder_dim=DECODER_DIM,
+        )
 
     # Training
     wandb.init(
-        project="nerv3d", entity="tuanlda78202", name=NAME, mode=MODE, config=config
+        project="nerv3d", entity="tuanlda78202", name=NAME, mode=WBMODE, config=config
     )
 
     tqdm_batch = tqdm(
@@ -90,8 +102,13 @@ def main(config):
         for batch_idx, data in enumerate(tqdm_batch):
             data = data.permute(0, 4, 1, 2, 3).cuda()
 
-            embed = torch.from_numpy(embedding[str(batch_idx)]).cuda()
-            pred, _ = decoder_model(embed)
+            if compress["method"] == "normal":
+                embed = embedding[batch_idx].cuda().type(torch.cuda.FloatTensor)
+                pred, _ = decoder_model(embed)
+
+            elif compress["method"] == "dcabac":
+                embed = torch.from_numpy(embedding[str(batch_idx)]).cuda()
+                pred, _ = decoder_model(embed)
 
             data = data.permute(0, 2, 1, 3, 4)
             pred = pred.permute(0, 2, 1, 3, 4)
@@ -111,15 +128,25 @@ def main(config):
 
             del pred, data
 
-        wandb.log(
-            {
-                "psnr": sum(psnr_video) / len(psnr_video),
-                "msssim": sum(msssim_video) / len(msssim_video),
-                "bpp": (embed_bit + decoder_bit)
-                * 8
-                / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
-            }
-        )
+        if compress["method"] == "normal":
+            wandb.log(
+                {
+                    "psnr": sum(psnr_video) / len(psnr_video),
+                    "msssim": sum(msssim_video) / len(msssim_video),
+                    "bpp": total_bits / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
+                }
+            )
+
+        elif compress["method"] == "dcabac":
+            wandb.log(
+                {
+                    "psnr": sum(psnr_video) / len(psnr_video),
+                    "msssim": sum(msssim_video) / len(msssim_video),
+                    "bpp": (embed_bit + decoder_bit)
+                    * 8
+                    / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
+                }
+            )
 
         wandb.finish()
 
@@ -146,6 +173,11 @@ if __name__ == "__main__":
     CustomArgs = collections.namedtuple("CustomArgs", "flags type target")
 
     options = [
+        CustomArgs(
+            ["-o", "--method"],
+            type=int,
+            target="compression;method",
+        ),
         CustomArgs(
             ["-m", "--mqp"],
             type=int,

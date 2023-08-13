@@ -81,6 +81,11 @@ trainer:
   name: "beauty-1080p_3M"
 
 compression:
+  method: "normal"
+  
+  traditional_embedding_path: "compression/3M/beauty/traditional_embedding.pt"
+  traditional_decoder_path: "compression/3M/beauty/traditional_decoder.pth"
+
   compress_dir: compression/3M/beauty/
   embedding_path: "compression/3M/beauty/compressed_embedding.ncc"
   raw_decoder_path: "compression/3M/beauty/raw_decoder.pt"
