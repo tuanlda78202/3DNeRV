@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import scipy.ndimage
 import torch
@@ -7,9 +8,7 @@ import torch.nn.functional as F
 from typing import Tuple, Union
 from torch.utils.data import Dataset
 import numpy as np
-from torchvision import transforms
-from . import video_transforms, volume_transforms
-import time
+from . import video_transforms
 
 
 class BaseYUV:
@@ -31,7 +30,9 @@ class BaseYUV:
     def _none_exist_frame(dst_format):
         if dst_format == "420":
             return None, None
+
         assert dst_format == "rgb"
+
         return None
 
     @staticmethod
@@ -40,15 +41,19 @@ class BaseYUV:
             if rgb is None:
                 rgb = ycbcr420_to_rgb(y, uv, order=1)
             return rgb
+
         assert dst_format == "420"
+
         if y is None:
             y, uv = rgb_to_ycbcr420(rgb)
+
         return y, uv
 
 
 class YUVReader(BaseYUV):
     def __init__(self, src_path, height, width, src_format="420"):
         super().__init__(src_path, height, width)
+
         if not src_path.endswith(".yuv"):
             src_path = src_path + ".yuv"
             self.src_path = src_path
@@ -60,6 +65,7 @@ class YUVReader(BaseYUV):
             self.uv_size = width * height // 2
         else:
             assert False
+
         # pylint: disable=R1732
         self.file = open(src_path, "rb")
 
@@ -108,23 +114,15 @@ class YUVDataset(Dataset):
     def __init__(
         self,
         data_path,
-        frame_interval=4,
-        crop_size=(720, 1280),
-        mode="train",
+        frame_interval=2,
+        crop_size=(1080, 1920),
     ):
         self.data_path = data_path
-        self.mode = mode
         self.frame_interval = frame_interval
         self.crop_size = crop_size
 
         self.vr = YUVReader(self.data_path, 1080, 1920)
         self.file = self.vr.file
-
-        self.data_transform = video_transforms.Compose(
-            [
-                video_transforms.CenterCrop(size=self.crop_size),
-            ]
-        )
 
     def __len__(self):
         return len(self.vr) // self.frame_interval
@@ -133,14 +131,15 @@ class YUVDataset(Dataset):
         # start_time = time.time()
 
         buffer = []
+
         for idx in range(self.frame_interval):
             frame = self.vr.read_one_frame(
                 frame_index=index * self.frame_interval + idx
             )
+
             buffer.append(frame)  # CHW
 
         buffer = np.array(buffer).transpose(0, 2, 3, 1)  # THWC
-        buffer = np.array(self.data_transform(buffer))
 
         # print("--- Data get index: %s seconds ---" % (time.time() - start_time))
 

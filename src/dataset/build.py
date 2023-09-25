@@ -55,7 +55,7 @@ def build_dataloader(
         )
 
         dataloader = DataLoader(
-            dataset, batch_size=batch_size, shuffle=False, num_workers=6
+            dataset, batch_size=batch_size, shuffle=False, num_workers=1
         )
 
     else:
