@@ -27,8 +27,6 @@ torch.backends.cudnn.deterministic = False
 
 
 def main(config):
-    logger = config.get_logger("test")
-
     # GLOBAL VARIABLES
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]

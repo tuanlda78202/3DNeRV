@@ -1,11 +1,12 @@
-import sys
 import os
-
+import sys
 import time
-import numpy as np
+import wandb
 import torch
 import argparse
 import collections
+import numpy as np
+from tqdm import tqdm
 
 sys.path.append(os.getcwd())
 np.random.seed(42)
@@ -13,21 +14,8 @@ torch.manual_seed(42)
 torch.backends.cudnn.benchmark = True
 torch.backends.cuda.matmul.allow_tf32 = True
 
-import logging
-from src.dataset.yuv import YUVDataset
-
-logger = logging.getLogger("wandb")
-logger.setLevel(logging.ERROR)
-logger.setLevel(logging.WARNING)
-
-import time
-import random
-import torch
-from .base_trainer import BaseTrainer
 from utils import inf_loop
-from tqdm import tqdm
-import wandb
-import gc
+from .base_trainer import BaseTrainer
 
 
 class NeRV3DTrainer(BaseTrainer):

@@ -1,11 +1,9 @@
-import sys
 import os
-
-import time
-import numpy as np
+import sys
 import torch
 import argparse
 import collections
+import numpy as np
 
 sys.path.append(os.getcwd())
 np.random.seed(42)
@@ -13,8 +11,6 @@ torch.manual_seed(42)
 torch.backends.cudnn.benchmark = True
 torch.backends.cuda.matmul.allow_tf32 = True
 
-from torchsummary import summary
-from ptflops import get_model_complexity_info
 from config.parse_config import ConfigParser
 import src.dataset.build as module_data
 import src.model.nerv3d as module_arch
@@ -24,19 +20,14 @@ from src.trainer.nerv3d_trainer import NeRV3DTrainer
 
 
 def main(config):
-    logger = config.get_logger("train")
-
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
     # Model
-    model = config.init_obj("arch", module_arch)
-    logger.info(model)
-
-    # Global device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.set_default_device(device)
+    model = config.init_obj("arch", module_arch)
     model = model.to(device)
 
     # Criterion & Metrics

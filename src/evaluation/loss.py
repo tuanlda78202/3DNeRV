@@ -1,6 +1,5 @@
 import torch.nn.functional as F
 from pytorch_msssim import ms_ssim, ssim
-import torch
 
 
 def loss_fn(pred, target, loss_type="L2", batch_average=True):
@@ -8,14 +7,6 @@ def loss_fn(pred, target, loss_type="L2", batch_average=True):
 
     if loss_type == "L2":
         loss = F.mse_loss(pred, target)  # reduction="none").flatten(1).mean(1)
-
-    elif loss_type == "l1-ms-ssim":
-        loss = 0.7 * F.l1_loss(pred, target) + 0.3 * torch.mean(
-            1
-            - ms_ssim(
-                pred.squeeze(0), target.squeeze(0), data_range=1, size_average=False
-            )
-        )
 
     elif loss_type == "L1":
         loss = F.l1_loss(pred, target, reduction="none").flatten(1).mean(1)

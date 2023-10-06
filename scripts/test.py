@@ -24,8 +24,6 @@ torch.backends.cudnn.deterministic = False
 
 
 def main(config):
-    logger = config.get_logger("test")
-
     # Config
     name_wandb = "infer-" + str(config["trainer"]["name"])
     batch_size = config["dataloader"]["args"]["batch_size"]

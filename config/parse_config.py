@@ -1,11 +1,8 @@
-import os
 import logging
 from pathlib import Path
 from functools import reduce, partial
 from operator import getitem
-from datetime import datetime
-from utils.log import setup_logging
-from utils import load_yaml, write_yaml
+from utils import load_yaml
 
 
 class ConfigParser:
@@ -63,6 +60,7 @@ class ConfigParser:
         modification = {
             opt.target: getattr(args, _get_opt_name(opt.flags)) for opt in options
         }
+
         return cls(config, resume, modification)
 
     def init_obj(self, name, module, *args, **kwargs):

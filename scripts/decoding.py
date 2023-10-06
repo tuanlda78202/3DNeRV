@@ -20,8 +20,6 @@ torch.backends.cudnn.deterministic = False
 
 
 def main(config):
-    logger = config.get_logger("test")
-
     # Dataset
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()

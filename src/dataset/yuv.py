@@ -1,14 +1,11 @@
 import os
-import time
 import numpy as np
 import scipy.ndimage
+from typing import Tuple, Union
 import torch
 from torch import Tensor
-import torch.nn.functional as F
-from typing import Tuple, Union
 from torch.utils.data import Dataset
-import numpy as np
-from . import video_transforms
+import torch.nn.functional as F
 
 
 class BaseYUV:
@@ -115,12 +112,11 @@ class YUVDataset(Dataset):
         self,
         data_path,
         frame_interval=2,
-        crop_size=(1080, 1920),
     ):
         self.data_path = data_path
         self.frame_interval = frame_interval
-        self.crop_size = crop_size
 
+        # default 1080p
         self.vr = YUVReader(self.data_path, 1080, 1920)
         self.file = self.vr.file
 
@@ -146,6 +142,7 @@ class YUVDataset(Dataset):
         return torch.from_numpy(buffer)
 
 
+# Color Space
 YCBCR_WEIGHTS = {
     # Spec: (K_r, K_g, K_b) with K_g = 1 - K_r - K_b
     "ITU-R_BT.709": (0.2126, 0.7152, 0.0722)

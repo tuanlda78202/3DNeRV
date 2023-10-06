@@ -1,9 +1,9 @@
-from ..backbone.videomaev2 import vit_small_patch16_224
+import time
 import torch
 from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
-import time
+from ..backbone.videomaev2 import vit_small_patch16_224
 
 
 def vmae_pretrained(

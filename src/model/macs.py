@@ -1,12 +1,12 @@
-import sys
 import os
+import sys
 import wandb
+import torch
 
 sys.path.append(os.getcwd())
 os.environ["WANDB_DIR"] = "./saved"
 
 from src.model.nerv3d import NeRV3D
-import torch
 from ptflops import get_model_complexity_info
 
 with torch.cuda.device(0):
