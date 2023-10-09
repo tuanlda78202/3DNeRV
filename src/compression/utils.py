@@ -3,10 +3,10 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from copy import deepcopy
+from dahuffman import HuffmanCodec
 from collections import defaultdict
 from utils import load_yaml
 from src.model.nerv3d import *
-from dahuffman import HuffmanCodec
 
 
 def state(full_model, raw_decoder_path, frame_interval):

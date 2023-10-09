@@ -4,10 +4,10 @@ import os
 sys.path.append(os.getcwd())
 os.environ["WANDB_DIR"] = "./saved"
 
-import collections
-import argparse
 import torch
 import wandb
+import argparse
+import collections
 import numpy as np
 from tqdm import tqdm
 import src.model as module_arch

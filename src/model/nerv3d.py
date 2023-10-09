@@ -12,7 +12,7 @@ def vmae_pretrained(
     **kwargs,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vmae: nn.Module = model_fn(**kwargs)  # num_heads = 3
+    vmae: nn.Module = model_fn(**kwargs)
 
     if ckpt_path is not None:
         ckt = torch.load(ckpt_path, map_location="cpu")
@@ -22,7 +22,7 @@ def vmae_pretrained(
                 break
         vmae.load_state_dict(ckt)
 
-        # print("Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
+        print("Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
 
     vmae.eval()
     vmae.to(device)

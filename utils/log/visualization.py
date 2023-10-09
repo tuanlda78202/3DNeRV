@@ -1,7 +1,6 @@
 import importlib
 from datetime import datetime
 from utils.util import init_wandb
-from typing import Dict, Any
 
 
 class WandB:

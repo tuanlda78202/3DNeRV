@@ -1,7 +1,10 @@
 dahuffman
+moviepy
+imageio
 numpy
 ptflops
 pytorch_msssim
+PyYAML
 scipy
 torch
 timm

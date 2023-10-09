@@ -2,17 +2,6 @@ import torch
 from abc import abstractmethod
 from utils.log import WandB
 
-"""
-- Training process logging
-- Checkpoint saving
-- Checkpoint resuming
-- Reconfigurable performance monitoring for saving current best model, and early stop training.
-    - If config monitor is set to max val_accuracy, which means then the trainer will save a checkpoint model_best.pth 
-      when validation accuracy of epoch replaces current maximum.
-    - If config early_stop is set, training will be automatically terminated when model performance does not improve for given number of 
-    epochs. This feature can be turned off by passing 0 to the early_stop option, or just deleting the line of config.
-"""
-
 
 class BaseTrainer:
     """
@@ -26,13 +15,11 @@ class BaseTrainer:
         metric_ftns,
         optimizer,
         config,
-        dataset,
         data_loader,
-        lr_scheduler=None,
-        len_epoch=None,
+        lr_scheduler,
     ):
         self.config = config
-        self.logger = config.get_logger("trainer", config["trainer"]["verbosity"])
+        self.logger = config.get_logger("trainer", 1)
 
         self.model = model
         self.criterion = criterion

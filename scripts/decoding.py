@@ -3,8 +3,8 @@ import os
 
 sys.path.append(os.getcwd())
 
-import argparse
 import torch
+import argparse
 import numpy as np
 from tqdm import tqdm
 from config.parse_config import ConfigParser
@@ -40,6 +40,7 @@ def main(config):
     )
 
     total_time = []
+
     with torch.no_grad():
         for idx in enumerate(tqdm_batch):
             embed = torch.from_numpy(embedding[str(idx)]).cuda()

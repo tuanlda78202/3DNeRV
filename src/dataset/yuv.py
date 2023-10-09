@@ -1,11 +1,11 @@
 import os
+import torch
 import numpy as np
 import scipy.ndimage
-from typing import Tuple, Union
-import torch
 from torch import Tensor
-from torch.utils.data import Dataset
 import torch.nn.functional as F
+from typing import Tuple, Union
+from torch.utils.data import Dataset
 
 
 class BaseYUV:

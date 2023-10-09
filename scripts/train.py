@@ -9,6 +9,7 @@ sys.path.append(os.getcwd())
 np.random.seed(42)
 torch.manual_seed(42)
 torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.deterministic = False
 torch.backends.cuda.matmul.allow_tf32 = True
 
 from config.parse_config import ConfigParser
@@ -25,8 +26,7 @@ def main(config):
     dataset, dataloader = build_data()
 
     # Model
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    torch.set_default_device(device)
+    device = torch.device("cuda")
     model = config.init_obj("arch", module_arch)
     model = model.to(device)
 
@@ -46,7 +46,6 @@ def main(config):
         metrics,
         optimizer,
         config=config,
-        dataset=dataset,
         data_loader=dataloader,
         lr_scheduler=lr_scheduler,
     )

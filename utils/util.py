@@ -1,16 +1,6 @@
-########## HNeRV
-import torch
-import torch.nn as nn
-from math import ceil
-from pathlib import Path
-import yaml
 import os
-
-
-def ensure_dir(dirname):
-    dirname = Path(dirname)
-    if not dirname.is_dir():
-        dirname.mkdir(parents=True, exist_ok=False)
+import yaml
+from pathlib import Path
 
 
 def load_yaml(fname):
@@ -49,12 +39,6 @@ def init_wandb(
 
     # name: user_name in WandB
     return wandb_lib.init(project=project, entity=entity, name=name, config=config)
-
-
-def inf_loop(data_loader):
-    """wrapper function for endless data loader."""
-    for loader in repeat(data_loader):
-        yield from loader
 
 
 def make_dir(path):

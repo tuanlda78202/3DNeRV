@@ -4,9 +4,9 @@ import os
 sys.path.append(os.getcwd())
 os.environ["WANDB_DIR"] = "./saved"
 
-import argparse
 import torch
 import wandb
+import argparse
 import numpy as np
 from tqdm import tqdm
 import src.dataset as module_data
@@ -88,8 +88,6 @@ def main(config):
 
             psnr_video.append(psnr_batch)
             msssim_video.append(msssim_batch)
-
-            # del pred, data
 
         wandb.log(
             {
