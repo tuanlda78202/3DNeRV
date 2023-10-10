@@ -1,3 +1,9 @@
+import torch
+
+torch.manual_seed(42)
+torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.deterministic = False
+torch.backends.cuda.matmul.allow_tf32 = True
 import torch.nn.functional as F
 from pytorch_msssim import ms_ssim, ssim
 

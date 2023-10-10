@@ -14,6 +14,8 @@ torch.backends.cuda.matmul.allow_tf32 = True
 
 from .base_trainer import BaseTrainer
 
+import time
+
 
 class NeRV3DTrainer(BaseTrainer):
     """
@@ -62,7 +64,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         for batch_idx, data in enumerate(tqdm_batch):
             # BTHWC > BCTHW
-            data = data.permute(0, 4, 1, 2, 3).cuda()
+            data = data.permute(0, 4, 1, 2, 3).cuda(non_blocking=True)
             pred = self.model(data)
 
             # BCTHW > BTCHW
@@ -132,7 +134,7 @@ class NeRV3DTrainer(BaseTrainer):
         with torch.no_grad():
             for batch_idx, valid_data in enumerate(valid_tqdm_batch):
                 # BTHWC > BCTHW
-                valid_data = valid_data.permute(0, 4, 1, 2, 3).cuda()
+                valid_data = valid_data.permute(0, 4, 1, 2, 3).cuda(non_blocking=True)
                 valid_pred = self.model(valid_data)
 
                 # BCTHW > BTCHW

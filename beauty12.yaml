@@ -53,12 +53,12 @@ lr_scheduler:
 trainer:
   resume: False 
   
-  epochs: 300
+  epochs: 0
   valid_period: 20
   save_dir: saved/
   save_period: 50
 
-  mode: "offline"
+  mode: "disabled"
   name: "fixbug"
   
   project: nerv3d
