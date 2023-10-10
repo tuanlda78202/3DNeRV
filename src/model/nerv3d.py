@@ -22,7 +22,7 @@ def vmae_pretrained(
                 break
         vmae.load_state_dict(ckt)
 
-        print("Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
+        print("✅Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
 
     vmae.eval()
     vmae.to(device)
@@ -70,8 +70,8 @@ class NeRVBlock3D(nn.Module):
 class NeRV3D(nn.Module):
     def __init__(
         self,
+        frame_interval: int,
         img_size: Tuple = (1080, 1920),
-        frame_interval: int = 4,
         embed_dim: int = 8,
         embed_size: Tuple = (9, 16),
         decode_dim: int = 305,  # 440 # 634

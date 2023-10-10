@@ -39,9 +39,8 @@ class NeRV3DTrainer(BaseTrainer):
         self.lr_scheduler = lr_scheduler
         self.len_epoch = len(self.data_loader)
 
-        self.batch_size = self.config["dataloader"]["args"]["batch_size"]
-        self.frame_interval = self.config["dataloader"]["args"]["frame_interval"]
-        self.valid_period = self.config["trainer"]["valid_period"]
+        self.frame_interval = config["dataloader"]["args"]["frame_interval"]
+        self.valid_period = config["trainer"]["valid_period"]
 
     def _train_epoch(self, epoch):
         """
@@ -53,7 +52,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         tqdm_batch = tqdm(
             iterable=self.data_loader,
-            desc="Epoch {}".format(epoch),
+            desc="🚀Epoch {}".format(epoch),
             total=self.len_epoch,
             unit="it",
         )
@@ -77,13 +76,9 @@ class NeRV3DTrainer(BaseTrainer):
             self.lr_scheduler.step()
 
             # Metrics
-            psnr = self.metric_ftns(
-                pred,
-                data,
-                batch_size=self.batch_size,
-                frame_interval=self.frame_interval,
-            )
+            psnr = self.metric_ftns(pred, data)
 
+            # TQDM & WandB
             tqdm_batch.set_postfix(
                 lr=self.lr_scheduler.get_last_lr()[0], loss=loss.item(), psnr=psnr
             )
@@ -105,7 +100,7 @@ class NeRV3DTrainer(BaseTrainer):
         tqdm_batch.close()
 
         print(
-            "Epoch: {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
+            "Train Epoch: {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
                 epoch,
                 train_loss_video / self.len_epoch,
                 train_psnr_video / self.len_epoch,
@@ -125,8 +120,8 @@ class NeRV3DTrainer(BaseTrainer):
 
         valid_tqdm_batch = tqdm(
             iterable=self.data_loader,
-            desc="[Valid] Epoch {}".format(epoch),
-            total=len(self.data_loader),
+            desc="🏆Valid Epoch {}".format(epoch),
+            total=self.len_epoch,
             unit="it",
         )
 
@@ -145,13 +140,9 @@ class NeRV3DTrainer(BaseTrainer):
                 valid_loss = self.criterion(valid_pred, valid_data)
 
                 # Metrics
-                valid_psnr = self.metric_ftns(
-                    valid_pred,
-                    valid_data,
-                    batch_size=self.batch_size,
-                    frame_interval=self.frame_interval,
-                )
+                valid_psnr = self.metric_ftns(valid_pred, valid_data)
 
+                # TQDM
                 valid_tqdm_batch.set_postfix(
                     valid_loss=valid_loss.item(), valid_psnr=valid_psnr
                 )

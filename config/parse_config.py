@@ -41,19 +41,9 @@ class ConfigParser:
         if not isinstance(args, tuple):
             args = args.parse_args()
 
-        if args.resume is not None:
-            resume = Path(args.resume)
-            cfg_fname = resume.parent / "config.yaml"
+        config = load_yaml(args.config)
 
-        else:
-            msg_no_cfg = "Configuration file need to be specified. Add '-c config.yaml', for example."
-            assert args.config is not None, msg_no_cfg
-            resume = None
-            cfg_fname = Path(args.config)
-
-        config = load_yaml(args.config)  # Load from default training config
-
-        if args.config and resume:
+        if args.config:
             config.update(load_yaml(args.config))
 
         # parse custom cli options into dictionary
@@ -61,7 +51,7 @@ class ConfigParser:
             opt.target: getattr(args, _get_opt_name(opt.flags)) for opt in options
         }
 
-        return cls(config, resume, modification)
+        return cls(config, modification)
 
     def init_obj(self, name, module, *args, **kwargs):
         """
@@ -75,10 +65,6 @@ class ConfigParser:
 
         module_name = self[name]["type"]
         module_args = dict(self[name]["args"])
-
-        assert all(
-            [k not in module_args for k in kwargs]
-        ), "Overwriting kwargs given in config file is not allowed"
 
         module_args.update(kwargs)
 
@@ -95,11 +81,11 @@ class ConfigParser:
         """
 
         module_name = self[name]["type"]
-        module_args = dict(self[name]["args"])
 
-        assert all(
-            [k not in module_args for k in kwargs]
-        ), "Overwriting kwargs given in config file is not allowed"
+        if name in ("psnr", "msssim"):
+            module_args = dict()
+        else:
+            module_args = dict(self[name]["args"])
 
         module_args.update(kwargs)
 

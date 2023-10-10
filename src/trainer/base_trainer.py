@@ -1,6 +1,6 @@
 import torch
 from abc import abstractmethod
-from utils.log import WandB
+from utils import WandB
 
 
 class BaseTrainer:
@@ -32,25 +32,17 @@ class BaseTrainer:
         self.save_period = cfg_trainer["save_period"]
         self.start_epoch = 0
         self.iters = 0
+
         self.checkpoint_dir = config.save_dir
+        self.wandb = WandB(
+            self.name_exp,
+            cfg_trainer,
+            self.logger,
+            config=self.config,
+        )
 
         if cfg_trainer["resume"]:
             self._resume_checkpoint(config.resume)
-
-        if cfg_trainer["visual_tool"] == "wandb":
-            self.wandb = WandB(
-                self.name_exp,
-                cfg_trainer,
-                self.logger,
-                cfg_trainer["visual_tool"],
-                config=self.config,
-            )
-
-        else:
-            raise ImportError(
-                "Visualization tool isn't exists, please refer to comment 1.* "
-                "to choose appropriate module"
-            )
 
     @abstractmethod
     def _train_epoch(self, epoch):

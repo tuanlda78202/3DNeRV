@@ -116,7 +116,7 @@ class YUVDataset(Dataset):
         self.data_path = data_path
         self.frame_interval = frame_interval
 
-        # default 1080p
+        # Default 1080p
         self.vr = YUVReader(self.data_path, 1080, 1920)
         self.file = self.vr.file
 

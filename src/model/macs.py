@@ -1,17 +1,9 @@
-import os
-import sys
 import wandb
 import torch
-
-sys.path.append(os.getcwd())
-os.environ["WANDB_DIR"] = "./saved"
-
 from src.model.nerv3d import NeRV3D
 from ptflops import get_model_complexity_info
 
 with torch.cuda.device(0):
-    wandb.init(project="nerv3d", entity="tuanlda78202", name="macs")
-
     model_3m = NeRV3D(
         img_size=(1080, 1920),
         frame_interval=4,
@@ -33,8 +25,6 @@ with torch.cuda.device(0):
 
     print("{:<30}  {:<8}".format("Computational complexity 3M model: ", macs_3m))
     print("{:<30}  {:<8}".format("Number of parameters 3M model: ", params_3m))
-
-    wandb.log({"macs_3m": macs_3m, "params_3m": params_3m})
 
     ###############################################################################
     model_6m = NeRV3D(
@@ -59,8 +49,6 @@ with torch.cuda.device(0):
     print("{:<30}  {:<8}".format("Computational complexity 6M model: ", macs_6m))
     print("{:<30}  {:<8}".format("Number of parameters 6M model: ", params_6m))
 
-    wandb.log({"macs_6m": macs_6m, "params_6m": params_6m})
-
     ###############################################################################
     model_12m = NeRV3D(
         img_size=(1080, 1920),
@@ -83,4 +71,3 @@ with torch.cuda.device(0):
 
     print("{:<30}  {:<8}".format("Computational complexity 12M model: ", macs_12m))
     print("{:<30}  {:<8}".format("Number of parameters 12M model: ", params_12m))
-    wandb.log({"macs_12m": macs_12m, "params_12m": params_12m})

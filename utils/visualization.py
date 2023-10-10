@@ -9,7 +9,7 @@ class WandB:
     and collaborate with your team so you can focus on building the best models.
     """
 
-    def __init__(self, name, cfg_trainer, logger, visual_tool, config):
+    def __init__(self, name, cfg_trainer, logger, config, visual_tool="wandb"):
         self.writer = None
         self.selected_module = ""
         self.name = "wandb"

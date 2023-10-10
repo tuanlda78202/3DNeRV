@@ -2,30 +2,14 @@ dataloader:
   type: build_data
 
   args:
-    data_path: "../uvg/beauty.yuv"                       
-    batch_size: 1 # 
-    frame_interval: 2 # 
-
-psnr:
-  type: psnr_batch
-
-  args:
-    batch_size: 1 # 
-    frame_interval: 2 # 
-
-msssim:
-  type: msssim_batch
-
-  args:
-    batch_size: 1 # 
+    data_path: "../uvg/beauty.yuv"
+    batch_size: 1
+    frame_interval: 2                   
 
 arch:
   type: NeRV3D
 
-  args:
-    img_size: [1080, 1920] 
-    frame_interval: 2 # 
-    
+  args:    
     embed_dim: 8
     embed_size: [9, 16]
     decode_dim: 634
@@ -36,13 +20,21 @@ arch:
     reduce: 3
     lower_width: 6
 
-    ckpt_path: "data/vmae_sdg.pth"
+    ckpt_path: "../uvg/vmae_sdg.pth"
 
 loss:
   type: loss_fn
 
   args:
     loss_type: "L2"
+
+psnr:
+  type: psnr_batch
+  args:
+
+msssim:
+  type: msssim_batch
+  args:
 
 optimizer:
   type: Adam
@@ -66,9 +58,9 @@ trainer:
   save_dir: saved/
   save_period: 50
 
-  visual_tool: wandb
-  mode: "disabled"
-  name: "debug"
+  mode: "offline"
+  name: "fixbug"
+  
   project: nerv3d
   entity: tuanlda78202
   api_key_file: "./config/api/tuanlda78202"
