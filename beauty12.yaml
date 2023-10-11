@@ -58,7 +58,7 @@ trainer:
   save_dir: saved/
   save_period: 100
 
-  mode: "disabled"
+  mode: "online"
   name: "fixbug"
   
   project: nerv3d

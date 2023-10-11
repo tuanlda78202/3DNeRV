@@ -98,6 +98,14 @@ class NeRV3DTrainer(BaseTrainer):
 
         tqdm_batch.close()
 
+        wandb.log(
+            {
+                "Avg. Loss": train_loss_video / self.len_epoch,
+                "Avg. PSNR": train_psnr_video / self.len_epoch,
+            }
+        )
+
+        """
         print(
             "Train epoch {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
                 epoch,
@@ -105,6 +113,7 @@ class NeRV3DTrainer(BaseTrainer):
                 train_psnr_video / self.len_epoch,
             )
         )
+        """
 
         if (epoch + 1) % self.valid_period == 0:
             self._valid_epoch(self, epoch)
