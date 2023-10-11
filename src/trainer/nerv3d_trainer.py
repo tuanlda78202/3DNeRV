@@ -11,10 +11,7 @@ torch.manual_seed(42)
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = False
 torch.backends.cuda.matmul.allow_tf32 = True
-
 from .base_trainer import BaseTrainer
-
-import time
 
 
 class NeRV3DTrainer(BaseTrainer):
@@ -54,7 +51,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         tqdm_batch = tqdm(
             iterable=self.data_loader,
-            desc="🚀Epoch {}".format(epoch),
+            desc="🚀 Epoch {}".format(epoch),
             total=self.len_epoch,
             unit="it",
         )
@@ -64,7 +61,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         for batch_idx, data in enumerate(tqdm_batch):
             # BTHWC > BCTHW
-            data = data.permute(0, 4, 1, 2, 3).cuda(non_blocking=True)
+            data = data.permute(0, 4, 1, 2, 3)
             pred = self.model(data)
 
             # BCTHW > BTCHW
@@ -102,7 +99,7 @@ class NeRV3DTrainer(BaseTrainer):
         tqdm_batch.close()
 
         print(
-            "Train Epoch: {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
+            "Train epoch {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
                 epoch,
                 train_loss_video / self.len_epoch,
                 train_psnr_video / self.len_epoch,
@@ -122,7 +119,7 @@ class NeRV3DTrainer(BaseTrainer):
 
         valid_tqdm_batch = tqdm(
             iterable=self.data_loader,
-            desc="🏆Valid Epoch {}".format(epoch),
+            desc="🏆 Valid Epoch {}".format(epoch),
             total=self.len_epoch,
             unit="it",
         )
@@ -134,7 +131,7 @@ class NeRV3DTrainer(BaseTrainer):
         with torch.no_grad():
             for batch_idx, valid_data in enumerate(valid_tqdm_batch):
                 # BTHWC > BCTHW
-                valid_data = valid_data.permute(0, 4, 1, 2, 3).cuda(non_blocking=True)
+                valid_data = valid_data.permute(0, 4, 1, 2, 3)
                 valid_pred = self.model(valid_data)
 
                 # BCTHW > BTCHW
@@ -181,7 +178,7 @@ class NeRV3DTrainer(BaseTrainer):
             )
 
             print(
-                "Valid Epoch: {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
+                "Valid epoch {} | Avg. Loss: {:.4f} | Avg. PSNR: {:.4f}".format(
                     epoch,
                     valid_loss_video / self.len_epoch,
                     valid_psnr_video / self.len_epoch,

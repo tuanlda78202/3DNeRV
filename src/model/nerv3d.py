@@ -22,7 +22,7 @@ def vmae_pretrained(
                 break
         vmae.load_state_dict(ckt)
 
-        print("✅Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
+        print("✅ Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
 
     vmae.eval()
     vmae.to(device)

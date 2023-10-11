@@ -8,8 +8,7 @@ def build_data(data_path, batch_size, frame_interval):
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
-        num_workers=1,
-        pin_memory=True,
+        num_workers=0,
         shuffle=False,
     )
 

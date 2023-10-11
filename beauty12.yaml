@@ -3,7 +3,7 @@ dataloader:
 
   args:
     data_path: "../uvg/beauty.yuv"
-    batch_size: 1
+    batch_size: 2
     frame_interval: 2                   
 
 arch:
@@ -39,24 +39,24 @@ msssim:
 optimizer:
   type: Adam
 
-  args: 
-    lr: 0.0005
+  args:  
+    lr: 0.001 # BS ~ LR 4x
     betas: [0.9, 0.99]
 
 lr_scheduler:
   type: CosineAnnealingLR
 
   args:
-    T_max: 90000
+    T_max: 45000
     eta_min: 0
 
 trainer:
-  resume: False 
+  resume: False
   
-  epochs: 0
-  valid_period: 20
+  epochs: 300
+  valid_period: 600
   save_dir: saved/
-  save_period: 50
+  save_period: 100
 
   mode: "disabled"
   name: "fixbug"
@@ -73,4 +73,4 @@ compression:
   compressed_decoder_path: "compression/12M/beauty/compressed_decoder_converted.pt"
 
   model_qp: -38
-  embed_qp: -38          
+  embed_qp: -38
