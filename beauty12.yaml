@@ -3,7 +3,7 @@ dataloader:
 
   args:
     data_path: "../uvg/beauty.yuv"
-    batch_size: 2
+    batch_size: 2 # 15
     frame_interval: 2                   
 
 arch:
@@ -12,12 +12,12 @@ arch:
   args:    
     embed_dim: 8
     embed_size: [9, 16]
-    decode_dim: 634
+    decode_dim: 634 # 400
 
     lower_kernel: 1
     upper_kernel: 5
     scales: [5, 4, 3, 2]
-    reduce: 3
+    reduce: 3 # 2 
     lower_width: 6
 
     ckpt_path: "../uvg/vmae_sdg.pth"
@@ -40,14 +40,14 @@ optimizer:
   type: Adam
 
   args:  
-    lr: 0.001 # BS ~ LR 4x
+    lr: 0.001 # 0.01
     betas: [0.9, 0.99]
 
 lr_scheduler:
   type: CosineAnnealingLR
 
   args:
-    T_max: 45000
+    T_max: 45000 # 600
     eta_min: 0
 
 trainer:
@@ -58,7 +58,7 @@ trainer:
   save_dir: saved/
   save_period: 100
 
-  mode: "online"
+  mode: "online" # offline
   name: "fixbug"
   
   project: nerv3d
