@@ -9,10 +9,8 @@ from pytorch_msssim import ms_ssim, ssim
 
 
 def loss_fn(pred, target, loss_type="L2", batch_average=True):
-    target = target.detach()
-
     if loss_type == "L2":
-        loss = F.mse_loss(pred, target)  # reduction="none").flatten(1).mean(1)
+        loss = F.mse_loss(pred, target)
 
     elif loss_type == "L1":
         loss = F.l1_loss(pred, target, reduction="none").flatten(1).mean(1)

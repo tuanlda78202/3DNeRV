@@ -3,12 +3,12 @@ import torch
 from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
-from ..backbone.videomaev2 import vit_small_patch16_224
+from ..backbone.videomaev2 import vit_small_patch16_224, vit_base_patch16_224
 
 
 def vmae_pretrained(
     ckpt_path=None,
-    model_fn=vit_small_patch16_224,
+    model_fn=vit_base_patch16_224,
     **kwargs,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -84,7 +84,7 @@ class NeRV3D(nn.Module):
         norm_fn=nn.Identity,
         act_fn=nn.GELU,
         out_fn=nn.Sigmoid,
-        model_fn=vit_small_patch16_224,
+        model_fn=vit_base_patch16_224,
         ckpt_path=None,
     ):
         super().__init__()
