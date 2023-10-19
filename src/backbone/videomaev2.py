@@ -42,8 +42,6 @@ class Mlp(nn.Module):
     def forward(self, x):
         x = self.fc1(x)
         x = self.act(x)
-        # x = self.drop(x)
-        # commit this for the orignal BERT implement
         x = self.fc2(x)
         x = self.drop(x)
         return x
@@ -63,11 +61,11 @@ class CosAttention(nn.Module):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
+
         if attn_head_dim is not None:
             head_dim = attn_head_dim
         all_head_dim = head_dim * self.num_heads
-        # self.scale = qk_scale or head_dim**-0.5
-        # DO NOT RENAME [self.scale] (for no weight decay)
+
         if qk_scale is None:
             self.scale = nn.Parameter(
                 torch.log(10 * torch.ones((num_heads, 1, 1))), requires_grad=True
@@ -104,11 +102,10 @@ class CosAttention(nn.Module):
             qkv[0],
             qkv[1],
             qkv[2],
-        )  # make torchscript happy (cannot use tensor as tuple)
+        )
 
         attn = F.normalize(q, dim=-1) @ F.normalize(k, dim=-1).transpose(-2, -1)
 
-        # torch.log(torch.tensor(1. / 0.01)) = 4.6052
         logit_scale = torch.clamp(self.scale, max=4.6052).exp()
 
         attn = attn * logit_scale
@@ -171,7 +168,7 @@ class Attention(nn.Module):
             qkv[0],
             qkv[1],
             qkv[2],
-        )  # make torchscript happy (cannot use tensor as tuple)
+        )
         q = q * self.scale
         attn = q @ k.transpose(-2, -1)
 
@@ -290,18 +287,12 @@ class PatchEmbed(nn.Module):
     def forward(self, x, **kwargs):
         B, C, T, H, W = x.shape
 
-        """
-        assert (
-            H == self.img_size[0] and W == self.img_size[1]
-        ), f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
-        """
         # b, c, l -> b, l, c
         x = self.proj(x).flatten(2).transpose(1, 2)
         return x
 
 
 # sin-cos position encoding
-# https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/transformer/Models.py#L31
 def get_sinusoid_encoding_table(n_position, d_hid):
     """Sinusoid position encoding table"""
 
@@ -462,7 +453,6 @@ class VisionTransformer(nn.Module):
                 x = blk(x)
 
         if self.fc_norm is not None:
-            # return self.fc_norm(x.mean(1))
             return self.fc_norm(x)
         else:
             return self.norm(x[:, 0])
@@ -489,22 +479,6 @@ def _cfg(url="", **kwargs):
 
 
 @register_model
-def vit_small_patch16_224(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        patch_size=16,
-        embed_dim=384,
-        depth=12,
-        num_heads=6,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
 def vit_base_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
         patch_size=16,
@@ -512,54 +486,6 @@ def vit_base_patch16_224(pretrained=False, **kwargs):
         depth=12,
         num_heads=12,
         mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_large_patch16_224(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        patch_size=16,
-        embed_dim=1024,
-        depth=24,
-        num_heads=16,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_huge_patch16_224(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        patch_size=16,
-        embed_dim=1280,
-        depth=32,
-        num_heads=16,
-        mlp_ratio=4,
-        qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6),
-        **kwargs
-    )
-    model.default_cfg = _cfg()
-    return model
-
-
-@register_model
-def vit_giant_patch14_224(pretrained=False, **kwargs):
-    model = VisionTransformer(
-        patch_size=14,
-        embed_dim=1408,
-        depth=40,
-        num_heads=16,
-        mlp_ratio=48 / 11,
         qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
         **kwargs
