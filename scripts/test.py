@@ -24,38 +24,45 @@ torch.backends.cudnn.deterministic = False
 
 
 def main(config):
-    # Config
-    name_wandb = "infer-" + str(config["trainer"]["name"])
-    batch_size = config["dataloader"]["args"]["batch_size"]
-    frame_interval = config["dataloader"]["args"]["frame_interval"]
+    # GLOBAL VARIABLES
+    NAME = "test-" + str(config["trainer"]["name"])
+    MODE = config["trainer"]["mode"]
+    BS = config["dataloader"]["args"]["batch_size"]
+    FI = config["dataloader"]["args"]["frame_interval"]
 
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
     # Model
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    torch.set_default_device(device)
-    model = config.init_obj("arch", module_arch).to(device)
+    device = torch.device("cuda")
+    model = config.init_obj(
+        "arch", module_arch, frame_interval=FI, arch_mode="test"
+    ).to(device)
     model.load_state_dict(torch.load(config.resume)["state_dict"])
 
     # Metrics
-    psnr_metric = config.init_ftn("psnr", module_metric)
-    msssim_metric = config.init_ftn("msssim", module_metric)
+    psnr_metric = config.init_ftn(
+        "psnr", module_metric, batch_size=BS, frame_interval=FI
+    )
+    msssim_metric = config.init_ftn("msssim", module_metric, batch_size=BS)
 
-    model.eval()
-
-    wandb.init(project="nerv3d", entity="tuanlda78202", name=name_wandb, config=config)
+    wandb.init(
+        project="nerv3d", entity="tuanlda78202", name=NAME, mode=MODE, config=config
+    )
 
     tqdm_batch = tqdm(
         iterable=dataloader,
-        desc="Inference UVG",
+        desc="🥳 Inference {}: ".format(NAME),
         total=len(dataloader),
         unit="it",
     )
 
+    model.eval()
+
     with torch.no_grad():
-        psnr_video, msssim_video = [], []
+        test_psnr_video, test_msssim_video = [], []
+
         for batch_idx, data in enumerate(tqdm_batch):
             data = data.permute(0, 4, 1, 2, 3).cuda()
             pred = model(data)
@@ -63,15 +70,11 @@ def main(config):
             # PSNR & MS-SSIM
             data = data.permute(0, 2, 1, 3, 4)
 
-            psnr_batch = psnr_metric(
-                pred, data, batch_size=batch_size, frame_interval=frame_interval
-            )
-
-            msssim_batch = msssim_metric(pred, data, batch_size=batch_size)
+            psnr_batch = psnr_metric(pred, data)
+            msssim_batch = msssim_metric(pred, data)
 
             data = torch.mul(data, 255).type(torch.uint8)
             pred = torch.mul(pred, 255).type(torch.uint8)
-
             pred = pred.cpu().detach().numpy()
             data = data.cpu().detach().numpy()
 
@@ -79,28 +82,36 @@ def main(config):
 
             wandb.log(
                 {
-                    "psnr_batch": psnr_batch,
-                    "msssim_batch": msssim_batch,
-                    "pred": wandb.Video(pred, fps=4, format="mp4"),
-                    "data": wandb.Video(data, fps=4, format="mp4"),
+                    "PSNR Test": psnr_batch,
+                    "MS-SSIM Test": msssim_batch,
+                    "Prediction": wandb.Video(pred, fps=FI, format="mp4"),
+                    "Ground Truth": wandb.Video(data, fps=FI, format="mp4"),
                 },
             )
 
-            psnr_video.append(psnr_batch)
-            msssim_video.append(msssim_batch)
+            test_psnr_video.append(psnr_batch)
+            test_msssim_video.append(msssim_batch)
 
         wandb.log(
             {
-                "psnr_video": sum(psnr_video) / len(psnr_video),
-                "msssim_video": sum(msssim_video) / len(msssim_video),
+                "Avg. PSNR Test": sum(test_psnr_video) / len(test_psnr_video),
+                "Avg. MS-SSIM Test": sum(test_msssim_video) / len(test_msssim_video),
             }
+        )
+
+        print(
+            "🎉 Avg. PSNR Test: {:.4f} dB & Avg. MS-SSIM Test: {:.4f}".format(
+                sum(test_psnr_video) / len(test_psnr_video),
+                sum(test_msssim_video) / len(test_msssim_video),
+            )
         )
 
         wandb.finish()
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="Inference with NeRV3D")
+    args = argparse.ArgumentParser(description="Testing NeRV3D")
+
     args.add_argument(
         "-c",
         "--config",

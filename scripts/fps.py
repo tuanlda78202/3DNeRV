@@ -33,9 +33,9 @@ def main(config):
     )
 
     tqdm_batch = tqdm(
-        iterable=range(args.frames),
-        desc="Decoding UVG",
-        total=args.frames,
+        iterable=range(len(dataloader)),
+        desc="🦋 Decoding UVG:",
+        total=len(dataloader),
         unit="it",
     )
 
@@ -44,12 +44,12 @@ def main(config):
     with torch.no_grad():
         for idx in enumerate(tqdm_batch):
             embed = torch.from_numpy(embedding[str(idx)]).cuda()
-            pred, dec_time = decoder_model(embed)
+            _, dec_time = decoder_model(embed)
 
             total_time.append(dec_time)
 
     print(
-        "FPS: {}".format(
+        "🦖 FPS: {}".format(
             len(dataset)
             * config["dataloader"]["args"]["frame_interval"]
             / sum(total_time)
@@ -58,7 +58,7 @@ def main(config):
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="NeRV3D Compression")
+    args = argparse.ArgumentParser(description="FPS 3DNeRV Decoder")
 
     args.add_argument(
         "-c",

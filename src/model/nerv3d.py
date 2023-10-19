@@ -3,18 +3,19 @@ import torch
 from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
-from ..backbone.videomaev2 import vit_small_patch16_224, vit_base_patch16_224
+from ..backbone.videomaev2 import vit_base_patch16_224
 
 
 def vmae_pretrained(
     ckpt_path=None,
     model_fn=vit_base_patch16_224,
+    arch_mode="train",
     **kwargs,
 ):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda")
     vmae: nn.Module = model_fn(**kwargs)
 
-    if ckpt_path is not None:
+    if arch_mode == "train" and ckpt_path is not None:
         ckt = torch.load(ckpt_path, map_location="cpu")
         for model_key in ["model", "module"]:
             if model_key in ckt:
@@ -24,13 +25,23 @@ def vmae_pretrained(
 
         print("✅ Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
 
-    vmae.eval()
-    vmae.to(device)
+        vmae.train()
+        vmae.to(device)
 
-    for param in vmae.parameters():
-        param.requires_grad = False
+        for param in vmae.parameters():
+            param.requires_grad = True
 
-    return vmae
+        return vmae
+
+    elif arch_mode == "test":
+        vmae.eval()
+        vmae.to(device)
+
+        for param in vmae.parameters():
+            param.requires_grad = False
+
+        print("🐿️ Testing session")
+        return vmae
 
 
 class NeRVBlock3D(nn.Module):
@@ -70,6 +81,7 @@ class NeRVBlock3D(nn.Module):
 class NeRV3D(nn.Module):
     def __init__(
         self,
+        arch_mode: str,
         frame_interval: int,
         img_size: Tuple = (1080, 1920),
         embed_dim: int = 8,
@@ -91,7 +103,7 @@ class NeRV3D(nn.Module):
 
         # Encoder
         self.encoder = vmae_pretrained(
-            ckpt_path, model_fn, all_frames=frame_interval, img_size=img_size
+            ckpt_path, model_fn, arch_mode, all_frames=frame_interval, img_size=img_size
         )
         self.hidden_dim = self.encoder.embed_dim
         patch_size = self.encoder.patch_embed.patch_size

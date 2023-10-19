@@ -41,7 +41,7 @@ class BaseTrainer:
             config=self.config,
         )
 
-        if cfg_trainer["resume"]:
+        if config.resume is not None:
             self._resume_checkpoint(config.resume)
 
     @abstractmethod

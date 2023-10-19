@@ -41,9 +41,16 @@ class ConfigParser:
         if not isinstance(args, tuple):
             args = args.parse_args()
 
+        if args.resume is not None:
+            resume = Path(args.resume)
+        else:
+            msg_no_cfg = "Configuration file need to be specified. Add '-c config.yaml', for example."
+            assert args.config is not None, msg_no_cfg
+            resume = None
+
         config = load_yaml(args.config)
 
-        if args.config:
+        if args.config and resume:
             config.update(load_yaml(args.config))
 
         # parse custom cli options into dictionary
@@ -51,7 +58,7 @@ class ConfigParser:
             opt.target: getattr(args, _get_opt_name(opt.flags)) for opt in options
         }
 
-        return cls(config, modification)
+        return cls(config, resume, modification)
 
     def init_obj(self, name, module, *args, **kwargs):
         """

@@ -3,22 +3,22 @@ dataloader:
 
   args:
     data_path: "../uvg/beauty.yuv"
-    batch_size: 12
+    batch_size: 1
     frame_interval: 2                   
 
 arch:
   type: NeRV3D
 
   args:    
-    embed_dim: 8
+    embed_dim: 8 # 256
     embed_size: [9, 16]
-    decode_dim: 634 
+    decode_dim: 192 # 1024
 
     lower_kernel: 1
     upper_kernel: 5
     scales: [5, 4, 3, 2]
-    reduce: 3 
-    lower_width: 6
+    reduce: 1.5 # 2
+    lower_width: 12
 
     ckpt_path: "../vit_b_k710_dl_from_giant.pth"
 
@@ -50,9 +50,7 @@ lr_scheduler:
     max_lr: 0.001 
     total_steps: 90000 
 
-trainer:
-  resume: False
-  
+trainer:  
   epochs: 300
   valid_period: 600
   save_dir: saved/

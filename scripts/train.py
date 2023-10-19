@@ -22,8 +22,8 @@ from src.trainer.nerv3d_trainer import NeRV3DTrainer
 
 def main(config):
     # GLOBAL VARIABLES
-    batch_size = config["dataloader"]["args"]["batch_size"]
-    frame_interval = config["dataloader"]["args"]["frame_interval"]
+    BS = config["dataloader"]["args"]["batch_size"]
+    FI = config["dataloader"]["args"]["frame_interval"]
 
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
@@ -31,14 +31,12 @@ def main(config):
 
     # Model
     device = torch.device("cuda")
-    model = config.init_obj("arch", module_arch, frame_interval=frame_interval)
+    model = config.init_obj("arch", module_arch, frame_interval=FI, arch_mode="train")
     model = model.to(device)
 
     # Criterion & Metrics
     criterion = config.init_ftn("loss", module_loss)
-    metrics = config.init_ftn(
-        "psnr", module_metric, batch_size=batch_size, frame_interval=frame_interval
-    )
+    metrics = config.init_ftn("psnr", module_metric, batch_size=BS, frame_interval=FI)
 
     # Optimizer
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())

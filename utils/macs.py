@@ -1,4 +1,3 @@
-import wandb
 import torch
 from src.model.nerv3d import NeRV3D
 from ptflops import get_model_complexity_info

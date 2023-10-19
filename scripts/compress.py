@@ -45,15 +45,16 @@ def main(config):
     dataset, dataloader = build_data()
 
     # Model
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    torch.set_default_device(device)
-    full_model = config.init_obj("arch", module_arch).to(device)
+    device = torch.device("cuda")
+    full_model = config.init_obj("arch", module_arch, frame_interval=FI).to(device)
     full_model.load_state_dict(torch.load(config.resume)["state_dict"])
     full_model.eval()
 
     # Metrics
-    psnr_metric = config.init_ftn("psnr", module_metric)
-    msssim_metric = config.init_ftn("msssim", module_metric)
+    psnr_metric = config.init_ftn(
+        "psnr", module_metric, batch_size=BS, frame_interval=FI
+    )
+    msssim_metric = config.init_ftn("msssim", module_metric, batch_size=BS)
 
     # EED
     encoder_model = state(full_model, compress["raw_decoder_path"], frame_interval=FI)
@@ -89,7 +90,7 @@ def main(config):
 
     tqdm_batch = tqdm(
         iterable=dataloader,
-        desc="Compress UVG",
+        desc="🍀 Compress UVG:",
         total=len(dataloader),
         unit="it",
     )
@@ -111,36 +112,33 @@ def main(config):
             data = data.permute(0, 2, 1, 3, 4)
             pred = pred.permute(0, 2, 1, 3, 4)
 
-            psnr_batch = psnr_metric(pred, data, batch_size=BS, frame_interval=FI)
-            msssim_batch = msssim_metric(pred, data, batch_size=BS)
+            psnr_batch = psnr_metric(pred, data)
+            msssim_batch = msssim_metric(pred, data)
 
-            data = torch.mul(data, 255).type(torch.uint8)
-            pred = torch.mul(pred, 255).type(torch.uint8)
+            tqdm_batch.set_postfix(psnr=psnr_batch, msssim=msssim_batch)
 
-            tqdm_batch.set_postfix(psnr=psnr_batch)
-
-            wandb.log({"psnr_batch": psnr_batch, "msssim_batch": msssim_batch})
+            wandb.log(
+                {"PSNR Compresison": psnr_batch, "MS-SSIM Compresison": msssim_batch}
+            )
 
             psnr_video.append(psnr_batch)
             msssim_video.append(msssim_batch)
 
-            del pred, data
-
         if compress["method"] == "normal":
             wandb.log(
                 {
-                    "psnr": sum(psnr_video) / len(psnr_video),
-                    "msssim": sum(msssim_video) / len(msssim_video),
-                    "bpp": total_bits / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
+                    "Avg. PSNR Compresison": sum(psnr_video) / len(psnr_video),
+                    "Avg. MS-SSIM Compresison": sum(msssim_video) / len(msssim_video),
+                    "BPP": total_bits / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
                 }
             )
 
         elif compress["method"] == "dcabac":
             wandb.log(
                 {
-                    "psnr": sum(psnr_video) / len(psnr_video),
-                    "msssim": sum(msssim_video) / len(msssim_video),
-                    "bpp": (embed_bit + decoder_bit)
+                    "Avg. PSNR Compresison": sum(psnr_video) / len(psnr_video),
+                    "Avg. MS-SSIM Compresison": sum(msssim_video) / len(msssim_video),
+                    "BPP": (embed_bit + decoder_bit)
                     * 8
                     / (len(dataset) * FI * IMG_SIZE[0] * IMG_SIZE[1]),
                 }
