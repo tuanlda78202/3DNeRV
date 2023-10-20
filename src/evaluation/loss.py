@@ -19,11 +19,12 @@ def loss_fn(pred, target, loss_type="L2", batch_average=True):
         loss = 1 - ssim(pred, target, data_range=1, size_average=False)
 
     elif loss_type == "L1-SSIM":
-        loss = 0.7 * F.l1_loss(
-            pred.squeeze(0), target.squeeze(0), reduction="none"
-        ).flatten(1).mean(1) + 0.3 * (
-            1
-            - ssim(pred.squeeze(0), target.squeeze(0), data_range=1, size_average=False)
+        BS, FI, C, H, W = pred.shape
+        bf = pred.reshape(BS * FI, C, H, W)
+        gt = target.reshape(BS * FI, C, H, W)
+
+        loss = 0.7 * F.l1_loss(bf, gt, reduction="none").flatten(1).mean(1) + 0.3 * (
+            1 - ssim(bf, gt, data_range=1, size_average=False)
         )
 
     elif loss_type == "Fusion1":
