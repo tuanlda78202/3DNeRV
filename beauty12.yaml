@@ -26,7 +26,7 @@ loss:
   type: loss_fn
 
   args:
-    loss_type: "L1-SSIM" # note bs 1 
+    loss_type: "L1-SSIM"
 
 psnr:
   type: psnr_batch
@@ -43,12 +43,14 @@ optimizer:
     lr: 0.001
     betas: [0.9, 0.99]
 
+  lr_encoder: 0.0003
+
 lr_scheduler:
-  type: OneCycleLR
+  type: CosineAnnealingLR
 
   args:
-    max_lr: 0.001 
-    total_steps: 90000 
+    T_max: 90000 
+    eta_min: 0.000001
 
 trainer:  
   epochs: 300

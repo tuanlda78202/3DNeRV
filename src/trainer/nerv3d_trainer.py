@@ -79,14 +79,18 @@ class NeRV3DTrainer(BaseTrainer):
 
             # TQDM & WandB
             tqdm_batch.set_postfix(
-                lr=self.lr_scheduler.get_last_lr()[0], loss=loss.item(), psnr=psnr
+                lr_enc=self.lr_scheduler.get_last_lr()[0],
+                lr_dec=self.lr_scheduler.get_last_lr()[1],
+                loss=loss.item(),
+                psnr=psnr,
             )
 
             wandb.log(
                 {
-                    "loss": loss.item(),
-                    "psnr": psnr,
-                    "lr": self.lr_scheduler.get_last_lr()[0],
+                    "Loss": loss.item(),
+                    "PSNR": psnr,
+                    "LR Encoder": self.lr_scheduler.get_last_lr()[0],
+                    "LR Decoder": self.lr_scheduler.get_last_lr()[1],
                 }
             )
 
@@ -161,12 +165,12 @@ class NeRV3DTrainer(BaseTrainer):
 
                 wandb.log(
                     {
-                        "valid_loss": valid_loss.item(),
-                        "valid_psnr": valid_psnr,
-                        "valid_pred": wandb.Video(
+                        "Valid Loss": valid_loss.item(),
+                        "Valid PSNR": valid_psnr,
+                        "Valid Prediction": wandb.Video(
                             valid_pred, fps=self.frame_interval, format="mp4"
                         ),
-                        "valid_data": wandb.Video(
+                        "Valid Data": wandb.Video(
                             valid_data, fps=self.frame_interval, format="mp4"
                         ),
                     }
@@ -179,8 +183,8 @@ class NeRV3DTrainer(BaseTrainer):
 
             wandb.log(
                 {
-                    "avg_loss": valid_loss_video / self.len_epoch,
-                    "avg_psnr": valid_psnr_video / self.len_epoch,
+                    "Avg. Valid Loss": valid_loss_video / self.len_epoch,
+                    "Avg. Valid PSNR": valid_psnr_video / self.len_epoch,
                 }
             )
 

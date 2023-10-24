@@ -24,6 +24,7 @@ def main(config):
     # GLOBAL VARIABLES
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]
+    LR_ENC = config["optimizer"]["args"]["lr_encoder"]
 
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
@@ -39,7 +40,12 @@ def main(config):
     metrics = config.init_ftn("psnr", module_metric, batch_size=BS, frame_interval=FI)
 
     # Optimizer
-    trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+    trainable_params = [
+        {"params": model.encoder.parameters(), "lr": LR_ENC},
+        {"params": model.proj.parameters()},
+        {"params": model.decoder.parameters()},
+        {"params": model.head_proj.parameters()},
+    ]
     optimizer = config.init_obj("optimizer", torch.optim, trainable_params)
     lr_scheduler = config.init_obj("lr_scheduler", torch.optim.lr_scheduler, optimizer)
 
