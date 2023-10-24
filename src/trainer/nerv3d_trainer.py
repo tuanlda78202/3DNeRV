@@ -104,8 +104,8 @@ class NeRV3DTrainer(BaseTrainer):
 
         wandb.log(
             {
-                "Avg. Loss": train_loss_video / self.len_epoch,
-                "Avg. PSNR": train_psnr_video / self.len_epoch,
+                "Avg. Train Loss": train_loss_video / self.len_epoch,
+                "Avg. Train PSNR": train_psnr_video / self.len_epoch,
             }
         )
 
