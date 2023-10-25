@@ -46,11 +46,11 @@ optimizer:
   lr_encoder: 0.0003
 
 lr_scheduler:
-  type: CosineAnnealingLR
+  type: OneCycleLR
 
   args:
-    T_max: 90000 
-    eta_min: 0.000001
+    max_lr: [0.0003, 0.001, 0.001, 0.001] 
+    total_steps: 90000
 
 trainer:  
   epochs: 300
