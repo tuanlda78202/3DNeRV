@@ -24,7 +24,7 @@ def main(config):
     # GLOBAL VARIABLES
     BS = config["dataloader"]["args"]["batch_size"]
     FI = config["dataloader"]["args"]["frame_interval"]
-    LR_ENC = config["optimizer"]["args"]["lr_encoder"]
+    LR_ENC = config["optimizer"]["lr_encoder"]
 
     # Dataset & DataLoader
     build_data = config.init_ftn("dataloader", module_data)
