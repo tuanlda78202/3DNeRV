@@ -3,12 +3,18 @@ import torch
 from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
-from ..backbone.videomaev2 import vit_base_patch16_224
+from collections import OrderedDict
+from ..backbone.videomaev2 import (
+    vit_small_patch16_224,
+    vit_base_patch16_224,
+    vit_large_patch16_224,
+    load_state_dict,
+)
 
 
 def vmae_pretrained(
     ckpt_path=None,
-    model_fn=vit_base_patch16_224,
+    model_fn=vit_large_patch16_224,
     arch_mode="train",
     **kwargs,
 ):
@@ -16,14 +22,39 @@ def vmae_pretrained(
     vmae: nn.Module = model_fn(**kwargs)
 
     if arch_mode == "train" and ckpt_path is not None:
-        ckt = torch.load(ckpt_path, map_location="cpu")
-        for model_key in ["model", "module"]:
-            if model_key in ckt:
-                ckt = ckt[model_key]
+        checkpoint = torch.load(ckpt_path, map_location="cpu")
+        model_key = "model|module"
+        checkpoint_model = None
+        for model_key in model_key.split("|"):
+            if model_key in checkpoint:
+                checkpoint_model = checkpoint[model_key]
+                print("Load state_dict by model_key = %s" % model_key)
                 break
-        vmae.load_state_dict(ckt)
 
-        print("✅ Loaded VMAEv2 pretrained weights from {}".format(ckpt_path))
+        state_dict = vmae.state_dict()
+        for k in ["head.weight", "head.bias"]:
+            if (
+                k in checkpoint_model
+                and checkpoint_model[k].shape != state_dict[k].shape
+            ):
+                print(f"Removing key {k} from pretrained checkpoint")
+                del checkpoint_model[k]
+
+        all_keys = list(checkpoint_model.keys())
+
+        new_dict = OrderedDict()
+        for key in all_keys:
+            if key.startswith("backbone."):
+                new_dict[key[9:]] = checkpoint_model[key]
+            elif key.startswith("encoder."):
+                new_dict[key[8:]] = checkpoint_model[key]
+            else:
+                new_dict[key] = checkpoint_model[key]
+        checkpoint_model = new_dict
+
+        load_state_dict(
+            vmae, checkpoint_model, prefix="", ignore_missing="relative_position_index"
+        )
 
         vmae.train()
         vmae.to(device)
@@ -86,17 +117,17 @@ class NeRV3D(nn.Module):
         img_size: Tuple = (1080, 1920),
         embed_dim: int = 8,
         embed_size: Tuple = (9, 16),
-        decode_dim: int = 305,  # 440 # 634
+        decode_dim: int = 140, 
         lower_kernel: int = 1,
         upper_kernel: int = 5,
-        scales: List = [5, 4, 3, 2],
-        reduce: float = 3,
-        lower_width: int = 6,
+        scales: List = [5, 3, 2, 2, 2],
+        reduce: float = 1.2,
+        lower_width: int = 12,
         bias: bool = True,
         norm_fn=nn.Identity,
         act_fn=nn.GELU,
         out_fn=nn.Sigmoid,
-        model_fn=vit_base_patch16_224,
+        model_fn=vit_large_patch16_224,
         ckpt_path=None,
     ):
         super().__init__()

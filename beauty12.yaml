@@ -20,7 +20,7 @@ arch:
     reduce: 1.2
     lower_width: 12
 
-    ckpt_path: "../uvg/vit_b_k710_dl_from_giant.pth"
+    ckpt_path: "../uvg/pretrain_vit-l_k400_e1600.pth"
 
 loss:
   type: loss_fn
@@ -59,7 +59,7 @@ trainer:
   save_period: 100
 
   mode: "offline" 
-  name: "stable"
+  name: "ft_vit-l"
   
   project: nerv3d
   entity: tuanlda78202
