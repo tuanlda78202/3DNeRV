@@ -43,13 +43,13 @@ optimizer:
     lr: 0.002
     betas: [0.9, 0.99]
 
-  lr_encoder: 0.0003
+  lr_encoder: 0.0005
 
 lr_scheduler:
   type: OneCycleLR
 
   args:
-    max_lr: [0.0003, 0.002, 0.002, 0.002] 
+    max_lr: [0.0005, 0.002, 0.002, 0.002] 
     total_steps: 90000
 
 trainer:  
@@ -59,7 +59,7 @@ trainer:
   save_period: 100
 
   mode: "offline" 
-  name: "ft_vit-l"
+  name: "ftp_vit-l"
   
   project: nerv3d
   entity: tuanlda78202
