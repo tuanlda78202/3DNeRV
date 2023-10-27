@@ -20,7 +20,7 @@ arch:
     reduce: 1.2
     lower_width: 12
 
-    ckpt_path: "../uvg/pretrain_vit-l_k400_e1600.pth"
+    ckpt_path: "../uvg/pretrain_vit-b_k400_e1600.pth"
 
 loss:
   type: loss_fn

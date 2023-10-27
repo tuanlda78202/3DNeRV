@@ -14,7 +14,7 @@ from ..backbone.videomaev2 import (
 
 def vmae_pretrained(
     ckpt_path=None,
-    model_fn=vit_large_patch16_224,
+    model_fn=vit_base_patch16_224,
     arch_mode="train",
     **kwargs,
 ):
@@ -117,7 +117,7 @@ class NeRV3D(nn.Module):
         img_size: Tuple = (1080, 1920),
         embed_dim: int = 8,
         embed_size: Tuple = (9, 16),
-        decode_dim: int = 140, 
+        decode_dim: int = 140,
         lower_kernel: int = 1,
         upper_kernel: int = 5,
         scales: List = [5, 3, 2, 2, 2],
@@ -127,7 +127,7 @@ class NeRV3D(nn.Module):
         norm_fn=nn.Identity,
         act_fn=nn.GELU,
         out_fn=nn.Sigmoid,
-        model_fn=vit_large_patch16_224,
+        model_fn=vit_base_patch16_224,
         ckpt_path=None,
     ):
         super().__init__()
