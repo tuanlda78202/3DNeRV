@@ -25,6 +25,7 @@ torch.backends.cudnn.deterministic = False
 
 def main(config):
     # GLOBAL VARIABLES
+    PROJECT = config["trainer"]["project"]
     NAME = "test-" + str(config["trainer"]["name"])
     MODE = config["trainer"]["mode"]
     BS = config["dataloader"]["args"]["batch_size"]
@@ -48,7 +49,11 @@ def main(config):
     msssim_metric = config.init_ftn("msssim", module_metric, batch_size=BS)
 
     wandb.init(
-        project="nerv3d", entity="tuanlda78202", name=NAME, mode=MODE, config=config
+        project=PROJECT,
+        entity="tuanlda78202",
+        name=NAME,
+        mode=MODE,
+        config=config,
     )
 
     tqdm_batch = tqdm(
