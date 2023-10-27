@@ -1,91 +1,76 @@
 dataloader:
-  type: build_dataloader
+  type: build_data
 
   args:
-    name: "uvghd30"
-    data_path: "data/jockey.mp4"                       
-    crop_size: [1080, 1920]                             
-    num_workers: 1                                     # CPU
-
-    batch_size: 1                                      # MEMORY
-    frame_interval: 4                                  # MEMORY
-
-psnr:
-  type: psnr_batch
-
-  args:
-    batch_size: 1                                   # MEMORY  
-    frame_interval: 4                               # MEMORY
-
-msssim:
-  type: msssim_batch
-
-  args:
-    batch_size: 1                                   # MEMORY  
+    data_path: "../uvg/jockey.yuv"
+    batch_size: 1
+    frame_interval: 2                   
 
 arch:
   type: NeRV3D
 
-  args:
-    img_size: [1080, 1920] 
-    frame_interval: 4                   # MEMORY      
-    
-    embed_dim: 8 
+  args:    
+    embed_dim: 8
     embed_size: [9, 16]
-    decode_dim: 440
+    decode_dim: 140
 
     lower_kernel: 1
     upper_kernel: 5
-    scales: [5, 4, 3, 2]
-    reduce: 3
-    lower_width: 6
+    scales: [5, 3, 2, 2, 2]
+    reduce: 1.2
+    lower_width: 12
 
-    ckpt_path: "data/vmae_sdg.pth"
+    ckpt_path: "../uvg/pretrain_vit-b_k400_e1600.pth"
 
 loss:
   type: loss_fn
 
   args:
-    loss_type: "L2"
-    batch_average: False
+    loss_type: "L1-SSIM"
+
+psnr:
+  type: psnr_batch
+  args:
+
+msssim:
+  type: msssim_batch
+  args:
 
 optimizer:
   type: Adam
 
-  args: 
-    lr: 0.001 
+  args:  
+    lr: 0.002
     betas: [0.9, 0.99]
 
+  lr_encoder: 0.0005
+
 lr_scheduler:
-  type: CosineAnnealingLR
+  type: OneCycleLR
 
   args:
-    T_max: 40000 # ~ num_epochs * len(dataloader)
-    eta_min: 0.00000001     # 1e-8
+    max_lr: [0.0005, 0.002, 0.002, 0.002] 
+    total_steps: 90000
 
-trainer:
-  resume: False 
-  
+trainer:  
   epochs: 300
-  valid_period: 10
-
+  valid_period: 100
   save_dir: saved/
   save_period: 100
-  verbosity: 1
 
-  visual_tool: wandb
-  mode: "online"
-  project: nerv3d
-  api_key_file: "./config/api/tuanlda78202"
+  mode: "offline" 
+  name: "jockey_6m"
+  
+  project: 3dnerv-cvpr24
   entity: tuanlda78202
-  name: "jockey-1080p_6M"        
+  api_key_file: "./config/api/tuanlda78202"
 
 compression:
-  compress_dir: compression/6M/jockey/
-  embedding_path: "compression/6M/jockey/compressed_embedding.ncc"
-  raw_decoder_path: "compression/6M/jockey/raw_decoder.pt"
-  stream_path: "compression/6M/jockey/compressed_decoder.nnc"
-  compressed_decoder_path: "compression/6M/jockey/compressed_decoder_converted.pt"
+  compress_dir: compression/6m/jockey/
+  embedding_path: "compression/6m/jockey/compressed_embedding.ncc"
+  raw_decoder_path: "compression/6m/jockey/raw_decoder.pt"
+  stream_path: "compression/6m/jockey/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/6m/jockey/compressed_decoder_converted.pt"
 
   model_qp: -38
-  embed_qp: -38 
+  embed_qp: -38

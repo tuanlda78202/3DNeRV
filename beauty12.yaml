@@ -59,9 +59,9 @@ trainer:
   save_period: 100
 
   mode: "offline" 
-  name: "ftp_vit-l"
+  name: "beauty_12M"
   
-  project: nerv3d
+  project: 3dnerv-cvpr24
   entity: tuanlda78202
   api_key_file: "./config/api/tuanlda78202"
 
