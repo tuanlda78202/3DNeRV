@@ -33,7 +33,7 @@ def state(full_model, raw_decoder_path, frame_interval):
     return encoder_model
 
 
-# DeepCABAC
+### DeepCABAC
 def embedding_compress(dataloader, encoder_model, embedding_path, eqp):
     embedding = defaultdict()
 
@@ -90,7 +90,7 @@ def dcabac_decoding(embedding_path, stream_path, compressed_decoder_path, decode
     return embedding[0], decoder_model.cuda()
 
 
-# Traditional Compression
+### Traditional Compression
 def compute_quantization_params(tensor, num_bits=8):
     def calculate_scale(min_value, max_value):
         return (max_value - min_value) / (2**num_bits - 1)

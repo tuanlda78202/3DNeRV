@@ -9,6 +9,8 @@ decoder: [
     "decoder.3.conv.bias",
     "decoder.4.conv.weight",
     "decoder.4.conv.bias",
+    "decoder.5.conv.weight",
+    "decoder.5.conv.bias",
     "head_proj.weight",
     "head_proj.bias"
 ]

@@ -32,6 +32,7 @@ def main(config):
     FI = config["dataloader"]["args"]["frame_interval"]
     IMG_SIZE = config["arch"]["args"]["img_size"]
     DECODER_DIM = config["arch"]["args"]["decode_dim"]
+    PROJECT = config["trainer"]["project"]
     WBMODE = config["trainer"]["mode"]
     DIR = config["compression"]["compress_dir"]
     compress = config["compression"]
@@ -85,7 +86,7 @@ def main(config):
 
     # Training
     wandb.init(
-        project="nerv3d", entity="tuanlda78202", name=NAME, mode=WBMODE, config=config
+        project=PROJECT, entity="tuanlda78202", name=NAME, mode=WBMODE, config=config
     )
 
     tqdm_batch = tqdm(

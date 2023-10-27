@@ -4,12 +4,7 @@ from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
 from collections import OrderedDict
-from ..backbone.videomaev2 import (
-    vit_small_patch16_224,
-    vit_base_patch16_224,
-    vit_large_patch16_224,
-    load_state_dict,
-)
+from ..backbone.videomaev2 import vit_base_patch16_224, load_state_dict
 
 
 def vmae_pretrained(
