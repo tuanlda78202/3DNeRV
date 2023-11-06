@@ -4,12 +4,12 @@ from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
 from collections import OrderedDict
-from ..backbone.videomaev2 import vit_base_patch16_224, load_state_dict
+from ..backbone.videomaev2 import vit_large_patch16_224, load_state_dict
 
 
 def vmae_pretrained(
     ckpt_path=None,
-    model_fn=vit_base_patch16_224,
+    model_fn=vit_large_patch16_224,
     arch_mode="train",
     **kwargs,
 ):
@@ -122,7 +122,7 @@ class NeRV3D(nn.Module):
         norm_fn=nn.Identity,
         act_fn=nn.GELU,
         out_fn=nn.Sigmoid,
-        model_fn=vit_base_patch16_224,
+        model_fn=vit_large_patch16_224,
         ckpt_path=None,
     ):
         super().__init__()

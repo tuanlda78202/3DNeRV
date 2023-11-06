@@ -20,7 +20,7 @@ arch:
     reduce: 1.2
     lower_width: 12
 
-    ckpt_path: "../uvg/pretrain_vit-b_k400_e1600.pth"
+    ckpt_path: "../uvg/pretrain_vit-l_k400_e1600.pth"
 
 loss:
   type: loss_fn
@@ -40,7 +40,7 @@ optimizer:
   type: Adam
 
   args:  
-    lr: 0.002
+    lr: 0.001
     betas: [0.9, 0.99]
 
   lr_encoder: 0.0005
@@ -49,7 +49,7 @@ lr_scheduler:
   type: OneCycleLR
 
   args:
-    max_lr: [0.0005, 0.002, 0.002, 0.002] 
+    max_lr: [0.0005, 0.001, 0.001, 0.001] 
     total_steps: 90000
 
 trainer:  
