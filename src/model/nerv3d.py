@@ -192,7 +192,14 @@ class NeRV3D(nn.Module):
             ngf = new_ngf
 
         self.decoder = nn.Sequential(*self.decoder)
-        self.head_proj = nn.Conv3d(ngf, 3, 3, 1, 1)
+        self.head_proj = nn.Conv3d(
+            ngf,
+            3,
+            7,
+            stride=1,
+            padding=ceil((7 - 1) // 2),
+            bias=bias,
+        )
         self.head_norm = norm_fn()
         self.out = out_fn()
 

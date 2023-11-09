@@ -10,7 +10,7 @@ arch:
   type: NeRV3D
 
   args:    
-    embed_dim: 8
+    embed_dim: 32
     embed_size: [9, 16]
     decode_dim: 140
 
