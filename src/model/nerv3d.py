@@ -110,7 +110,7 @@ class NeRV3D(nn.Module):
         arch_mode: str,
         frame_interval: int,
         img_size: Tuple = (1080, 1920),
-        embed_dim: int = 8,
+        embed_dim: int = 32,
         embed_size: Tuple = (9, 16),
         decode_dim: int = 140,
         lower_kernel: int = 1,
@@ -146,7 +146,7 @@ class NeRV3D(nn.Module):
             img_size[1] // patch_size[1],
         )
 
-        # reduce size of embeddings (hidden to embed)
+        # Hidden to Embedding
         self.proj = nn.Sequential(
             nn.Conv3d(
                 in_channels=self.hidden_dim,
@@ -195,7 +195,7 @@ class NeRV3D(nn.Module):
         self.head_proj = nn.Conv3d(
             ngf,
             3,
-            7,
+            kernel_size=7,
             stride=1,
             padding=ceil((7 - 1) // 2),
             bias=bias,
@@ -211,8 +211,8 @@ class NeRV3D(nn.Module):
         x = self.proj(x)
         x = x.reshape(
             B, self.embed_dim, self.frame_interval, self.embed_h, self.embed_w
-        )  # embedding
-
+        )
+        
         x = self.decoder(x)
         x = self.out(self.head_norm(self.head_proj(x)))
 
@@ -236,7 +236,7 @@ class NeRV3DEncoder(nn.Module):
         x = x.reshape(B, self.hidden_dim, self.hidden_t, self.hidden_h, self.hidden_w)
         x = self.proj(x)
 
-        return x  # embedding
+        return x
 
 
 class NeRV3DDecoder(nn.Module):
