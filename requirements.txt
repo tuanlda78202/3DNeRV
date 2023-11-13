@@ -12,3 +12,4 @@ torchsummary
 torchvision
 tqdm
 wandb
+cupy

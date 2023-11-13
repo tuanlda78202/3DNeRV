@@ -4,12 +4,12 @@ from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
 from collections import OrderedDict
-from ..backbone.videomaev2 import vit_large_patch16_224, load_state_dict
+from ..backbone.videomaev2 import *
 
 
 def vmae_pretrained(
     ckpt_path=None,
-    model_fn=vit_large_patch16_224,
+    model_fn=None,  # vit_small_patch16_224, vit_base_patch16_224
     arch_mode="train",
     **kwargs,
 ):
@@ -112,7 +112,7 @@ class NeRV3D(nn.Module):
         img_size: Tuple = (1080, 1920),
         embed_dim: int = 32,
         embed_size: Tuple = (9, 16),
-        decode_dim: int = 140,
+        decode_dim: int = 132,
         lower_kernel: int = 1,
         upper_kernel: int = 5,
         scales: List = [5, 3, 2, 2, 2],
@@ -181,8 +181,8 @@ class NeRV3D(nn.Module):
 
             upsample_blk = NeRVBlock3D(
                 scale,
-                ngf,
-                new_ngf,
+                in_channels=ngf,
+                out_channels=new_ngf,
                 kernel_size=min(lower_kernel + 2 * i, upper_kernel),
                 bias=bias,
                 norm_fn=norm_fn,
@@ -193,8 +193,8 @@ class NeRV3D(nn.Module):
 
         self.decoder = nn.Sequential(*self.decoder)
         self.head_proj = nn.Conv3d(
-            ngf,
-            3,
+            in_channels=ngf,
+            out_channels=3,
             kernel_size=7,
             stride=1,
             padding=ceil((7 - 1) // 2),
@@ -212,7 +212,7 @@ class NeRV3D(nn.Module):
         x = x.reshape(
             B, self.embed_dim, self.frame_interval, self.embed_h, self.embed_w
         )
-        
+
         x = self.decoder(x)
         x = self.out(self.head_norm(self.head_proj(x)))
 

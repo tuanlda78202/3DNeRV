@@ -12,7 +12,7 @@ arch:
   args:    
     embed_dim: 32
     embed_size: [9, 16]
-    decode_dim: 140
+    decode_dim: 132
 
     lower_kernel: 1
     upper_kernel: 5
