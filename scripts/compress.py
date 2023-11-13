@@ -41,7 +41,7 @@ def main(config):
     )
     make_dir(DIR)
 
-    # Dataset & DataLoader
+    # Data
     build_data = config.init_ftn("dataloader", module_data)
     dataset, dataloader = build_data()
 
