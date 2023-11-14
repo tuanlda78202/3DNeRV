@@ -257,7 +257,7 @@ class PatchEmbed(nn.Module):
 
     def __init__(
         self,
-        img_size=(720, 1280),
+        img_size=(1080, 1920),
         patch_size=16,
         in_chans=3,
         embed_dim=768,
@@ -319,10 +319,10 @@ class VisionTransformer(nn.Module):
 
     def __init__(
         self,
-        img_size=640,
+        img_size=(1080, 1920),
         patch_size=16,
         in_chans=3,
-        num_classes=710,  # 1000
+        num_classes=710,
         embed_dim=768,
         depth=12,
         num_heads=12,
@@ -337,7 +337,7 @@ class VisionTransformer(nn.Module):
         init_values=0.0,
         use_learnable_pos_emb=False,
         init_scale=0.0,
-        all_frames=12,  # 16
+        all_frames=2,
         tubelet_size=2,
         use_mean_pooling=True,
         with_cp=False,
@@ -512,9 +512,9 @@ def vit_base_patch16_224(pretrained=False, **kwargs):
 @register_model
 def vit_large_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
-        patch_size=16,
+        patch_size=24,
         embed_dim=1024,
-        depth=12, # 24
+        depth=24,
         num_heads=16,
         mlp_ratio=4,
         qkv_bias=True,
@@ -523,7 +523,6 @@ def vit_large_patch16_224(pretrained=False, **kwargs):
     )
     model.default_cfg = _cfg()
     return model
-
 
 def load_state_dict(
     model, state_dict, prefix="", ignore_missing="relative_position_index"
