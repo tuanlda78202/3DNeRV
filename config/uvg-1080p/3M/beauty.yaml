@@ -1,0 +1,96 @@
+dataloader:
+  type: build_dataloader
+
+  args:
+    name: "uvghd30"
+    data_path: "data/beauty.mp4"                       
+    crop_size: [1080, 1920]                             
+    num_workers: 16                                     # CPU
+
+    batch_size: 1                                      # MEMORY
+    frame_interval: 4                                  # MEMORY
+
+psnr:
+  type: psnr_batch
+
+  args:
+    batch_size: 1                                   # MEMORY  
+    frame_interval: 4                               # MEMORY
+
+msssim:
+  type: msssim_batch
+
+  args:
+    batch_size: 1                                   # MEMORY  
+
+arch:
+  type: NeRV3D
+
+  args:
+    img_size: [1080, 1920] 
+    frame_interval: 4                   # MEMORY      
+    
+    embed_dim: 8 
+    embed_size: [9, 16]
+    decode_dim: 305
+
+    lower_kernel: 1
+    upper_kernel: 5
+    scales: [5, 4, 3, 2]
+    reduce: 3
+    lower_width: 6
+
+    ckpt_path: "data/vmae_sdg.pth"
+
+loss:
+  type: loss_fn
+
+  args:
+    loss_type: "L2"
+    batch_average: False
+
+optimizer:
+  type: Adam
+
+  args: 
+    lr: 0.001 
+    betas: [0.9, 0.99]
+
+lr_scheduler:
+  type: CosineAnnealingLR
+
+  args:
+    T_max: 40000 # ~ num_epochs * len(dataloader)
+    eta_min: 0.00000001     # 1e-8
+
+trainer:
+  resume: False 
+  
+  epochs: 300
+  valid_period: 10
+
+  save_dir: saved/
+  save_period: 100
+  verbosity: 1
+
+  visual_tool: wandb
+  mode: "online"
+  project: nerv3d
+  api_key_file: "./config/api/tuanlda78202"
+  entity: tuanlda78202
+  name: "beauty-1080p_3M"
+
+compression:
+  method: "normal"
+  
+  traditional_embedding_path: "compression/3M/beauty/traditional_embedding.pt"
+  traditional_decoder_path: "compression/3M/beauty/traditional_decoder.pth"
+
+  compress_dir: compression/3M/beauty/
+  embedding_path: "compression/3M/beauty/compressed_embedding.ncc"
+  raw_decoder_path: "compression/3M/beauty/raw_decoder.pt"
+  stream_path: "compression/3M/beauty/compressed_decoder.nnc"
+  compressed_decoder_path: "compression/3M/beauty/compressed_decoder_converted.pt"
+
+  model_qp: -38
+  embed_qp: -38          
