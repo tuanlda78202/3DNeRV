@@ -16,6 +16,7 @@ def vmae_pretrained(
     ckpt_path=None,
     model_fn=vit_large_patch16_224,
     arch_mode="train",
+    attn_only=False,
     **kwargs,
 ):
     device = torch.device("cuda")
@@ -60,27 +61,28 @@ def vmae_pretrained(
         vmae.train()
 
         # Fine-tuning only Attn. weights
-        for name_p, p in vmae.named_parameters():
-            if "attn" in name_p:
-                p.requires_grad = True
-            else:
-                p.requires_grad = False
-
-            try:
-                vmae.head.weight.requires_grad = True
-                vmae.head.bias.requires_grad = True
-            except:
-                vmae.fc.weight.requires_grad = True
-                vmae.fc.bias.requires_grad = True
-            try:
-                vmae.pos_embed.requires_grad = True
-            except:
-                print("No Position Encoding")
-            try:
-                for p in vmae.patch_embed.parameters():
+        if attn_only:
+            for name_p, p in vmae.named_parameters():
+                if "attn" in name_p:
+                    p.requires_grad = True
+                else:
                     p.requires_grad = False
-            except:
-                print("No Patch Embedding")
+
+                try:
+                    vmae.head.weight.requires_grad = True
+                    vmae.head.bias.requires_grad = True
+                except:
+                    vmae.fc.weight.requires_grad = True
+                    vmae.fc.bias.requires_grad = True
+                try:
+                    vmae.pos_embed.requires_grad = True
+                except:
+                    print("No Position Encoding")
+                try:
+                    for p in vmae.patch_embed.parameters():
+                        p.requires_grad = False
+                except:
+                    print("No Patch Embedding")
 
         vmae.to(device)
 
