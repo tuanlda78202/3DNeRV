@@ -1,11 +1,15 @@
+import os
+import sys
 import torch
+
+sys.path.append(os.getcwd())
 from src.model.nerv3d import NeRV3D
 from ptflops import get_model_complexity_info
 
 with torch.cuda.device(0):
     # Embedding: 300 * 9 * 16 * 32 = 1.38M
     ###############################################################################
-    # 1421.49 GMac & 1.67M (3.05M)
+    # 1325.72 GMac & 1.67M (3.05M)
     model_3m = NeRV3D(
         arch_mode="test",
         img_size=(1080, 1920),
@@ -32,7 +36,7 @@ with torch.cuda.device(0):
     print("{:<30}  {:<8}".format("Number of parameters 3M model: ", params_3m))
 
     ###############################################################################
-    # 2222.69 GMac & 4.68M (6.06M)
+    # 2126.84 GMac & 4.68M (6.06M)
     model_6m = NeRV3D(
         arch_mode="test",
         img_size=(1080, 1920),
@@ -59,7 +63,7 @@ with torch.cuda.device(0):
     print("{:<30}  {:<8}".format("Number of parameters 6M model: ", params_6m))
 
     ###############################################################################
-    # 3795.96 GMac & 10.62M (12M)
+    # 3700.0 GMac & 10.62M (12M)
     model_12m = NeRV3D(
         arch_mode="test",
         img_size=(1080, 1920),
