@@ -4,13 +4,19 @@ from torch import nn
 from math import ceil, sqrt
 from typing import List, Tuple
 from collections import OrderedDict
-from ..backbone.videomaev2 import *
+from ..backbone.videomaev2 import (
+    vit_small_patch16_224,
+    vit_base_patch16_224,
+    vit_large_patch16_224,
+    load_state_dict,
+)
 
 
 def vmae_pretrained(
     ckpt_path=None,
-    model_fn=None,  # vit_small_patch16_224, vit_base_patch16_224
+    model_fn=vit_large_patch16_224,
     arch_mode="train",
+    attn_only=False,
     **kwargs,
 ):
     device = torch.device("cuda")
@@ -45,6 +51,7 @@ def vmae_pretrained(
                 new_dict[key[8:]] = checkpoint_model[key]
             else:
                 new_dict[key] = checkpoint_model[key]
+
         checkpoint_model = new_dict
 
         load_state_dict(
@@ -52,10 +59,32 @@ def vmae_pretrained(
         )
 
         vmae.train()
-        vmae.to(device)
 
-        for param in vmae.parameters():
-            param.requires_grad = True
+        # Fine-tuning only Attn. weights
+        if attn_only:
+            for name_p, p in vmae.named_parameters():
+                if "attn" in name_p:
+                    p.requires_grad = True
+                else:
+                    p.requires_grad = False
+
+                try:
+                    vmae.head.weight.requires_grad = True
+                    vmae.head.bias.requires_grad = True
+                except:
+                    vmae.fc.weight.requires_grad = True
+                    vmae.fc.bias.requires_grad = True
+                try:
+                    vmae.pos_embed.requires_grad = True
+                except:
+                    print("No Position Encoding")
+                try:
+                    for p in vmae.patch_embed.parameters():
+                        p.requires_grad = False
+                except:
+                    print("No Patch Embedding")
+
+        vmae.to(device)
 
         return vmae
 
