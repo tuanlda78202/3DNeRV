@@ -50,7 +50,7 @@ lr_scheduler:
 
   args:
     max_lr: [0.0005, 0.001, 0.001, 0.001] 
-    total_steps: 90000
+    total_steps: 36000
 
 trainer:  
   epochs: 300
